@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --font-body: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+}
+
+html {
+  background: #fbf7f0;
+}
+
+body {
+  min-height: 100vh;
+  background-image: radial-gradient(circle at top left, rgba(255, 127, 99, 0.18), transparent 28%),
+    radial-gradient(circle at top right, rgba(30, 183, 166, 0.14), transparent 24%),
+    linear-gradient(180deg, #fbf7f0 0%, #fffdf8 52%, #f5ead9 100%);
+  color: #1d2b2a;
+  font-family: var(--font-body);
+}
+
+* {
+  border-color: rgba(40, 64, 63, 0.12);
+}
+
+::selection {
+  background: rgba(30, 183, 166, 0.16);
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  appearance: textfield;
+}
+
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4 {
+    letter-spacing: -0.03em;
+  }
+}
+
+@layer components {
+  .page-shell {
+    @apply mx-auto w-full max-w-7xl px-4 pb-12 pt-5 sm:px-6 lg:px-8;
+  }
+
+  .surface-card {
+    @apply rounded-4xl border border-slate-200/70 bg-white/85 shadow-soft backdrop-blur;
+  }
+
+  .surface-muted {
+    @apply rounded-3xl border border-white/70 bg-sand-50/80 backdrop-blur;
+  }
+
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.24em] text-slate-700/70;
+  }
+
+  .section-title {
+    @apply font-display text-3xl text-slate-900 sm:text-4xl;
+  }
+
+  .status-pill {
+    @apply inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold;
+  }
+
+  .field-shell {
+    @apply rounded-3xl border border-slate-200/70 bg-white px-4 py-3 shadow-sm transition duration-200 focus-within:border-accent-teal focus-within:ring-2 focus-within:ring-accent-teal/15;
+  }
+
+  .tap-card {
+    @apply rounded-3xl border border-white/70 bg-white/90 px-4 py-4 shadow-soft transition duration-200 hover:-translate-y-0.5;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}

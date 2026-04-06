@@ -1,0 +1,12 @@
+.DS_Store
+.next
+node_modules
+.env
+.env.local
+.env.production
+coverage
+dist
+data
+*.tsbuildinfo
+*.log
+.next-dev-*.txt

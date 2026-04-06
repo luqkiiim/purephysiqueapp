@@ -1,0 +1,128 @@
+import Link from "next/link";
+import { Activity, KeyRound, Users } from "lucide-react";
+
+import { loginCoachAction } from "@/app/actions/auth";
+import { CoachLoginForm } from "@/components/forms/coach-login-form";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { demoClientCredentials, demoCoachCredentials } from "@/lib/demo/credentials";
+import { isSupabaseAuthEnabled } from "@/lib/supabase/config";
+
+export default async function CoachLoginPage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const errorValue = resolvedSearchParams.error;
+  const error = Array.isArray(errorValue) ? errorValue[0] : errorValue;
+  const isDemoMode = !isSupabaseAuthEnabled;
+
+  return (
+    <main className="page-shell">
+      <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
+        <section className="space-y-5">
+          <p className="eyebrow">Coach access</p>
+          <h1 className="font-display text-5xl leading-none text-slate-900 sm:text-6xl">
+            Sign in and manage the whole coaching roster from one place.
+          </h1>
+          <p className="max-w-xl text-base text-slate-700 sm:text-lg">
+            Check who logged today, review trends, send feedback, and keep follow-up simple.
+          </p>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="tap-card">
+              <Activity className="h-5 w-5 text-accent-teal" />
+              <p className="mt-3 text-sm font-semibold text-slate-900">Daily check-ins</p>
+            </div>
+            <div className="tap-card">
+              <Users className="h-5 w-5 text-accent-coral" />
+              <p className="mt-3 text-sm font-semibold text-slate-900">Client follow-up</p>
+            </div>
+            <div className="tap-card">
+              <KeyRound className="h-5 w-5 text-accent-gold" />
+              <p className="mt-3 text-sm font-semibold text-slate-900">Private access</p>
+            </div>
+          </div>
+        </section>
+
+        <div className="mx-auto w-full max-w-md space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Coach login</CardTitle>
+              <CardDescription>
+                Sign in to open the dashboard, clients, and reminders.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {error ? (
+                <div className="rounded-3xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+                  {decodeURIComponent(error)}
+                </div>
+              ) : null}
+              <CoachLoginForm
+                action={loginCoachAction}
+                defaultEmail={isDemoMode ? demoCoachCredentials.email : undefined}
+                defaultPassword={isDemoMode ? demoCoachCredentials.password : undefined}
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Testing access</CardTitle>
+              <CardDescription>
+                {isDemoMode
+                  ? "Use these demo details while previewing the app locally."
+                  : "These are local preview details. If live auth is configured, use the real coach account instead."}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="surface-muted p-4 text-sm">
+                  <p className="font-semibold text-slate-900">Coach test login</p>
+                  <p className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">Email</p>
+                  <p className="mt-1 break-all font-medium text-slate-900">
+                    {demoCoachCredentials.email}
+                  </p>
+                  <p className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">
+                    Password
+                  </p>
+                  <p className="mt-1 font-medium text-slate-900">
+                    {demoCoachCredentials.password}
+                  </p>
+                </div>
+
+                <div className="surface-muted p-4 text-sm">
+                  <p className="font-semibold text-slate-900">Client test access</p>
+                  <p className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">Client</p>
+                  <p className="mt-1 break-all font-medium text-slate-900">
+                    {demoClientCredentials.fullName}
+                  </p>
+                  <p className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">
+                    Access link
+                  </p>
+                  <p className="mt-1 break-all font-medium text-slate-900">
+                    /access/{demoClientCredentials.inviteToken}
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-3xl border border-slate-200 px-4 py-3 text-sm text-slate-600">
+                Client production access now uses the private invite link directly, without a password or one-time code.
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                <Link href={`/access/${demoClientCredentials.inviteToken}`}>
+                  <Button variant="secondary">Open client access demo</Button>
+                </Link>
+                <Link href="/client">
+                  <Button variant="ghost">Open client preview</Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </main>
+  );
+}
