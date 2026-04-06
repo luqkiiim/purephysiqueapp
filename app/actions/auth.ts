@@ -4,13 +4,13 @@ import { redirect } from "next/navigation";
 
 import { demoCoachCredentials } from "@/lib/demo/credentials";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { isSupabaseAuthEnabled } from "@/lib/supabase/config";
+import { isLiveAppEnabled } from "@/lib/supabase/config";
 import { coachLoginSchema } from "@/lib/validation/forms";
 
 export async function loginCoachAction(formData: FormData) {
   const rawValues = Object.fromEntries(formData.entries());
 
-  if (!isSupabaseAuthEnabled) {
+  if (!isLiveAppEnabled) {
     const values = coachLoginSchema.safeParse(rawValues);
 
     if (
@@ -36,14 +36,20 @@ export async function loginCoachAction(formData: FormData) {
   });
 
   if (error) {
-    redirect(`/coach/login?error=${encodeURIComponent(error.message)}`);
+    const usedDemoEmail =
+      values.email.toLowerCase() === demoCoachCredentials.email.toLowerCase();
+    const errorMessage = usedDemoEmail
+      ? "Create a Supabase Auth user for this coach email and sign in with that password. The demo password only works when live Supabase mode is off."
+      : error.message;
+
+    redirect(`/coach/login?error=${encodeURIComponent(errorMessage)}`);
   }
 
   redirect("/coach");
 }
 
 export async function logoutAction() {
-  if (isSupabaseAuthEnabled) {
+  if (isLiveAppEnabled) {
     const supabase = await createServerSupabaseClient();
     await supabase.auth.signOut();
   }

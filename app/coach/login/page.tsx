@@ -6,7 +6,7 @@ import { CoachLoginForm } from "@/components/forms/coach-login-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { demoClientCredentials, demoCoachCredentials } from "@/lib/demo/credentials";
-import { isSupabaseAuthEnabled } from "@/lib/supabase/config";
+import { isLiveAppEnabled } from "@/lib/supabase/config";
 
 export default async function CoachLoginPage({
   searchParams,
@@ -16,7 +16,7 @@ export default async function CoachLoginPage({
   const resolvedSearchParams = (await searchParams) ?? {};
   const errorValue = resolvedSearchParams.error;
   const error = Array.isArray(errorValue) ? errorValue[0] : errorValue;
-  const isDemoMode = !isSupabaseAuthEnabled;
+  const isDemoMode = !isLiveAppEnabled;
 
   return (
     <main className="page-shell">
@@ -79,17 +79,27 @@ export default async function CoachLoginPage({
             <CardContent className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="surface-muted p-4 text-sm">
-                  <p className="font-semibold text-slate-900">Coach test login</p>
+                  <p className="font-semibold text-slate-900">
+                    {isDemoMode ? "Coach test login" : "Coach auth email"}
+                  </p>
                   <p className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">Email</p>
                   <p className="mt-1 break-all font-medium text-slate-900">
                     {demoCoachCredentials.email}
                   </p>
-                  <p className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">
-                    Password
-                  </p>
-                  <p className="mt-1 font-medium text-slate-900">
-                    {demoCoachCredentials.password}
-                  </p>
+                  {isDemoMode ? (
+                    <>
+                      <p className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">
+                        Password
+                      </p>
+                      <p className="mt-1 font-medium text-slate-900">
+                        {demoCoachCredentials.password}
+                      </p>
+                    </>
+                  ) : (
+                    <p className="mt-3 text-slate-600">
+                      Use the password from the matching Supabase Auth user. The demo password is not accepted once live auth is configured.
+                    </p>
+                  )}
                 </div>
 
                 <div className="surface-muted p-4 text-sm">
