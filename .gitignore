@@ -6,7 +6,7 @@ node_modules
 .env.production
 coverage
 dist
-data
+/data/
 *.tsbuildinfo
 *.log
 .next-dev-*.txt

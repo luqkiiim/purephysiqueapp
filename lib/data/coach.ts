@@ -1,0 +1,177 @@
+import { parseISO, subDays } from "date-fns";
+import { notFound } from "next/navigation";
+
+import { requireCoach } from "@/lib/auth";
+import {
+  getClientBundleByCoachAndId,
+  listClientBundlesByCoachId,
+  listCoachNotesForClient,
+  listDailyCheckInsForClient,
+  listDailyCheckInsForClients,
+  listFeedbackMessagesForClient,
+  listProgressPhotosForClient,
+} from "@/lib/database/queries";
+import {
+  getDemoClientDetailData,
+  getDemoCoachDashboardData,
+  demoClients,
+} from "@/lib/demo/data";
+import { isLiveAppEnabled } from "@/lib/supabase/config";
+import type { Client, DailyCheckIn } from "@/lib/types/app";
+import {
+  buildClientStatusRow,
+  buildTodaySnapshot,
+  buildWeeklySummary,
+  getTodaysOrLatestCheckIn,
+  groupCheckInsByClientId,
+  resolveProgressPhotoUrls,
+} from "@/lib/data/shared";
+import { getTodayIsoDate } from "@/lib/utils";
+
+function average(values: number[]) {
+  if (!values.length) {
+    return 0;
+  }
+
+  return values.reduce((total, value) => total + value, 0) / values.length;
+}
+
+function buildAdherenceTrend(checkIns: DailyCheckIn[]) {
+  const sortedCheckIns = [...checkIns].sort((left, right) => left.date.localeCompare(right.date));
+  const anchorDate = sortedCheckIns.length
+    ? parseISO(sortedCheckIns.at(-1)!.date)
+    : new Date();
+
+  return Array.from({ length: 6 }, (_, index) => {
+    const windowEnd = subDays(anchorDate, (5 - index) * 7);
+    const windowStartIso = subDays(windowEnd, 6).toISOString().slice(0, 10);
+    const windowEndIso = windowEnd.toISOString().slice(0, 10);
+    const bucket = sortedCheckIns.filter(
+      (entry) => entry.date >= windowStartIso && entry.date <= windowEndIso,
+    );
+    const weights = bucket.map((entry) => entry.bodyWeight);
+
+    return {
+      label: `W${index + 1}`,
+      adherence: Math.round(average(bucket.map((entry) => entry.completionPercentage))),
+      weightDelta:
+        weights.length > 1
+          ? Number((weights.at(-1)! - weights[0]!).toFixed(1))
+          : 0,
+    };
+  });
+}
+
+function buildMomentumClients(clients: Client[], checkInsByClientId: Map<string, DailyCheckIn[]>) {
+  return clients
+    .map((client) => buildClientStatusRow(client, checkInsByClientId.get(client.id) ?? []))
+    .sort((left, right) => {
+      if (right.streak !== left.streak) {
+        return right.streak - left.streak;
+      }
+
+      return right.proteinConsistency + right.stepConsistency - (left.proteinConsistency + left.stepConsistency);
+    })
+    .slice(0, 3)
+    .map((row) => ({
+      id: row.id,
+      fullName: row.fullName,
+      streak: row.streak,
+      adherence: Math.round((row.proteinConsistency + row.stepConsistency) / 2),
+    }));
+}
+
+export async function getCoachDashboardData() {
+  const { coach, isDemo } = await requireCoach();
+
+  if (!isLiveAppEnabled || isDemo) {
+    return getDemoCoachDashboardData();
+  }
+
+  const clients = await listClientBundlesByCoachId(coach.id);
+  const sinceDate = subDays(new Date(), 41).toISOString().slice(0, 10);
+  const allRecentCheckIns = await listDailyCheckInsForClients(
+    clients.map((client) => client.id),
+    sinceDate,
+  );
+  const checkInsByClientId = groupCheckInsByClientId(allRecentCheckIns);
+  const rows = clients.map((client) =>
+    buildClientStatusRow(client, checkInsByClientId.get(client.id) ?? []),
+  );
+  const todaysEntries = new Map(
+    allRecentCheckIns
+      .filter((entry) => entry.date === getTodayIsoDate())
+      .map((entry) => [entry.clientId, entry] as const),
+  );
+
+  return {
+    coach,
+    summaryCards: [
+      {
+        label: "Total clients",
+        value: `${clients.length}`,
+        hint: "One coach workspace",
+        tone: "neutral" as const,
+      },
+      {
+        label: "Logged today",
+        value: `${rows.filter((row) => row.statusLabel === "Logged today").length}`,
+        hint: "Daily compliance snapshot",
+        tone: "success" as const,
+      },
+      {
+        label: "Missed today",
+        value: `${rows.filter((row) => row.statusLabel !== "Logged today").length}`,
+        hint: "Needs follow-up",
+        tone: "warning" as const,
+      },
+      {
+        label: "Active streaks",
+        value: `${clients.filter((client) => client.currentStreak >= 5).length}`,
+        hint: "Clients at 5+ days",
+        tone: "accent" as const,
+      },
+    ],
+    clients: rows,
+    adherenceTrend: buildAdherenceTrend(allRecentCheckIns),
+    todayCheckInSnapshot: buildTodaySnapshot(clients, todaysEntries),
+    momentumClients: buildMomentumClients(clients, checkInsByClientId),
+  };
+}
+
+export async function getCoachClientDetailData(clientId: string) {
+  const { coach, isDemo } = await requireCoach();
+
+  if (!isLiveAppEnabled || isDemo) {
+    if (!demoClients.some((client) => client.id === clientId)) {
+      notFound();
+    }
+
+    return getDemoClientDetailData(clientId);
+  }
+
+  const client = await getClientBundleByCoachAndId(coach.id, clientId);
+
+  if (!client) {
+    notFound();
+  }
+
+  const [recentCheckIns, rawProgressPhotos, coachNotes, feedbackMessages] = await Promise.all([
+    listDailyCheckInsForClient(client.id),
+    listProgressPhotosForClient(client.id),
+    listCoachNotesForClient(client.id),
+    listFeedbackMessagesForClient(client.id),
+  ]);
+  const progressPhotos = await resolveProgressPhotoUrls(rawProgressPhotos);
+
+  return {
+    coach,
+    client,
+    todaysCheckIn: getTodaysOrLatestCheckIn(recentCheckIns),
+    recentCheckIns,
+    progressPhotos,
+    coachNotes,
+    feedbackMessages,
+    weeklySummary: buildWeeklySummary(client, recentCheckIns),
+  };
+}
