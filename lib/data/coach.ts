@@ -139,6 +139,34 @@ export async function getCoachDashboardData() {
   };
 }
 
+export async function getCoachClientsPageData() {
+  const { coach, isDemo } = await requireCoach();
+
+  if (!isLiveAppEnabled || isDemo) {
+    const demo = getDemoCoachDashboardData();
+
+    return {
+      coach: demo.coach,
+      clients: demo.clients,
+    };
+  }
+
+  const clients = await listClientBundlesByCoachId(coach.id);
+  const sinceDate = subDays(new Date(), 6).toISOString().slice(0, 10);
+  const recentCheckIns = await listDailyCheckInsForClients(
+    clients.map((client) => client.id),
+    sinceDate,
+  );
+  const checkInsByClientId = groupCheckInsByClientId(recentCheckIns);
+
+  return {
+    coach,
+    clients: clients.map((client) =>
+      buildClientStatusRow(client, checkInsByClientId.get(client.id) ?? []),
+    ),
+  };
+}
+
 export async function getCoachClientDetailData(clientId: string) {
   const { coach, isDemo } = await requireCoach();
 

@@ -3,11 +3,11 @@ import Link from "next/link";
 import { CoachShell } from "@/components/layout/coach-shell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getCoachDashboardData } from "@/lib/data/coach";
+import { getCoachClientsPageData } from "@/lib/data/coach";
 import { isLiveAppEnabled } from "@/lib/supabase/config";
 
 export default async function CoachClientsPage() {
-  const data = await getCoachDashboardData();
+  const data = await getCoachClientsPageData();
 
   return (
     <CoachShell
