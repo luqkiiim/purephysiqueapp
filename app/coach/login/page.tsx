@@ -76,23 +76,17 @@ export default async function CoachLoginPage({
             <CardContent className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="surface-muted p-4 text-sm">
-                  <p className="font-semibold text-slate-900">
-                    {isDemoMode ? "Coach test login" : "Coach auth email"}
-                  </p>
+                  <p className="font-semibold text-slate-900">Coach email</p>
                   <p className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">Email</p>
-                  <p className="mt-1 break-all font-medium text-slate-900">
+                  <p className="mt-1 overflow-hidden text-ellipsis whitespace-nowrap font-medium text-slate-900">
                     {demoCoachCredentials.email}
                   </p>
-                  {isDemoMode ? (
-                    <>
-                      <p className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">
-                        Password
-                      </p>
-                      <p className="mt-1 font-medium text-slate-900">
-                        {demoCoachCredentials.password}
-                      </p>
-                    </>
-                  ) : null}
+                  <p className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">
+                    Password
+                  </p>
+                  <p className="mt-1 font-medium text-slate-900">
+                    {demoCoachCredentials.password}
+                  </p>
                 </div>
 
                 <div className="surface-muted p-4 text-sm">
