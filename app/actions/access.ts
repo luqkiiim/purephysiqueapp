@@ -60,9 +60,7 @@ export async function openClientAccessAction(formData: FormData) {
 }
 
 export async function clearClientAccessAction() {
-  if (isLiveAppEnabled) {
-    await clearClientSessionInviteToken();
-  }
+  await clearClientSessionInviteToken();
 
   redirect("/");
 }

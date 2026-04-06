@@ -27,7 +27,7 @@ export function ClientShell({
             <Badge tone="accent">{streak} day streak</Badge>
             <form action={clearClientAccessAction}>
               <Button variant="ghost" size="sm" type="submit">
-                Use another link
+                Sign out
               </Button>
             </form>
           </div>
