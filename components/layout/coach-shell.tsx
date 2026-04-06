@@ -7,13 +7,12 @@ import { logoutAction } from "@/app/actions/auth";
 
 export function CoachShell({
   heading,
-  subheading,
   demoMode,
   children,
   actions,
 }: {
   heading: string;
-  subheading: string;
+  subheading?: string;
   demoMode: boolean;
   children: React.ReactNode;
   actions?: React.ReactNode;
@@ -26,12 +25,7 @@ export function CoachShell({
             <Link href="/" className="eyebrow">
               Pure Physique
             </Link>
-            <div>
-              <h1 className="section-title">{heading}</h1>
-              <p className="mt-2 max-w-2xl text-sm text-slate-700 sm:text-base">
-                {subheading}
-              </p>
-            </div>
+            <h1 className="section-title">{heading}</h1>
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <nav className="flex flex-wrap items-center gap-2">

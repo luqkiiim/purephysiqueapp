@@ -60,26 +60,6 @@ export default async function ClientWeeklyPage() {
         description="Your recent completion pattern at a glance."
         data={adherenceData}
       />
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Consistency cues</CardTitle>
-          <CardDescription>
-            The app keeps analytics clear: hit targets, protect streaks, and keep recovery visible.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-3 sm:grid-cols-3">
-          <div className="surface-muted p-4 text-sm text-slate-700">
-            Daily protein and steps are the biggest levers for adherence.
-          </div>
-          <div className="surface-muted p-4 text-sm text-slate-700">
-            Sleep and body weight give your coach enough context to interpret progress.
-          </div>
-          <div className="surface-muted p-4 text-sm text-slate-700">
-            Hydration makes recovery and appetite trends easier to spot early.
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

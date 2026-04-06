@@ -3,7 +3,6 @@ import { cn } from "@/lib/utils";
 export function SectionHeading({
   eyebrow,
   title,
-  description,
   className,
 }: {
   eyebrow?: string;
@@ -15,7 +14,6 @@ export function SectionHeading({
     <div className={cn("space-y-2", className)}>
       {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
       <h2 className="font-display text-2xl text-slate-900 sm:text-3xl">{title}</h2>
-      {description ? <p className="max-w-2xl text-sm text-slate-700">{description}</p> : null}
     </div>
   );
 }

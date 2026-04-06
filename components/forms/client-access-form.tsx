@@ -13,9 +13,6 @@ export function ClientAccessForm({
       <FormSubmitButton variant="teal" size="lg" fullWidth pendingLabel="Opening...">
         Open check-in app
       </FormSubmitButton>
-      <p className="text-center text-sm text-slate-600">
-        No password or email code required on this device.
-      </p>
     </form>
   );
 }

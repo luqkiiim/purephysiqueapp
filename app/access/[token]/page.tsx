@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { ArrowLeft, Link2, LockKeyhole } from "lucide-react";
+import { ArrowLeft, LockKeyhole } from "lucide-react";
 
 import { openClientAccessAction } from "@/app/actions/access";
 import { ClientAccessForm } from "@/components/forms/client-access-form";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getClientInviteData } from "@/lib/data/access";
 
 export default async function ClientInvitePage({
@@ -26,9 +26,6 @@ export default async function ClientInvitePage({
         <Card className="mx-auto max-w-xl">
           <CardHeader>
             <CardTitle>Invite not found</CardTitle>
-            <CardDescription>
-              This private access link is invalid or expired. Ask your coach to send a fresh link.
-            </CardDescription>
           </CardHeader>
           <CardContent>
             <Link href="/">
@@ -53,9 +50,6 @@ export default async function ClientInvitePage({
               <LockKeyhole className="h-6 w-6 text-slate-900" />
             </div>
             <CardTitle>Open your private check-in app</CardTitle>
-            <CardDescription>
-              This link is reserved for {invite.client.fullName}. Open it once on this device and the client area stays available until you switch links.
-            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
             {error ? (
@@ -67,13 +61,6 @@ export default async function ClientInvitePage({
             ) : null}
             <div className="surface-muted p-4">
               <p className="text-sm font-semibold text-slate-900">{invite.client.fullName}</p>
-              <div className="mt-2 flex items-center gap-2 text-sm text-slate-600">
-                <Link2 className="h-4 w-4" />
-                <span>Private invite link verified</span>
-              </div>
-              <p className="mt-2 text-xs text-slate-500">
-                Reminder emails still go to {invite.client.email}. If the link ever stops working, ask your coach for a fresh one.
-              </p>
             </div>
             <ClientAccessForm action={openClientAccessAction} inviteToken={token} />
           </CardContent>

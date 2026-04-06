@@ -11,7 +11,6 @@ export interface CheckboxProps
 export function Checkbox({
   className,
   label,
-  description,
   ...props
 }: CheckboxProps) {
   return (
@@ -26,11 +25,8 @@ export function Checkbox({
         className="mt-1 h-4 w-4 rounded border-slate-300 text-accent-teal focus:ring-accent-teal"
         {...props}
       />
-      <span className="space-y-1">
+      <span>
         <span className="block text-sm font-semibold text-slate-900">{label}</span>
-        {description ? (
-          <span className="block text-sm text-slate-600">{description}</span>
-        ) : null}
       </span>
     </label>
   );

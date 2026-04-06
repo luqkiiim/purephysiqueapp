@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import { CoachShell } from "@/components/layout/coach-shell";
-import { SectionHeading } from "@/components/layout/section-heading";
 import { AdherenceTrendChart } from "@/components/charts/adherence-trend-chart";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -134,34 +133,6 @@ export default async function CoachDashboardPage() {
             ))}
           </CardContent>
         </Card>
-      </section>
-
-      <section className="surface-card p-6 sm:p-8">
-        <SectionHeading
-          eyebrow="Coach workflow"
-          title="What this dashboard replaces from the spreadsheet"
-          description="Create clients, set custom targets, send invite links, track who logged, and drill into trends without dumping clients into spreadsheet-style tables."
-        />
-        <div className="mt-4 grid gap-4 md:grid-cols-3">
-          <div className="surface-muted p-4">
-            <p className="text-sm font-semibold text-slate-900">At-a-glance compliance</p>
-            <p className="mt-2 text-sm text-slate-700">
-              Logged today, missed today, active streaks, protein consistency, and step consistency.
-            </p>
-          </div>
-          <div className="surface-muted p-4">
-            <p className="text-sm font-semibold text-slate-900">Client drill-down</p>
-            <p className="mt-2 text-sm text-slate-700">
-              Body weight trend, recent check-ins, progress photos, private notes, and visible feedback.
-            </p>
-          </div>
-          <div className="surface-muted p-4">
-            <p className="text-sm font-semibold text-slate-900">Reminder follow-up</p>
-            <p className="mt-2 text-sm text-slate-700">
-              Invite emails, private link access, daily reminder logic, missed-day nudges, and weekly summaries.
-            </p>
-          </div>
-        </div>
       </section>
     </CoachShell>
   );

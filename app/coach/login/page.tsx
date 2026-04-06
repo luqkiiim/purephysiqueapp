@@ -26,9 +26,6 @@ export default async function CoachLoginPage({
           <h1 className="font-display text-5xl leading-none text-slate-900 sm:text-6xl">
             Sign in and manage the whole coaching roster from one place.
           </h1>
-          <p className="max-w-xl text-base text-slate-700 sm:text-lg">
-            Check who logged today, review trends, send feedback, and keep follow-up simple.
-          </p>
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="tap-card">
               <Activity className="h-5 w-5 text-accent-teal" />
@@ -95,11 +92,7 @@ export default async function CoachLoginPage({
                         {demoCoachCredentials.password}
                       </p>
                     </>
-                  ) : (
-                    <p className="mt-3 text-slate-600">
-                      Use the password from the matching Supabase Auth user. The demo password is not accepted once live auth is configured.
-                    </p>
-                  )}
+                  ) : null}
                 </div>
 
                 <div className="surface-muted p-4 text-sm">
@@ -117,15 +110,11 @@ export default async function CoachLoginPage({
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-slate-200 px-4 py-3 text-sm text-slate-600">
-                Client production access now uses the private invite link directly, without a password or one-time code.
-              </div>
-
               <div className="flex flex-wrap gap-3">
                 <Link href={`/access/${demoClientCredentials.inviteToken}`}>
                   <Button variant="secondary">Open client access demo</Button>
                 </Link>
-                <Link href="/client">
+                <Link href="/preview/client">
                   <Button variant="ghost">Open client preview</Button>
                 </Link>
               </div>

@@ -25,11 +25,11 @@ export function CardTitle({
   );
 }
 
-export function CardDescription({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLParagraphElement>) {
-  return <p className={cn("mt-2 text-sm text-slate-700/80", className)} {...props} />;
+export function CardDescription(
+  _props: React.HTMLAttributes<HTMLParagraphElement>,
+) {
+  void _props;
+  return null;
 }
 
 export function CardContent({

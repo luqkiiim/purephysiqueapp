@@ -21,12 +21,7 @@ export function ClientShell({
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-2">
             <p className="eyebrow">Daily check-in</p>
-            <div>
-              <h1 className="font-display text-3xl text-slate-900">{clientName}</h1>
-              <p className="mt-2 text-sm text-slate-700">
-                Fast logging, clear targets, and a steady streak.
-              </p>
-            </div>
+            <h1 className="font-display text-3xl text-slate-900">{clientName}</h1>
           </div>
           <div className="flex flex-col items-end gap-3">
             <Badge tone="accent">{streak} day streak</Badge>
