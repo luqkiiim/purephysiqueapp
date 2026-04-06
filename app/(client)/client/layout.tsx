@@ -1,5 +1,5 @@
 import { ClientShell } from "@/components/layout/client-shell";
-import { getClientHomeData } from "@/lib/data/client";
+import { getClientShellData } from "@/lib/data/client";
 import { isLiveAppEnabled } from "@/lib/supabase/config";
 
 export default async function ClientLayout({
@@ -7,7 +7,7 @@ export default async function ClientLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const data = await getClientHomeData();
+  const data = await getClientShellData();
 
   return (
     <ClientShell

@@ -2,11 +2,11 @@ import { AdherenceTrendChart } from "@/components/charts/adherence-trend-chart";
 import { TargetComparisonChart } from "@/components/charts/target-comparison-chart";
 import { WeightTrendChart } from "@/components/charts/weight-trend-chart";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getClientHomeData } from "@/lib/data/client";
+import { getClientHistoryPageData } from "@/lib/data/client";
 import { formatFullDate, formatShortDate } from "@/lib/utils";
 
 export default async function ClientHistoryPage() {
-  const data = await getClientHomeData();
+  const data = await getClientHistoryPageData();
 
   const weightData = data.recentCheckIns.slice(-12).map((entry) => ({
     label: formatShortDate(entry.date),

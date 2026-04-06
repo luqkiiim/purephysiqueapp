@@ -1,11 +1,11 @@
 import Image from "next/image";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getClientHomeData } from "@/lib/data/client";
+import { getClientPhotosPageData } from "@/lib/data/client";
 import { formatFullDate } from "@/lib/utils";
 
 export default async function ClientPhotosPage() {
-  const data = await getClientHomeData();
+  const data = await getClientPhotosPageData();
 
   return (
     <div className="space-y-5">

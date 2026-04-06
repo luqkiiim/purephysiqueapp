@@ -1,10 +1,10 @@
 import { AdherenceTrendChart } from "@/components/charts/adherence-trend-chart";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getClientHomeData } from "@/lib/data/client";
+import { getClientWeeklyPageData } from "@/lib/data/client";
 import { formatShortDate } from "@/lib/utils";
 
 export default async function ClientWeeklyPage() {
-  const data = await getClientHomeData();
+  const data = await getClientWeeklyPageData();
   const adherenceData = data.recentCheckIns.slice(-14).map((entry) => ({
     label: formatShortDate(entry.date),
     adherence: entry.completionPercentage,

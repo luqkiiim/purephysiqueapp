@@ -1,10 +1,10 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getClientHomeData } from "@/lib/data/client";
+import { getClientMessagesPageData } from "@/lib/data/client";
 import { formatFullDate } from "@/lib/utils";
 
 export default async function ClientMessagesPage() {
-  const data = await getClientHomeData();
+  const data = await getClientMessagesPageData();
 
   return (
     <div className="space-y-5">

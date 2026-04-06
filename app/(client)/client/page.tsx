@@ -1,14 +1,14 @@
 import { saveDailyCheckInAction } from "@/app/actions/client";
 import { DailyCheckInForm } from "@/components/forms/daily-checkin-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getClientHomeData } from "@/lib/data/client";
+import { getClientCheckInPageData } from "@/lib/data/client";
 
 export default async function ClientHomePage({
   searchParams,
 }: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const data = await getClientHomeData();
+  const data = await getClientCheckInPageData();
   const resolvedSearchParams = (await searchParams) ?? {};
   const submittedValue = resolvedSearchParams.submitted;
   const submitted = Array.isArray(submittedValue)
