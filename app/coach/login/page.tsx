@@ -74,11 +74,11 @@ export default async function CoachLoginPage({
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-4">
                 <div className="surface-muted p-4 text-sm">
                   <p className="font-semibold text-slate-900">Coach email</p>
                   <p className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">Email</p>
-                  <p className="mt-1 overflow-hidden text-ellipsis whitespace-nowrap font-medium text-slate-900">
+                  <p className="mt-1 whitespace-nowrap font-medium text-slate-900">
                     {demoCoachCredentials.email}
                   </p>
                   <p className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">
