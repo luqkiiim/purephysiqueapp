@@ -16,8 +16,9 @@ html {
 
 body {
   min-height: 100vh;
-  background-image: radial-gradient(circle at top left, rgba(232, 192, 97, 0.18), transparent 28%),
-    radial-gradient(circle at top right, rgba(228, 50, 146, 0.12), transparent 24%),
+  background-image: radial-gradient(circle at top left, rgba(232, 192, 97, 0.16), transparent 28%),
+    radial-gradient(circle at top right, rgba(224, 5, 137, 0.14), transparent 24%),
+    radial-gradient(circle at 18% 78%, rgba(3, 255, 247, 0.1), transparent 26%),
     linear-gradient(180deg, #2d2e2d 0%, #181818 52%, #0a0a0a 100%);
   color: #ffffff;
   font-family: var(--font-body);
@@ -28,7 +29,7 @@ body {
 }
 
 ::selection {
-  background: rgba(232, 192, 97, 0.24);
+  background: rgba(3, 255, 247, 0.28);
   color: #2d2e2d;
 }
 
@@ -80,11 +81,11 @@ input[type="number"] {
   }
 
   .field-shell {
-    @apply rounded-3xl border border-white/15 bg-slate-50 px-4 py-3 shadow-sm transition duration-200 focus-within:border-accent-coral focus-within:ring-2 focus-within:ring-accent-coral/15;
+    @apply rounded-3xl border border-white/15 bg-slate-50 px-4 py-3 shadow-sm transition duration-200 focus-within:border-accent-teal focus-within:ring-2 focus-within:ring-accent-teal/15;
   }
 
   .tap-card {
-    @apply rounded-3xl border border-white/10 bg-slate-100/90 px-4 py-4 shadow-soft transition duration-200 hover:-translate-y-0.5 hover:bg-slate-100;
+    @apply rounded-3xl border border-white/10 bg-slate-100/90 px-4 py-4 shadow-soft transition duration-200 hover:-translate-y-0.5 hover:border-accent-teal/25 hover:bg-slate-100;
   }
 }
 

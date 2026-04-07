@@ -11,7 +11,7 @@ const config: Config = {
       colors: {
         sand: {
           50: "#fae9be",
-          100: "#e8cd8b",
+          100: "#e8c061",
           200: "#b39244",
         },
         slate: {
@@ -28,9 +28,11 @@ const config: Config = {
         },
         accent: {
           coral: "#e8c061",
-          teal: "#b39244",
+          teal: "#03fff7",
           gold: "#fae9be",
           mint: "#fae9be",
+          magenta: "#e00589",
+          cyan: "#03fff7",
         },
       },
       boxShadow: {
@@ -42,7 +44,7 @@ const config: Config = {
       },
       backgroundImage: {
         "hero-gradient":
-          "radial-gradient(circle at top left, rgba(232, 192, 97, 0.18), transparent 34%), radial-gradient(circle at top right, rgba(228, 50, 146, 0.12), transparent 30%), linear-gradient(180deg, #2d2e2d 0%, #181818 52%, #0a0a0a 100%)",
+          "radial-gradient(circle at top left, rgba(232, 192, 97, 0.18), transparent 34%), radial-gradient(circle at top right, rgba(224, 5, 137, 0.14), transparent 28%), radial-gradient(circle at bottom left, rgba(3, 255, 247, 0.12), transparent 30%), linear-gradient(180deg, #2d2e2d 0%, #181818 52%, #0a0a0a 100%)",
       },
       keyframes: {
         float: {

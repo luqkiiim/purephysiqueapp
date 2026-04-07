@@ -4,15 +4,17 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center rounded-full font-semibold transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-coral/20 disabled:pointer-events-none disabled:opacity-60",
+  "inline-flex items-center justify-center rounded-full font-semibold transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-teal/25 disabled:pointer-events-none disabled:opacity-60",
   {
     variants: {
       variant: {
         primary: "bg-accent-coral text-[#2d2e2d] shadow-soft hover:bg-accent-gold",
-        secondary: "border border-white/15 bg-slate-50 text-slate-900 hover:bg-slate-100",
-        coral: "bg-slate-50 text-accent-coral shadow-soft hover:bg-slate-100",
-        teal: "bg-[#e43292] text-white shadow-soft hover:brightness-95",
-        ghost: "text-slate-700 hover:bg-white/5",
+        secondary:
+          "border border-white/15 bg-slate-50 text-slate-900 hover:border-accent-teal/30 hover:bg-slate-100",
+        coral: "bg-slate-50 text-accent-magenta shadow-soft hover:bg-slate-100",
+        teal:
+          "bg-accent-magenta text-white shadow-[0_14px_32px_rgba(224,5,137,0.28)] hover:bg-accent-magenta/90",
+        ghost: "text-slate-700 hover:bg-accent-teal/10 hover:text-slate-900",
       },
       size: {
         sm: "px-3.5 py-2 text-sm",

@@ -54,7 +54,7 @@ export function ActiveNav({
         "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition",
         active
           ? "bg-accent-coral text-[#2d2e2d] shadow-soft"
-          : "text-slate-700 hover:bg-accent-gold/15",
+          : "text-slate-700 hover:bg-accent-teal/10 hover:text-slate-900",
         mobile && "w-full justify-center px-3 py-2.5 text-xs",
       )}
     >
