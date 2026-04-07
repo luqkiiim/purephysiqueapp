@@ -7,11 +7,11 @@ const badgeVariants = cva(
   {
     variants: {
       tone: {
-        neutral: "border-slate-200 bg-white text-slate-700",
+        neutral: "border-white/10 bg-slate-50 text-slate-700",
         success: "border-emerald-200 bg-emerald-50 text-emerald-700",
         warning: "border-amber-200 bg-amber-50 text-amber-700",
-        accent: "border-accent-coral/30 bg-accent-mint text-slate-900",
-        coral: "border-accent-coral/30 bg-accent-coral text-slate-900",
+        accent: "border-accent-coral/30 bg-accent-mint text-[#2d2e2d]",
+        coral: "border-[#e43292]/40 bg-[#e43292] text-white",
       },
     },
     defaultVariants: {

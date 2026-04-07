@@ -47,7 +47,7 @@ export default async function ClientInvitePage({
         <Card className="overflow-hidden">
           <CardHeader>
             <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-3xl bg-accent-mint">
-              <LockKeyhole className="h-6 w-6 text-slate-900" />
+              <LockKeyhole className="h-6 w-6 text-[#2d2e2d]" />
             </div>
             <CardTitle>Open your private check-in app</CardTitle>
           </CardHeader>

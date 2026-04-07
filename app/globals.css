@@ -5,30 +5,31 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
   --font-body: "Montserrat", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --font-display: "Lulo Clean", "Montserrat", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 }
 
 html {
-  background: #fffdf7;
+  background: #2d2e2d;
 }
 
 body {
   min-height: 100vh;
   background-image: radial-gradient(circle at top left, rgba(232, 192, 97, 0.18), transparent 28%),
-    radial-gradient(circle at top right, rgba(45, 46, 45, 0.1), transparent 24%),
-    linear-gradient(180deg, #fffdf7 0%, #fff8e8 52%, #fae9be 100%);
-  color: #2d2e2d;
+    radial-gradient(circle at top right, rgba(228, 50, 146, 0.12), transparent 24%),
+    linear-gradient(180deg, #2d2e2d 0%, #181818 52%, #0a0a0a 100%);
+  color: #ffffff;
   font-family: var(--font-body);
 }
 
 * {
-  border-color: rgba(45, 46, 45, 0.14);
+  border-color: rgba(255, 255, 255, 0.14);
 }
 
 ::selection {
   background: rgba(232, 192, 97, 0.24);
+  color: #2d2e2d;
 }
 
 input[type="number"]::-webkit-inner-spin-button,
@@ -59,11 +60,11 @@ input[type="number"] {
   }
 
   .surface-card {
-    @apply rounded-4xl border border-slate-200/70 bg-white/85 shadow-soft backdrop-blur;
+    @apply rounded-4xl border border-white/10 bg-slate-50/90 shadow-soft backdrop-blur;
   }
 
   .surface-muted {
-    @apply rounded-3xl border border-white/70 bg-sand-50/80 backdrop-blur;
+    @apply rounded-3xl border border-white/10 bg-slate-100/85 backdrop-blur;
   }
 
   .eyebrow {
@@ -79,11 +80,11 @@ input[type="number"] {
   }
 
   .field-shell {
-    @apply rounded-3xl border border-slate-200/70 bg-white px-4 py-3 shadow-sm transition duration-200 focus-within:border-accent-teal focus-within:ring-2 focus-within:ring-accent-teal/15;
+    @apply rounded-3xl border border-white/15 bg-slate-50 px-4 py-3 shadow-sm transition duration-200 focus-within:border-accent-coral focus-within:ring-2 focus-within:ring-accent-coral/15;
   }
 
   .tap-card {
-    @apply rounded-3xl border border-white/70 bg-white/90 px-4 py-4 shadow-soft transition duration-200 hover:-translate-y-0.5;
+    @apply rounded-3xl border border-white/10 bg-slate-100/90 px-4 py-4 shadow-soft transition duration-200 hover:-translate-y-0.5 hover:bg-slate-100;
   }
 }
 

@@ -8,11 +8,11 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: "bg-accent-coral text-slate-900 shadow-soft hover:bg-accent-gold",
-        secondary: "border border-accent-coral/30 bg-white text-slate-900 hover:bg-sand-50",
-        coral: "bg-slate-900 text-accent-coral shadow-soft hover:bg-slate-800",
-        teal: "bg-accent-teal text-slate-900 shadow-soft hover:brightness-95",
-        ghost: "text-slate-800 hover:bg-accent-gold/15",
+        primary: "bg-accent-coral text-[#2d2e2d] shadow-soft hover:bg-accent-gold",
+        secondary: "border border-white/15 bg-slate-50 text-slate-900 hover:bg-slate-100",
+        coral: "bg-slate-50 text-accent-coral shadow-soft hover:bg-slate-100",
+        teal: "bg-[#e43292] text-white shadow-soft hover:brightness-95",
+        ghost: "text-slate-700 hover:bg-white/5",
       },
       size: {
         sm: "px-3.5 py-2 text-sm",

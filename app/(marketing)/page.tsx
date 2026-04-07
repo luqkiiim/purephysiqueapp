@@ -45,7 +45,7 @@ export default function LandingPage() {
 
           <div className="surface-muted relative overflow-hidden p-6 shadow-float">
             <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-accent-coral/15 blur-3xl" />
-            <div className="absolute -bottom-12 -left-12 h-40 w-40 rounded-full bg-accent-teal/15 blur-3xl" />
+            <div className="absolute -bottom-12 -left-12 h-40 w-40 rounded-full bg-[#e43292]/16 blur-3xl" />
             <div className="relative space-y-4">
               <div className="tap-card animate-float">
                 <p className="text-sm text-slate-500">Client check-in</p>
@@ -71,7 +71,7 @@ export default function LandingPage() {
           <Card key={title}>
             <CardHeader className="space-y-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-mint">
-                <Icon className="h-5 w-5 text-slate-900" />
+                <Icon className="h-5 w-5 text-[#2d2e2d]" />
               </div>
               <CardTitle className="text-xl">{title}</CardTitle>
             </CardHeader>

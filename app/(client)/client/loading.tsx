@@ -36,7 +36,7 @@ export default function ClientLoading() {
         </div>
       </section>
 
-      <nav className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-xl border-t border-white/70 bg-white/95 px-3 py-3 shadow-[0_-8px_24px_rgba(29,43,42,0.08)] backdrop-blur sm:rounded-t-4xl sm:border-x">
+      <nav className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-xl border-t border-white/10 bg-[rgba(10,10,10,0.94)] px-3 py-3 shadow-[0_-8px_24px_rgba(0,0,0,0.35)] backdrop-blur sm:rounded-t-4xl sm:border-x">
         <div className="grid grid-cols-5 gap-2">
           {Array.from({ length: 5 }, (_, index) => (
             <LoadingBlock key={index} className="h-12 w-full rounded-2xl" />

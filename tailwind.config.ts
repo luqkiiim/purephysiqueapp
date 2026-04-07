@@ -10,39 +10,39 @@ const config: Config = {
     extend: {
       colors: {
         sand: {
-          50: "#fffdf7",
-          100: "#fae9be",
-          200: "#e8cd8b",
+          50: "#fae9be",
+          100: "#e8cd8b",
+          200: "#b39244",
         },
         slate: {
-          50: "#faf8f3",
-          100: "#f1ece2",
-          200: "#e1d9ca",
-          300: "#c7c7c7",
-          400: "#b0a89d",
+          50: "#2d2e2d",
+          100: "#3a3b3a",
+          200: "#4a4b4a",
+          300: "#646464",
+          400: "#7d7d7d",
           500: "#959595",
-          600: "#646464",
-          700: "#4a4b4a",
-          800: "#3a3b3a",
-          900: "#2d2e2d",
+          600: "#b0b0b0",
+          700: "#c7c7c7",
+          800: "#f1ece2",
+          900: "#ffffff",
         },
         accent: {
           coral: "#e8c061",
           teal: "#b39244",
-          gold: "#e8cd8b",
+          gold: "#fae9be",
           mint: "#fae9be",
         },
       },
       boxShadow: {
-        float: "0 20px 55px rgba(45, 46, 45, 0.14)",
-        soft: "0 12px 30px rgba(45, 46, 45, 0.08)",
+        float: "0 20px 55px rgba(0, 0, 0, 0.32)",
+        soft: "0 12px 30px rgba(0, 0, 0, 0.22)",
       },
       borderRadius: {
         "4xl": "2rem",
       },
       backgroundImage: {
         "hero-gradient":
-          "radial-gradient(circle at top left, rgba(232, 192, 97, 0.24), transparent 34%), radial-gradient(circle at top right, rgba(45, 46, 45, 0.12), transparent 28%), linear-gradient(180deg, #fffdf7 0%, #fff8e8 52%, #fae9be 100%)",
+          "radial-gradient(circle at top left, rgba(232, 192, 97, 0.18), transparent 34%), radial-gradient(circle at top right, rgba(228, 50, 146, 0.12), transparent 30%), linear-gradient(180deg, #2d2e2d 0%, #181818 52%, #0a0a0a 100%)",
       },
       keyframes: {
         float: {

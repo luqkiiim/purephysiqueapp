@@ -199,10 +199,10 @@ export function DailyCheckInForm({
             </p>
           </div>
           <div className="rounded-3xl bg-accent-mint px-4 py-3 text-right">
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-700/70">
+            <p className="text-xs uppercase tracking-[0.2em] text-[#6b5730]/80">
               Streak
             </p>
-            <p className="mt-1 text-2xl font-display text-slate-900">
+            <p className="mt-1 text-2xl font-display text-[#2d2e2d]">
               {streak} days
             </p>
           </div>
@@ -558,7 +558,7 @@ export function DailyCheckInForm({
                 name="progressPhoto"
                 type="file"
                 accept="image/*"
-                className="mt-2 block w-full text-sm text-slate-600 file:mr-4 file:rounded-full file:border-0 file:bg-slate-900 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white"
+                className="mt-2 block w-full text-sm text-slate-600 file:mr-4 file:rounded-full file:border-0 file:bg-accent-coral file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[#2d2e2d]"
               />
             </label>
             <label className="block space-y-2">
