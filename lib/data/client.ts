@@ -35,22 +35,14 @@ export const getClientCheckInPageData = cache(async () => {
     return {
       client: demo.client,
       todaysCheckIn: demo.todaysCheckIn,
-      feedbackMessages: demo.feedbackMessages,
-      sharedCoachNotes: demo.sharedCoachNotes,
     };
   }
 
-  const [recentCheckIns, feedbackMessages, sharedCoachNotes] = await Promise.all([
-    listDailyCheckInsForClient(client.id),
-    listFeedbackMessagesForClient(client.id),
-    listCoachNotesForClient(client.id, "shared"),
-  ]);
+  const recentCheckIns = await listDailyCheckInsForClient(client.id);
 
   return {
     client,
     todaysCheckIn: getTodaysOrLatestCheckIn(recentCheckIns),
-    feedbackMessages,
-    sharedCoachNotes,
   };
 });
 

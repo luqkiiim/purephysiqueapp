@@ -49,6 +49,9 @@ interface ExerciseEntryDraft {
   durationMinutes: string;
 }
 
+const SLEEP_TARGET_HOURS = 7;
+const HYDRATION_TARGET_LITERS = 3;
+
 function createExerciseEntryDraft(
   entry: Partial<ExerciseEntry> = {},
 ): ExerciseEntryDraft {
@@ -221,13 +224,13 @@ export function DailyCheckInForm({
           <div className="tap-card">
             <p className="text-slate-500">Sleep</p>
             <p className="mt-1 font-semibold text-slate-900">
-              {totalSleepHours} hrs
+              {totalSleepHours} / {SLEEP_TARGET_HOURS}h
             </p>
           </div>
           <div className="tap-card">
             <p className="text-slate-500">Hydration</p>
             <p className="mt-1 font-semibold text-slate-900">
-              {hydrationLiters} L
+              {hydrationLiters} / {HYDRATION_TARGET_LITERS}L
             </p>
           </div>
           <div className="tap-card">
