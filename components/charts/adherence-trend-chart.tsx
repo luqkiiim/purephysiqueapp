@@ -30,16 +30,16 @@ export function AdherenceTrendChart({
       <CardContent className="h-72">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e7e0d2" />
-            <XAxis dataKey="label" stroke="#6b7b7a" fontSize={12} tickLine={false} axisLine={false} />
-            <YAxis stroke="#6b7b7a" fontSize={12} tickLine={false} axisLine={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e1d9ca" />
+            <XAxis dataKey="label" stroke="#646464" fontSize={12} tickLine={false} axisLine={false} />
+            <YAxis stroke="#646464" fontSize={12} tickLine={false} axisLine={false} />
             <Tooltip />
             <Line
               type="monotone"
               dataKey="adherence"
-              stroke="#1eb7a6"
+              stroke="#b39244"
               strokeWidth={3}
-              dot={{ r: 4, fill: "#ff7f63" }}
+              dot={{ r: 4, fill: "#2d2e2d", stroke: "#e8c061", strokeWidth: 2 }}
             />
           </LineChart>
         </ResponsiveContainer>

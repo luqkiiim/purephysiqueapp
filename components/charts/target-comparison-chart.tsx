@@ -30,12 +30,12 @@ export function TargetComparisonChart({
       <CardContent className="h-72">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e7e0d2" />
-            <XAxis dataKey="label" stroke="#6b7b7a" fontSize={12} tickLine={false} axisLine={false} />
-            <YAxis stroke="#6b7b7a" fontSize={12} tickLine={false} axisLine={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e1d9ca" />
+            <XAxis dataKey="label" stroke="#646464" fontSize={12} tickLine={false} axisLine={false} />
+            <YAxis stroke="#646464" fontSize={12} tickLine={false} axisLine={false} />
             <Tooltip />
-            <Bar dataKey="target" fill="#f1c45a" radius={[10, 10, 0, 0]} />
-            <Bar dataKey="actual" fill="#ff7f63" radius={[10, 10, 0, 0]} />
+            <Bar dataKey="target" fill="#fae9be" radius={[10, 10, 0, 0]} />
+            <Bar dataKey="actual" fill="#e8c061" radius={[10, 10, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

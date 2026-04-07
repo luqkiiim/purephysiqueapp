@@ -10,8 +10,8 @@ const badgeVariants = cva(
         neutral: "border-slate-200 bg-white text-slate-700",
         success: "border-emerald-200 bg-emerald-50 text-emerald-700",
         warning: "border-amber-200 bg-amber-50 text-amber-700",
-        accent: "border-accent-teal/20 bg-accent-mint text-slate-900",
-        coral: "border-accent-coral/20 bg-orange-50 text-orange-700",
+        accent: "border-accent-coral/30 bg-accent-mint text-slate-900",
+        coral: "border-accent-coral/30 bg-accent-coral text-slate-900",
       },
     },
     defaultVariants: {

@@ -32,18 +32,18 @@ export function WeightTrendChart({
           <AreaChart data={data}>
             <defs>
               <linearGradient id="weightFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#1eb7a6" stopOpacity={0.35} />
-                <stop offset="100%" stopColor="#1eb7a6" stopOpacity={0.02} />
+                <stop offset="0%" stopColor="#e8c061" stopOpacity={0.3} />
+                <stop offset="100%" stopColor="#e8c061" stopOpacity={0.02} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e7e0d2" />
-            <XAxis dataKey="label" stroke="#6b7b7a" fontSize={12} tickLine={false} axisLine={false} />
-            <YAxis stroke="#6b7b7a" fontSize={12} tickLine={false} axisLine={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e1d9ca" />
+            <XAxis dataKey="label" stroke="#646464" fontSize={12} tickLine={false} axisLine={false} />
+            <YAxis stroke="#646464" fontSize={12} tickLine={false} axisLine={false} />
             <Tooltip />
             <Area
               type="monotone"
               dataKey="weight"
-              stroke="#1d2b2a"
+              stroke="#2d2e2d"
               strokeWidth={3}
               fill="url(#weightFill)"
             />
