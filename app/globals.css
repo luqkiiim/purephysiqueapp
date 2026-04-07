@@ -1,11 +1,13 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
   color-scheme: light;
-  --font-body: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  --font-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --font-body: "Montserrat", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Lulo Clean", "Montserrat", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 }
 
 html {
