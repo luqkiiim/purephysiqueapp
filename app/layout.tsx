@@ -5,7 +5,7 @@ import "./globals.css";
 
 const luloCleanDisplay = localFont({
   src: [
-    { path: "./fonts/Lulo Clean One.otf", weight: "400", style: "normal" },
+    { path: "./fonts/Lulo Clean One Bold.otf", weight: "400", style: "normal" },
     { path: "./fonts/Lulo Clean One Bold.otf", weight: "700", style: "normal" },
   ],
   variable: "--font-display",
