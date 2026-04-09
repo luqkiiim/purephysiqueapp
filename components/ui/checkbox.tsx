@@ -23,13 +23,15 @@ export function Checkbox({
     >
       <input
         type="checkbox"
-        className="mt-1 h-5 w-5 rounded border-white/20 bg-transparent text-accent-teal focus:ring-accent-teal"
+        className="mt-1 h-5 w-5 shrink-0 rounded border-white/20 bg-transparent text-accent-teal focus:ring-accent-teal"
         {...props}
       />
-      <span>
+      <span className="min-w-0 flex-1">
         <span className="block text-sm font-semibold text-slate-900">{label}</span>
         {description ? (
-          <span className="mt-1 block text-sm leading-5 text-slate-600">{description}</span>
+          <span className="mt-1 block text-safe-wrap text-sm leading-5 text-slate-600">
+            {description}
+          </span>
         ) : null}
       </span>
     </label>

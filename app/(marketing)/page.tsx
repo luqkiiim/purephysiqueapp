@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Activity, ShieldCheck, Smartphone } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 
 const landingCards = [
   {
@@ -79,16 +79,20 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-3">
+      <section className="mx-auto grid max-w-5xl gap-4 sm:gap-5 md:grid-cols-3">
         {landingCards.map(({ title, description, icon: Icon }) => (
-          <Card key={title}>
-            <CardHeader className="space-y-4">
+          <Card key={title} className="h-full w-full max-w-[30rem] justify-self-center">
+            <CardContent className="flex h-full flex-col items-center px-5 pb-5 pt-5 text-center sm:px-6 sm:pb-6 sm:pt-6">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-accent-teal/25 bg-accent-teal/10">
                 <Icon className="h-5 w-5 text-accent-teal" />
               </div>
-              <CardTitle className="text-xl">{title}</CardTitle>
-              <CardDescription>{description}</CardDescription>
-            </CardHeader>
+              <div className="mt-4 space-y-2">
+                <CardTitle className="text-lg sm:text-xl">{title}</CardTitle>
+                <CardDescription className="mx-auto max-w-[18rem]">
+                  {description}
+                </CardDescription>
+              </div>
+            </CardContent>
           </Card>
         ))}
       </section>
