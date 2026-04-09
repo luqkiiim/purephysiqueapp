@@ -48,11 +48,11 @@ export default async function ClientHistoryPage() {
         <CardContent className="space-y-3">
           {data.recentCheckIns.slice(-10).reverse().map((entry) => (
             <div key={entry.id} className="surface-muted p-4">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <p className="font-semibold text-slate-900">{formatFullDate(entry.date)}</p>
                 <p className="text-sm text-slate-600">{entry.completionPercentage}% complete</p>
               </div>
-              <div className="mt-3 grid grid-cols-2 gap-3 text-sm text-slate-700">
+              <div className="mt-3 grid gap-3 text-sm text-slate-700 sm:grid-cols-2">
                 <p>Weight: {entry.bodyWeight}</p>
                 <p>Protein: {entry.proteinGrams}g</p>
                 <p>Steps: {entry.steps.toLocaleString()}</p>

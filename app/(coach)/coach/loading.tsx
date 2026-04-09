@@ -6,7 +6,7 @@ export default function CoachLoading() {
   return (
     <div className="page-shell space-y-6">
       <header className="surface-card overflow-hidden p-4 sm:p-6">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-5">
           <div className="space-y-3">
             <LoadingBlock className="h-3 w-28 rounded-full" />
             <div className="space-y-3">
@@ -14,14 +14,16 @@ export default function CoachLoading() {
               <LoadingBlock className="h-4 w-full max-w-2xl" />
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex flex-wrap items-center gap-2">
+          <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+            <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:items-center">
               <LoadingBlock className="h-10 w-24 rounded-full" />
               <LoadingBlock className="h-10 w-24 rounded-full" />
               <LoadingBlock className="h-10 w-24 rounded-full" />
             </div>
-            <LoadingBlock className="h-10 w-24 rounded-full" />
-            <LoadingBlock className="h-10 w-24 rounded-full" />
+            <div className="grid gap-2 sm:flex sm:flex-wrap sm:justify-end">
+              <LoadingBlock className="h-10 w-full rounded-full sm:w-24" />
+              <LoadingBlock className="h-10 w-full rounded-full sm:w-24" />
+            </div>
           </div>
         </div>
       </header>

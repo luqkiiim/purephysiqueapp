@@ -12,6 +12,7 @@
 
 html {
   background: #2d2e2d;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -22,6 +23,7 @@ body {
     linear-gradient(180deg, #2d2e2d 0%, #181818 52%, #0a0a0a 100%);
   color: #ffffff;
   font-family: var(--font-body);
+  overflow-x: hidden;
 }
 
 * {
@@ -53,40 +55,64 @@ input[type="number"] {
     font-family: var(--font-display);
     font-weight: 700;
     letter-spacing: -0.03em;
+    line-height: 1.08;
+    text-wrap: balance;
+  }
+
+  p,
+  span,
+  a,
+  label,
+  button {
+    overflow-wrap: anywhere;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 16px;
   }
 }
 
 @layer components {
   .page-shell {
-    @apply mx-auto w-full max-w-7xl px-4 pb-12 pt-5 sm:px-6 lg:px-8;
+    @apply mx-auto w-full max-w-7xl px-3 pb-14 pt-4 sm:px-6 sm:pb-12 sm:pt-5 lg:px-8;
   }
 
   .surface-card {
-    @apply rounded-4xl border border-white/10 bg-slate-50/90 shadow-soft backdrop-blur;
+    @apply rounded-[1.6rem] border border-white/10 bg-slate-50/90 shadow-soft backdrop-blur sm:rounded-4xl;
   }
 
   .surface-muted {
-    @apply rounded-3xl border border-white/10 bg-slate-100/85 backdrop-blur;
+    @apply rounded-[1.3rem] border border-white/10 bg-slate-100/85 backdrop-blur sm:rounded-3xl;
   }
 
   .eyebrow {
-    @apply text-xs font-semibold uppercase tracking-[0.24em] text-slate-700/70;
+    @apply text-[0.65rem] font-semibold uppercase tracking-[0.24em] text-slate-700/70 sm:text-xs;
   }
 
   .section-title {
-    @apply font-display text-3xl text-slate-900 sm:text-4xl;
+    @apply font-display text-[1.7rem] leading-[1.02] text-slate-900 sm:text-3xl lg:text-4xl;
   }
 
   .status-pill {
-    @apply inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold;
+    @apply inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-semibold;
   }
 
   .field-shell {
-    @apply rounded-3xl border border-white/15 bg-slate-50 px-4 py-3 shadow-sm transition duration-200 focus-within:border-accent-teal focus-within:ring-2 focus-within:ring-accent-teal/15;
+    @apply rounded-[1.3rem] border border-white/15 bg-slate-50 px-4 py-3.5 shadow-sm transition duration-200 focus-within:border-accent-teal focus-within:ring-2 focus-within:ring-accent-teal/15 sm:rounded-3xl;
   }
 
   .tap-card {
-    @apply rounded-3xl border border-white/10 bg-slate-100/90 px-4 py-4 shadow-soft transition duration-200 hover:-translate-y-0.5 hover:border-accent-teal/25 hover:bg-slate-100;
+    @apply rounded-[1.3rem] border border-white/10 bg-slate-100/90 px-4 py-4 shadow-soft transition duration-200 hover:-translate-y-0.5 hover:border-accent-teal/25 hover:bg-slate-100 sm:rounded-3xl;
+  }
+
+  .mobile-section {
+    @apply surface-card p-4 sm:p-5;
+  }
+
+  .metric-grid {
+    @apply grid gap-3 sm:grid-cols-2;
   }
 }
 
@@ -97,5 +123,10 @@ input[type="number"] {
 
   .text-balance {
     text-wrap: balance;
+  }
+
+  .text-safe-wrap {
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 }

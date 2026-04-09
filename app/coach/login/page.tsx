@@ -21,11 +21,15 @@ export default async function CoachLoginPage({
   return (
     <main className="page-shell">
       <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
-        <section className="space-y-5">
+        <section className="order-2 space-y-5 lg:order-1">
           <p className="eyebrow">Coach access</p>
-          <h1 className="font-display text-5xl leading-none text-slate-900 sm:text-6xl">
+          <h1 className="font-display text-[2.1rem] leading-[0.96] text-slate-900 sm:text-5xl lg:text-6xl">
             Sign in and manage the whole coaching roster from one place.
           </h1>
+          <p className="max-w-2xl text-sm leading-6 text-slate-700 sm:text-base">
+            The core coach views should stay readable and actionable from a phone first, then
+            expand naturally on larger screens.
+          </p>
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="tap-card">
               <Activity className="h-5 w-5 text-accent-teal" />
@@ -42,7 +46,7 @@ export default async function CoachLoginPage({
           </div>
         </section>
 
-        <div className="mx-auto w-full max-w-md space-y-4">
+        <div className="order-1 mx-auto w-full max-w-md space-y-4 lg:order-2">
           <Card>
             <CardHeader>
               <CardTitle>Coach login</CardTitle>
@@ -78,7 +82,7 @@ export default async function CoachLoginPage({
                 <div className="surface-muted p-4 text-sm">
                   <p className="font-semibold text-slate-900">Coach email</p>
                   <p className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">Email</p>
-                  <p className="mt-1 whitespace-nowrap font-medium text-slate-900">
+                  <p className="mt-1 font-mono text-[0.8rem] font-medium text-slate-900 sm:text-sm">
                     {demoCoachCredentials.email}
                   </p>
                   <p className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">
@@ -92,24 +96,31 @@ export default async function CoachLoginPage({
                 <div className="surface-muted p-4 text-sm">
                   <p className="font-semibold text-slate-900">Client test access</p>
                   <p className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">Client</p>
-                  <p className="mt-1 break-all font-medium text-slate-900">
+                  <p className="mt-1 font-medium text-slate-900">
                     {demoClientCredentials.fullName}
                   </p>
                   <p className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">
                     Access link
                   </p>
-                  <p className="mt-1 break-all font-medium text-slate-900">
+                  <p className="mt-1 font-mono text-[0.8rem] font-medium text-slate-900 sm:text-sm">
                     /access/{demoClientCredentials.inviteToken}
                   </p>
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-3">
-                <Link href={`/access/${demoClientCredentials.inviteToken}`}>
-                  <Button variant="secondary">Open client access demo</Button>
+              <div className="grid gap-3 sm:flex sm:flex-wrap">
+                <Link
+                  href={`/access/${demoClientCredentials.inviteToken}`}
+                  className="block w-full sm:inline-block sm:w-auto"
+                >
+                  <Button variant="secondary" fullWidth>
+                    Open client access demo
+                  </Button>
                 </Link>
-                <Link href="/preview/client">
-                  <Button variant="ghost">Open client preview</Button>
+                <Link href="/preview/client" className="block w-full sm:inline-block sm:w-auto">
+                  <Button variant="ghost" fullWidth>
+                    Open client preview
+                  </Button>
                 </Link>
               </div>
             </CardContent>

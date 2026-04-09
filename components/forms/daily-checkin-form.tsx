@@ -186,29 +186,29 @@ export function DailyCheckInForm({
   }
 
   return (
-    <form action={action} className="space-y-5">
-      <div className="surface-card p-5">
-        <div className="flex items-start justify-between gap-3">
-          <div>
+    <form action={action} className="space-y-4 sm:space-y-5">
+      <div className="surface-card p-4 sm:p-5">
+        <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
+          <div className="min-w-0">
             <p className="eyebrow">Today&apos;s momentum</p>
-            <h2 className="mt-2 font-display text-3xl text-slate-900">
+            <h2 className="mt-2 font-display text-[1.9rem] leading-[1.04] text-slate-900 sm:text-3xl">
               {completion}% complete
             </h2>
-            <p className="mt-2 text-sm text-slate-700">
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-700">
               Keep it quick. The goal is a complete check-in, not perfect detail.
             </p>
           </div>
-          <div className="rounded-3xl bg-accent-mint px-4 py-3 text-right">
+          <div className="self-start rounded-[1.3rem] bg-accent-mint px-4 py-3 text-left sm:rounded-3xl sm:text-right">
             <p className="text-xs uppercase tracking-[0.2em] text-[#6b5730]/80">
               Streak
             </p>
-            <p className="mt-1 text-2xl font-display text-[#2d2e2d]">
+            <p className="mt-1 text-2xl font-display text-[#2d2e2d] sm:text-[1.75rem]">
               {streak} days
             </p>
           </div>
         </div>
-        <ProgressBar className="mt-4" value={completion} />
-        <div className="mt-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-5">
+        <ProgressBar className="mt-5" value={completion} />
+        <div className="mt-5 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3 xl:grid-cols-5">
           <div className="tap-card">
             <p className="text-slate-500">Protein</p>
             <p className="mt-1 font-semibold text-slate-900">
@@ -243,14 +243,14 @@ export function DailyCheckInForm({
       </div>
 
       {submitted ? (
-        <div className="rounded-4xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-800">
+        <div className="rounded-[1.6rem] border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm text-emerald-800 sm:rounded-4xl sm:px-5">
           Check-in complete. Keep tomorrow simple and protect the streak.
         </div>
       ) : null}
 
       <section className="grid gap-4">
-        <div className="surface-card p-5">
-          <div className="mb-4 flex items-center gap-3">
+        <div className="surface-card p-4 sm:p-5">
+          <div className="mb-5 flex items-start gap-3">
             <MoonStar className="h-5 w-5 text-accent-teal" />
             <div>
               <h3 className="text-base font-semibold text-slate-900">Sleep</h3>
@@ -259,7 +259,7 @@ export function DailyCheckInForm({
               </p>
             </div>
           </div>
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             <label className="field-shell">
               <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                 Bedtime
@@ -267,7 +267,7 @@ export function DailyCheckInForm({
               <input
                 name="bedtime"
                 type="time"
-                className="mt-2 w-full bg-transparent text-xl font-semibold outline-none"
+                className="mt-2 w-full bg-transparent text-lg font-semibold outline-none sm:text-xl"
                 value={bedtime}
                 onChange={(event) => setBedtime(event.target.value)}
                 required
@@ -280,7 +280,7 @@ export function DailyCheckInForm({
               <input
                 name="wakeTime"
                 type="time"
-                className="mt-2 w-full bg-transparent text-xl font-semibold outline-none"
+                className="mt-2 w-full bg-transparent text-lg font-semibold outline-none sm:text-xl"
                 value={wakeTime}
                 onChange={(event) => setWakeTime(event.target.value)}
                 required
@@ -294,7 +294,7 @@ export function DailyCheckInForm({
                 name="totalSleepHours"
                 type="number"
                 step="0.1"
-                className="mt-2 w-full bg-transparent text-3xl font-display outline-none"
+                className="mt-2 w-full bg-transparent text-[2rem] font-display outline-none sm:text-3xl"
                 value={totalSleepHours}
                 onChange={(event) => setTotalSleepHours(Number(event.target.value))}
                 required
@@ -303,8 +303,8 @@ export function DailyCheckInForm({
           </div>
         </div>
 
-        <div className="surface-card p-5">
-          <div className="mb-4 flex items-center gap-3">
+        <div className="surface-card p-4 sm:p-5">
+          <div className="mb-5 flex items-start gap-3">
             <Salad className="h-5 w-5 text-accent-coral" />
             <div>
               <h3 className="text-base font-semibold text-slate-900">
@@ -315,7 +315,7 @@ export function DailyCheckInForm({
               </p>
             </div>
           </div>
-          <div className="grid gap-3 md:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             <label className="field-shell">
               <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                 Protein (grams)
@@ -324,7 +324,7 @@ export function DailyCheckInForm({
                 <input
                   name="proteinGrams"
                   type="number"
-                  className="w-full bg-transparent text-3xl font-display outline-none"
+                  className="w-full bg-transparent text-[2rem] font-display outline-none sm:text-3xl"
                   value={proteinGrams}
                   onChange={(event) => setProteinGrams(Number(event.target.value))}
                   required
@@ -344,7 +344,7 @@ export function DailyCheckInForm({
                 <input
                   name="steps"
                   type="number"
-                  className="w-full bg-transparent text-3xl font-display outline-none"
+                  className="w-full bg-transparent text-[2rem] font-display outline-none sm:text-3xl"
                   value={steps}
                   onChange={(event) => setSteps(Number(event.target.value))}
                   required
@@ -363,7 +363,7 @@ export function DailyCheckInForm({
                   type="number"
                   step="0.1"
                   min="0"
-                  className="w-full bg-transparent text-3xl font-display outline-none"
+                  className="w-full bg-transparent text-[2rem] font-display outline-none sm:text-3xl"
                   value={hydrationLiters}
                   onChange={(event) => setHydrationLiters(Number(event.target.value))}
                   required
@@ -376,8 +376,8 @@ export function DailyCheckInForm({
           </div>
         </div>
 
-        <div className="surface-card p-5">
-          <div className="mb-4 flex items-center gap-3">
+        <div className="surface-card p-4 sm:p-5">
+          <div className="mb-5 flex items-start gap-3">
             <Dumbbell className="h-5 w-5 text-accent-gold" />
             <div>
               <h3 className="text-base font-semibold text-slate-900">Exercise</h3>
@@ -390,7 +390,7 @@ export function DailyCheckInForm({
             {exerciseEntries.map((entry, index) => (
               <div
                 key={entry.id}
-                className="grid gap-3 md:grid-cols-[minmax(0,1fr)_190px_auto]"
+                className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_170px_auto]"
               >
                 <label className="field-shell">
                   <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
@@ -400,7 +400,7 @@ export function DailyCheckInForm({
                     name="exerciseType"
                     type="text"
                     placeholder="Strength, run, class, sport..."
-                    className="mt-2 w-full bg-transparent text-xl font-semibold outline-none"
+                    className="mt-2 w-full bg-transparent text-lg font-semibold outline-none sm:text-xl"
                     value={entry.type}
                     onChange={(event) =>
                       updateExerciseEntry(entry.id, "type", event.target.value)
@@ -416,7 +416,7 @@ export function DailyCheckInForm({
                     name="exerciseDurationMinutes"
                     type="number"
                     min="0"
-                    className="mt-2 w-full bg-transparent text-3xl font-display outline-none"
+                    className="mt-2 w-full bg-transparent text-[2rem] font-display outline-none sm:text-3xl"
                     value={entry.durationMinutes}
                     onChange={(event) =>
                       updateExerciseEntry(
@@ -434,7 +434,7 @@ export function DailyCheckInForm({
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="w-full md:w-auto"
+                      className="w-full lg:w-auto"
                       onClick={() => removeExerciseEntry(entry.id)}
                     >
                       <Minus className="mr-2 h-4 w-4" />
@@ -444,7 +444,7 @@ export function DailyCheckInForm({
                 </div>
               </div>
             ))}
-            <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-slate-600">
                 For a day off, enter <span className="font-semibold">Rest day</span> and 0 minutes.
               </p>
@@ -461,8 +461,8 @@ export function DailyCheckInForm({
           </div>
         </div>
 
-        <div className="surface-card p-5">
-          <div className="mb-4 flex items-center gap-3">
+        <div className="surface-card p-4 sm:p-5">
+          <div className="mb-5 flex items-start gap-3">
             <ShieldCheck className="h-5 w-5 text-accent-teal" />
             <div>
               <h3 className="text-base font-semibold text-slate-900">
@@ -501,8 +501,8 @@ export function DailyCheckInForm({
           </div>
         </div>
 
-        <div className="surface-card p-5">
-          <div className="mb-4 flex items-center gap-3">
+        <div className="surface-card p-4 sm:p-5">
+          <div className="mb-5 flex items-start gap-3">
             <Scale className="h-5 w-5 text-accent-coral" />
             <div>
               <h3 className="text-base font-semibold text-slate-900">
@@ -525,7 +525,7 @@ export function DailyCheckInForm({
                 step="0.1"
                 min="0"
                 placeholder="72.4"
-                className="mt-2 h-10 w-full bg-transparent text-2xl font-semibold leading-none outline-none"
+                className="mt-2 h-10 w-full bg-transparent text-xl font-semibold leading-none outline-none sm:text-2xl"
                 value={bodyWeightInput}
                 onChange={(event) => setBodyWeightInput(event.target.value)}
                 required
@@ -537,8 +537,8 @@ export function DailyCheckInForm({
           </div>
         </div>
 
-        <div className="surface-card p-5">
-          <div className="mb-4 flex items-center gap-3">
+        <div className="surface-card p-4 sm:p-5">
+          <div className="mb-5 flex items-start gap-3">
             <Camera className="h-5 w-5 text-accent-gold" />
             <div>
               <h3 className="text-base font-semibold text-slate-900">

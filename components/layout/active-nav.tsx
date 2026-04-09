@@ -51,15 +51,16 @@ export function ActiveNav({
     <Link
       href={href}
       className={cn(
-        "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition",
+        "inline-flex min-w-0 shrink-0 items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold leading-tight transition sm:gap-2 sm:px-4 sm:text-sm",
         active
           ? "bg-accent-coral text-[#2d2e2d] shadow-soft"
           : "text-slate-700 hover:bg-accent-teal/10 hover:text-slate-900",
-        mobile && "w-full justify-center px-3 py-2.5 text-xs",
+        mobile &&
+          "min-h-[3.5rem] min-w-[4.75rem] shrink-0 flex-1 flex-col gap-1 rounded-[1.15rem] px-3 py-2 text-[0.68rem] text-center sm:min-w-0 sm:flex-row sm:gap-2 sm:rounded-full sm:py-2.5 sm:text-xs",
       )}
     >
-      <Icon className={mobile ? "h-4 w-4" : "h-4 w-4"} />
-      <span>{label}</span>
+      <Icon className="h-4 w-4 shrink-0" />
+      <span className="min-w-0 text-balance">{label}</span>
     </Link>
   );
 }

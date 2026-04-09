@@ -30,9 +30,13 @@ export default async function ClientHomePage({
 
       <Card>
         <CardHeader>
-          <CardTitle>{data.client.profile.welcomeMessage}</CardTitle>
+          <CardTitle>Today&apos;s focus</CardTitle>
         </CardHeader>
-        <CardContent />
+        <CardContent>
+          <p className="text-sm leading-6 text-slate-700 sm:text-base">
+            {data.client.profile.welcomeMessage}
+          </p>
+        </CardContent>
       </Card>
     </div>
   );

@@ -19,7 +19,7 @@ export function FeedbackMessageForm({
           required
         />
       </label>
-      <FormSubmitButton variant="coral" pendingLabel="Sending message...">
+      <FormSubmitButton variant="coral" fullWidth pendingLabel="Sending message...">
         Save client feedback
       </FormSubmitButton>
     </form>

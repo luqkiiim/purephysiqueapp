@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { CoachShell } from "@/components/layout/coach-shell";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getCoachClientsPageData } from "@/lib/data/coach";
@@ -15,8 +16,8 @@ export default async function CoachClientsPage() {
       subheading="Manage profiles, targets, invite links, and reminder settings across the full roster."
       demoMode={!isLiveAppEnabled}
       actions={
-        <Link href="/coach/clients/new">
-          <Button variant="coral" size="sm">
+        <Link href="/coach/clients/new" className="block w-full sm:inline-block sm:w-auto">
+          <Button variant="coral" size="sm" fullWidth>
             New client
           </Button>
         </Link>
@@ -31,23 +32,40 @@ export default async function CoachClientsPage() {
                   <CardTitle>{client.fullName}</CardTitle>
                   <CardDescription>{client.email}</CardDescription>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  <Link href={`/coach/clients/${client.id}`}>
-                    <Button variant="secondary" size="sm">
+                <div className="grid gap-2 sm:flex sm:flex-wrap">
+                  <Link
+                    href={`/coach/clients/${client.id}`}
+                    className="block w-full sm:inline-block sm:w-auto"
+                  >
+                    <Button variant="secondary" size="sm" fullWidth>
                       Open detail
                     </Button>
                   </Link>
-                  <Link href={`/coach/clients/${client.id}/edit`}>
-                    <Button variant="ghost" size="sm">
+                  <Link
+                    href={`/coach/clients/${client.id}/edit`}
+                    className="block w-full sm:inline-block sm:w-auto"
+                  >
+                    <Button variant="ghost" size="sm" fullWidth>
                       Edit
                     </Button>
                   </Link>
                 </div>
               </CardHeader>
-              <CardContent className="grid gap-3 md:grid-cols-4">
+              <CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 <div className="surface-muted p-4">
                   <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Status</p>
-                  <p className="mt-2 text-lg font-semibold text-slate-900">{client.statusLabel}</p>
+                  <Badge
+                    tone={
+                      client.statusTone === "success"
+                        ? "success"
+                        : client.statusTone === "warning"
+                          ? "warning"
+                          : "neutral"
+                    }
+                    className="mt-2 self-start"
+                  >
+                    {client.statusLabel}
+                  </Badge>
                 </div>
                 <div className="surface-muted p-4">
                   <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Streak</p>

@@ -11,22 +11,26 @@ export interface CheckboxProps
 export function Checkbox({
   className,
   label,
+  description,
   ...props
 }: CheckboxProps) {
   return (
     <label
       className={cn(
-        "flex cursor-pointer items-start gap-3 rounded-3xl border border-white/15 bg-slate-50 px-4 py-4 transition hover:border-accent-teal/40",
+        "flex min-h-[4.25rem] cursor-pointer items-start gap-3 rounded-[1.3rem] border border-white/15 bg-slate-50 px-4 py-4 transition hover:border-accent-teal/40 sm:rounded-3xl",
         className,
       )}
     >
       <input
         type="checkbox"
-        className="mt-1 h-4 w-4 rounded border-white/20 bg-transparent text-accent-teal focus:ring-accent-teal"
+        className="mt-1 h-5 w-5 rounded border-white/20 bg-transparent text-accent-teal focus:ring-accent-teal"
         {...props}
       />
       <span>
         <span className="block text-sm font-semibold text-slate-900">{label}</span>
+        {description ? (
+          <span className="mt-1 block text-sm leading-5 text-slate-600">{description}</span>
+        ) : null}
       </span>
     </label>
   );

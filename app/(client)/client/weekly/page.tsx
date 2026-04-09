@@ -19,7 +19,7 @@ export default async function ClientWeeklyPage() {
               <CardTitle>{summary.weekLabel}</CardTitle>
               <CardDescription>Simple version-one weekly summary.</CardDescription>
             </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-3">
+            <CardContent className="grid gap-3 sm:grid-cols-2">
               <div className="surface-muted p-4">
                 <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Adherence</p>
                 <p className="mt-2 text-2xl font-display text-slate-900">

@@ -27,12 +27,20 @@ export function TargetComparisonChart({
         <CardTitle>{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
-      <CardContent className="h-72">
+      <CardContent className="h-60 px-0 sm:h-72">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data}>
+          <BarChart data={data} margin={{ top: 8, right: 8, left: -24, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e1d9ca" />
-            <XAxis dataKey="label" stroke="#646464" fontSize={12} tickLine={false} axisLine={false} />
-            <YAxis stroke="#646464" fontSize={12} tickLine={false} axisLine={false} />
+            <XAxis
+              dataKey="label"
+              stroke="#646464"
+              fontSize={12}
+              tickLine={false}
+              axisLine={false}
+              minTickGap={18}
+              tickMargin={8}
+            />
+            <YAxis stroke="#646464" fontSize={12} tickLine={false} axisLine={false} width={32} />
             <Tooltip />
             <Bar dataKey="target" fill="#fae9be" radius={[10, 10, 0, 0]} />
             <Bar dataKey="actual" fill="#e8c061" radius={[10, 10, 0, 0]} />

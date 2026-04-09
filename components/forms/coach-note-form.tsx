@@ -27,7 +27,7 @@ export function CoachNoteForm({
           required
         />
       </label>
-      <FormSubmitButton variant="secondary" pendingLabel="Saving note...">
+      <FormSubmitButton variant="secondary" fullWidth pendingLabel="Saving note...">
         Save note
       </FormSubmitButton>
     </form>

@@ -7,6 +7,7 @@ import { logoutAction } from "@/app/actions/auth";
 
 export function CoachShell({
   heading,
+  subheading,
   demoMode,
   children,
   actions,
@@ -20,25 +21,34 @@ export function CoachShell({
   return (
     <div className="page-shell space-y-6">
       <header className="surface-card overflow-hidden p-4 sm:p-6">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-5">
           <div className="space-y-3">
             <Link href="/" className="eyebrow">
               Pure Physique
             </Link>
-            <h1 className="section-title">{heading}</h1>
+            <div className="max-w-3xl space-y-3">
+              <h1 className="section-title">{heading}</h1>
+              {subheading ? (
+                <p className="max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+                  {subheading}
+                </p>
+              ) : null}
+            </div>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <nav className="flex flex-wrap items-center gap-2">
+          <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+            <nav className="flex gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:items-center sm:overflow-visible sm:pb-0">
               <ActiveNav href="/coach" label="Overview" icon="dashboard" />
               <ActiveNav href="/coach/clients" label="Clients" icon="users" />
               <ActiveNav href="/coach/settings" label="Settings" icon="settings" />
             </nav>
-            {actions}
-            <form action={logoutAction}>
-              <Button variant="secondary" size="sm" type="submit">
-                Sign out
-              </Button>
-            </form>
+            <div className="grid gap-2 [&>*]:w-full [&>*>*]:w-full sm:flex sm:flex-wrap sm:justify-end sm:[&>*]:w-auto sm:[&>*>*]:w-auto">
+              {actions}
+              <form action={logoutAction}>
+                <Button variant="secondary" size="sm" type="submit" fullWidth>
+                  Sign out
+                </Button>
+              </form>
+            </div>
           </div>
         </div>
       </header>

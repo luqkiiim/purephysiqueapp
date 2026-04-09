@@ -26,10 +26,16 @@ export default async function ClientInvitePage({
         <Card className="mx-auto max-w-xl">
           <CardHeader>
             <CardTitle>Invite not found</CardTitle>
+            <p className="text-sm leading-6 text-slate-600">
+              This link is missing or expired. Head back to the home page and request a fresh
+              invite if needed.
+            </p>
           </CardHeader>
           <CardContent>
-            <Link href="/">
-              <Button variant="secondary">Back to home</Button>
+            <Link href="/" className="block w-full sm:inline-block sm:w-auto">
+              <Button variant="secondary" fullWidth>
+                Back to home
+              </Button>
             </Link>
           </CardContent>
         </Card>
@@ -50,6 +56,9 @@ export default async function ClientInvitePage({
               <LockKeyhole className="h-6 w-6 text-accent-teal" />
             </div>
             <CardTitle>Open your private check-in app</CardTitle>
+            <p className="text-sm leading-6 text-slate-600">
+              Built to open fast on mobile so the check-in flow feels direct and lightweight.
+            </p>
           </CardHeader>
           <CardContent className="space-y-5">
             {error ? (
@@ -60,6 +69,7 @@ export default async function ClientInvitePage({
               </div>
             ) : null}
             <div className="surface-muted p-4">
+              <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Client</p>
               <p className="text-sm font-semibold text-slate-900">{invite.client.fullName}</p>
             </div>
             <ClientAccessForm action={openClientAccessAction} inviteToken={token} />

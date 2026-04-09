@@ -4,16 +4,18 @@ function LoadingBlock({ className }: { className: string }) {
 
 export default function ClientLoading() {
   return (
-    <div className="page-shell pb-28 space-y-5">
-      <header className="surface-card overflow-hidden p-5">
-        <div className="flex items-start justify-between gap-4">
-          <div className="space-y-2">
-            <LoadingBlock className="h-3 w-28 rounded-full" />
-            <LoadingBlock className="h-10 w-48" />
+    <div className="page-shell space-y-5 pb-32 sm:pb-28">
+      <header className="surface-card overflow-hidden p-4 sm:p-5">
+        <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <LoadingBlock className="h-3 w-28 rounded-full" />
+              <LoadingBlock className="h-8 w-28 rounded-full" />
+            </div>
+            <LoadingBlock className="h-10 w-48 max-w-full" />
           </div>
-          <div className="flex flex-col items-end gap-3">
-            <LoadingBlock className="h-8 w-24 rounded-full" />
-            <LoadingBlock className="h-8 w-28 rounded-full" />
+          <div className="grid gap-2 sm:justify-items-end">
+            <LoadingBlock className="h-10 w-28 rounded-full" />
           </div>
         </div>
       </header>
@@ -36,10 +38,10 @@ export default function ClientLoading() {
         </div>
       </section>
 
-      <nav className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-xl border-t border-white/10 bg-[rgba(10,10,10,0.94)] px-3 py-3 shadow-[0_-8px_24px_rgba(0,0,0,0.35)] backdrop-blur sm:rounded-t-4xl sm:border-x">
-        <div className="grid grid-cols-5 gap-2">
+      <nav className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-xl border-t border-white/10 bg-[rgba(10,10,10,0.94)] px-3 pb-[calc(env(safe-area-inset-bottom,0)+0.75rem)] pt-2 shadow-[0_-8px_24px_rgba(0,0,0,0.35)] backdrop-blur sm:rounded-t-4xl sm:border-x">
+        <div className="flex gap-2 overflow-x-auto pb-1 sm:grid sm:grid-cols-5 sm:overflow-visible sm:pb-0">
           {Array.from({ length: 5 }, (_, index) => (
-            <LoadingBlock key={index} className="h-12 w-full rounded-2xl" />
+            <LoadingBlock key={index} className="h-14 w-[4.75rem] rounded-[1.15rem] sm:w-full" />
           ))}
         </div>
       </nav>
