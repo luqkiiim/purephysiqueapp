@@ -11,15 +11,16 @@ export default async function ClientMessagesPage() {
     <div className="space-y-5">
       <Card>
         <CardHeader>
-          <CardTitle>Coach messages</CardTitle>
+          <CardTitle>Messages</CardTitle>
           <CardDescription>
-            Encouraging feedback and shared notes stay visible here so progress feels supported.
+            Coach feedback and shared notes stay visible here so progress still feels supported
+            between check-ins.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="surface-muted p-4">
-              <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Messages</p>
+              <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Feedback</p>
               <p className="mt-2 text-2xl font-display text-slate-900">
                 {data.feedbackMessages.length}
               </p>
@@ -37,7 +38,7 @@ export default async function ClientMessagesPage() {
               {data.feedbackMessages.length ? (
                 <section className="space-y-3">
                   <div className="space-y-1">
-                    <p className="eyebrow">Visible feedback</p>
+                    <p className="eyebrow">Coach feedback</p>
                     <p className="text-sm leading-6 text-slate-600">
                       Short coach messages saved for the client to revisit anytime.
                     </p>
@@ -84,7 +85,7 @@ export default async function ClientMessagesPage() {
             </div>
           ) : (
             <div className="surface-muted p-5 text-sm text-slate-700">
-              No coach messages yet. When feedback is added, it will show up here.
+              No messages yet. When feedback or shared notes are added, they will show up here.
             </div>
           )}
         </CardContent>

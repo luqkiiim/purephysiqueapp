@@ -47,7 +47,7 @@ export function ClientShell({
           <ActiveNav href="/client/history" label="History" icon="history" mobile />
           <ActiveNav href="/client/weekly" label="Weekly" icon="weekly" mobile />
           <ActiveNav href="/client/photos" label="Photos" icon="photos" mobile />
-          <ActiveNav href="/client/messages" label="Inbox" icon="messages" mobile />
+          <ActiveNav href="/client/messages" label="Messages" icon="messages" mobile />
         </div>
       </nav>
     </div>

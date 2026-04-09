@@ -11,11 +11,15 @@ import { isLiveAppEnabled } from "@/lib/supabase/config";
 
 export default async function CoachDashboardPage() {
   const data = await getCoachDashboardData();
+  const needsFollowUpClients = data.clients
+    .filter((client) => client.statusLabel !== "Logged today")
+    .sort((left, right) => left.streak - right.streak)
+    .slice(0, 4);
 
   return (
     <CoachShell
-      heading="Coach dashboard"
-      subheading="Track who logged today, spot missed check-ins early, and keep momentum visible across the whole roster."
+      heading="Overview"
+      subheading="Track who logged today, spot missed check-ins early, and keep momentum visible across the roster without managing profiles from this screen."
       demoMode={!isLiveAppEnabled}
       actions={
         <Link href="/coach/clients/new" className="block w-full sm:inline-block sm:w-auto">
@@ -58,37 +62,38 @@ export default async function CoachDashboardPage() {
         </Card>
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
+      <section className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
         <Card>
           <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <CardTitle>Client roster</CardTitle>
+              <CardTitle>Needs follow-up</CardTitle>
               <CardDescription>
-                Daily logging status, streaks, protein consistency, and step consistency.
+                Quick scan of the clients who still need a touchpoint today. Use Clients for the
+                full roster and profile management.
               </CardDescription>
             </div>
             <Link href="/coach/clients" className="block w-full sm:inline-block sm:w-auto">
               <Button variant="secondary" size="sm" fullWidth>
-                View all clients
+                Open clients
               </Button>
             </Link>
           </CardHeader>
           <CardContent className="space-y-4">
-            {data.clients.length ? (
-              <>
-                <div className="space-y-3 md:hidden">
-                  {data.clients.map((client) => (
-                    <div key={client.id} className="surface-muted p-4">
-                      <div className="flex flex-col gap-3">
-                        <div className="space-y-1">
-                          <Link
-                            href={`/coach/clients/${client.id}`}
-                            className="text-base font-semibold text-slate-900"
-                          >
-                            {client.fullName}
-                          </Link>
-                          <p className="text-sm text-slate-600">{client.email}</p>
-                        </div>
+            {needsFollowUpClients.length ? (
+              <div className="space-y-3">
+                {needsFollowUpClients.map((client) => (
+                  <div key={client.id} className="surface-muted p-4">
+                    <div className="flex flex-col gap-3">
+                      <div className="space-y-1">
+                        <Link
+                          href={`/coach/clients/${client.id}`}
+                          className="text-base font-semibold text-slate-900"
+                        >
+                          {client.fullName}
+                        </Link>
+                        <p className="text-sm text-slate-600">{client.email}</p>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
                         <Badge
                           tone={
                             client.statusTone === "success"
@@ -97,83 +102,21 @@ export default async function CoachDashboardPage() {
                                 ? "warning"
                                 : "neutral"
                           }
-                          className="self-start"
                         >
                           {client.statusLabel}
                         </Badge>
-                        <div className="grid grid-cols-2 gap-3 text-sm text-slate-700">
-                          <div className="surface-card px-3 py-3">
-                            <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
-                              Streak
-                            </p>
-                            <p className="mt-2 font-semibold text-slate-900">{client.streak} days</p>
-                          </div>
-                          <div className="surface-card px-3 py-3">
-                            <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
-                              Protein
-                            </p>
-                            <p className="mt-2 font-semibold text-slate-900">
-                              {client.proteinConsistency}%
-                            </p>
-                          </div>
-                          <div className="surface-card px-3 py-3">
-                            <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
-                              Steps
-                            </p>
-                            <p className="mt-2 font-semibold text-slate-900">
-                              {client.stepConsistency}%
-                            </p>
-                          </div>
-                          <div className="surface-card px-3 py-3">
-                            <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
-                              Weight
-                            </p>
-                            <p className="mt-2 font-semibold text-slate-900">
-                              {client.recentWeight}
-                            </p>
-                          </div>
-                        </div>
+                        <Badge tone="accent">{client.streak} day streak</Badge>
+                        <Badge tone="neutral">Protein {client.proteinConsistency}%</Badge>
+                        <Badge tone="neutral">Steps {client.stepConsistency}%</Badge>
                       </div>
                     </div>
-                  ))}
-                </div>
-
-                <div className="hidden overflow-x-auto md:block">
-                  <table className="min-w-full text-left text-sm">
-                    <thead className="text-slate-500">
-                      <tr>
-                        <th className="pb-3 font-medium">Client</th>
-                        <th className="pb-3 font-medium">Status</th>
-                        <th className="pb-3 font-medium">Streak</th>
-                        <th className="pb-3 font-medium">Protein</th>
-                        <th className="pb-3 font-medium">Steps</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {data.clients.map((client) => (
-                        <tr key={client.id}>
-                          <td className="py-4">
-                            <Link
-                              href={`/coach/clients/${client.id}`}
-                              className="font-semibold text-slate-900"
-                            >
-                              {client.fullName}
-                            </Link>
-                            <p className="text-slate-500">{client.email}</p>
-                          </td>
-                          <td className="py-4 text-slate-700">{client.statusLabel}</td>
-                          <td className="py-4 text-slate-700">{client.streak} days</td>
-                          <td className="py-4 text-slate-700">{client.proteinConsistency}%</td>
-                          <td className="py-4 text-slate-700">{client.stepConsistency}%</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </>
+                  </div>
+                ))}
+              </div>
             ) : (
               <div className="surface-muted p-5 text-sm text-slate-700">
-                No clients yet. Create the first client profile to start replacing the spreadsheet.
+                All clients have logged today. Use the Clients page when you want the full roster
+                or need to edit profiles.
               </div>
             )}
           </CardContent>
@@ -183,7 +126,7 @@ export default async function CoachDashboardPage() {
           <CardHeader>
             <CardTitle>Momentum clients</CardTitle>
             <CardDescription>
-              Clients carrying the strongest current streaks and adherence.
+              Clients carrying the strongest current streaks and adherence right now.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">

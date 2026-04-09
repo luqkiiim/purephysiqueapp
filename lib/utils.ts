@@ -2,7 +2,7 @@ import { clsx, type ClassValue } from "clsx";
 import { format, formatDistanceToNowStrict, isToday, parseISO } from "date-fns";
 import { twMerge } from "tailwind-merge";
 
-import type { ExerciseEntry } from "@/lib/types/app";
+import type { ClientStatus, CoachNoteVisibility, ExerciseEntry } from "@/lib/types/app";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -151,4 +151,28 @@ export function parseExerciseEntries(
 
 export function createInviteLink(baseUrl: string, inviteToken: string) {
   return `${baseUrl.replace(/\/$/, "")}/access/${inviteToken}`;
+}
+
+export function formatClientStatusLabel(status: ClientStatus) {
+  switch (status) {
+    case "active":
+      return "Active";
+    case "paused":
+      return "Paused";
+    case "inactive":
+      return "Inactive";
+    default:
+      return status;
+  }
+}
+
+export function formatCoachNoteVisibilityLabel(visibility: CoachNoteVisibility) {
+  switch (visibility) {
+    case "private":
+      return "Private";
+    case "shared":
+      return "Shared";
+    default:
+      return visibility;
+  }
 }
