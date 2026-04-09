@@ -27,16 +27,16 @@ export default function LandingPage() {
     <main className="page-shell space-y-6">
       <section className="surface-card overflow-hidden px-4 py-6 sm:px-8 sm:py-10">
         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-          <div className="space-y-5">
+          <div className="min-w-0 space-y-5">
             <p className="eyebrow">Pure Physique</p>
-            <h1 className="font-display text-[2.2rem] leading-[0.96] text-slate-900 sm:text-5xl lg:text-6xl">
+            <h1 className="text-safe-wrap font-display text-[2.2rem] leading-[0.96] text-slate-900 sm:text-5xl lg:text-6xl">
               Daily client check-ins, clear coach follow-up, no spreadsheet mess.
             </h1>
             <p className="max-w-2xl text-sm leading-6 text-slate-700 sm:text-base">
               Designed for phone use first so clients can log quickly and coaches can act without
               pinching, zooming, or fighting cramped layouts.
             </p>
-            <div className="grid gap-3 sm:flex sm:flex-wrap">
+            <div className="grid w-full max-w-full gap-3 sm:flex sm:flex-wrap">
               <Link href="/coach/login" className="block w-full sm:inline-block sm:w-auto">
                 <Button variant="primary" size="lg" fullWidth>
                   Coach login
