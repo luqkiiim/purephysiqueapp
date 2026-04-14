@@ -455,6 +455,19 @@ export async function listDailyCheckInsForClient(clientId: string) {
   return ((result.data ?? []) as DailyCheckInRow[]).map(mapDailyCheckIn);
 }
 
+export async function getDailyCheckInForClientByDate(clientId: string, date: string) {
+  const admin = createSupabaseAdminClient();
+  const result = await admin
+    .from("daily_check_ins")
+    .select("*")
+    .eq("client_id", clientId)
+    .eq("date", date)
+    .maybeSingle();
+
+  throwIfError(result.error, "Failed to fetch client check-in by date");
+  return result.data ? mapDailyCheckIn(result.data as DailyCheckInRow) : null;
+}
+
 export async function listDailyCheckInsForClients(clientIds: string[], sinceDate?: string) {
   if (!clientIds.length) {
     return [];

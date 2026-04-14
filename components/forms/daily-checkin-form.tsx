@@ -3,6 +3,7 @@
 import { useState } from "react";
 import {
   Camera,
+  CalendarDays,
   Dumbbell,
   Droplets,
   Footprints,
@@ -47,6 +48,18 @@ interface ExerciseEntryDraft {
   id: string;
   type: string;
   durationMinutes: string;
+}
+
+interface DailyCheckInHiddenField {
+  name: string;
+  value: string;
+}
+
+interface DailyCheckInDateField {
+  defaultValue: string;
+  max?: string;
+  label?: string;
+  description?: string;
 }
 
 const SLEEP_TARGET_HOURS = 7;
@@ -102,6 +115,13 @@ export function DailyCheckInForm({
   fishOilEnabled,
   streak,
   submitted,
+  dateField,
+  hiddenFields = [],
+  headerEyebrow = "Today's momentum",
+  headerDescription = "Keep it quick. The goal is a complete check-in, not perfect detail.",
+  submittedMessage = "Check-in complete. Keep tomorrow simple and protect the streak.",
+  submitLabel = "Submit today's check-in",
+  pendingLabel = "Saving check-in...",
 }: {
   action: (formData: FormData) => Promise<void>;
   defaults?: DailyCheckInDefaults | null;
@@ -111,7 +131,15 @@ export function DailyCheckInForm({
   fishOilEnabled: boolean;
   streak: number;
   submitted?: boolean;
+  dateField?: DailyCheckInDateField;
+  hiddenFields?: DailyCheckInHiddenField[];
+  headerEyebrow?: string;
+  headerDescription?: string;
+  submittedMessage?: string;
+  submitLabel?: string;
+  pendingLabel?: string;
 }) {
+  const [checkInDate, setCheckInDate] = useState(dateField?.defaultValue ?? "");
   const [bedtime, setBedtime] = useState(defaults?.bedtime ?? "22:30");
   const [wakeTime, setWakeTime] = useState(defaults?.wakeTime ?? "06:30");
   const [totalSleepHours, setTotalSleepHours] = useState(
@@ -187,15 +215,50 @@ export function DailyCheckInForm({
 
   return (
     <form action={action} className="space-y-4 sm:space-y-5">
+      {hiddenFields.map((field) => (
+        <input key={field.name} type="hidden" name={field.name} value={field.value} />
+      ))}
+
+      {dateField ? (
+        <div className="surface-card p-4 sm:p-5">
+          <div className="mb-5 flex items-start gap-3">
+            <CalendarDays className="h-5 w-5 text-accent-teal" />
+            <div>
+              <h3 className="text-base font-semibold text-slate-900">
+                {dateField.label ?? "Check-in date"}
+              </h3>
+              <p className="text-sm text-slate-600">
+                {dateField.description ??
+                  "Pick the day you want to backfill. Saving the same date again will overwrite that date's log."}
+              </p>
+            </div>
+          </div>
+          <label className="field-shell block max-w-sm">
+            <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              Date
+            </span>
+            <input
+              name="date"
+              type="date"
+              className="mt-2 w-full bg-transparent text-lg font-semibold outline-none sm:text-xl"
+              value={checkInDate}
+              max={dateField.max}
+              onChange={(event) => setCheckInDate(event.target.value)}
+              required
+            />
+          </label>
+        </div>
+      ) : null}
+
       <div className="surface-card p-4 sm:p-5">
         <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
           <div className="min-w-0">
-            <p className="eyebrow">Today&apos;s momentum</p>
+            <p className="eyebrow">{headerEyebrow}</p>
             <h2 className="mt-2 font-display text-[1.9rem] leading-[1.04] text-slate-900 sm:text-3xl">
               {completion}% complete
             </h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-700">
-              Keep it quick. The goal is a complete check-in, not perfect detail.
+              {headerDescription}
             </p>
           </div>
           <div className="self-start rounded-[1.3rem] bg-accent-mint px-4 py-3 text-left sm:rounded-3xl sm:text-right">
@@ -244,7 +307,7 @@ export function DailyCheckInForm({
 
       {submitted ? (
         <div className="rounded-[1.6rem] border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm text-emerald-800 sm:rounded-4xl sm:px-5">
-          Check-in complete. Keep tomorrow simple and protect the streak.
+          {submittedMessage}
         </div>
       ) : null}
 
@@ -580,9 +643,9 @@ export function DailyCheckInForm({
         variant="teal"
         size="lg"
         fullWidth
-        pendingLabel="Saving check-in..."
+        pendingLabel={pendingLabel}
       >
-        Submit today&apos;s check-in
+        {submitLabel}
       </FormSubmitButton>
     </form>
   );

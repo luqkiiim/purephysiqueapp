@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { requireCoach } from "@/lib/auth";
 import {
+  getDailyCheckInForClientByDate,
   getClientBundleByCoachAndId,
   listClientBundlesByCoachId,
   listCoachNotesForClient,
@@ -201,5 +202,37 @@ export async function getCoachClientDetailData(clientId: string) {
     coachNotes,
     feedbackMessages,
     weeklySummary: buildWeeklySummary(client, recentCheckIns),
+  };
+}
+
+export async function getCoachClientBackfillPageData(clientId: string, date?: string) {
+  const { coach, isDemo } = await requireCoach();
+
+  if (!isLiveAppEnabled || isDemo) {
+    if (!demoClients.some((client) => client.id === clientId)) {
+      notFound();
+    }
+
+    const demo = getDemoClientDetailData(clientId);
+
+    return {
+      coach: demo.coach,
+      client: demo.client,
+      existingCheckIn: date
+        ? demo.recentCheckIns.find((entry) => entry.date === date) ?? null
+        : null,
+    };
+  }
+
+  const client = await getClientBundleByCoachAndId(coach.id, clientId);
+
+  if (!client) {
+    notFound();
+  }
+
+  return {
+    coach,
+    client,
+    existingCheckIn: date ? await getDailyCheckInForClientByDate(client.id, date) : null,
   };
 }

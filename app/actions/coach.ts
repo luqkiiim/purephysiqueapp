@@ -5,16 +5,18 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { requireCoach } from "@/lib/auth";
+import { saveDailyCheckInForClient } from "@/lib/check-ins";
 import { getClientBundleByCoachAndId } from "@/lib/database/queries";
 import { sendInviteEmail } from "@/lib/email/service";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { appEnv, isLiveAppEnabled } from "@/lib/supabase/config";
 import {
+  coachBackfillCheckInSchema,
   clientProfileSchema,
   coachNoteSchema,
   feedbackMessageSchema,
 } from "@/lib/validation/forms";
-import { createInviteLink } from "@/lib/utils";
+import { createInviteLink, getTodayIsoDate } from "@/lib/utils";
 
 async function logNotification(
   clientId: string,
@@ -310,4 +312,56 @@ export async function resendInviteAction(formData: FormData) {
   }
 
   revalidatePath(`/coach/clients/${clientId}`);
+}
+
+export async function saveCoachBackfillCheckInAction(formData: FormData) {
+  const clientId = String(formData.get("clientId") ?? "");
+  const date = String(formData.get("date") ?? "");
+
+  if (!isLiveAppEnabled) {
+    redirect(
+      `/coach/clients/${clientId}/backfill?saved=1${date ? `&date=${encodeURIComponent(date)}` : ""}`,
+    );
+  }
+
+  const exerciseTypes = formData.getAll("exerciseType");
+  const exerciseDurations = formData.getAll("exerciseDurationMinutes");
+  const values = coachBackfillCheckInSchema.parse({
+    ...Object.fromEntries(formData.entries()),
+    exerciseEntries: exerciseTypes.map((type, index) => ({
+      type: String(type),
+      durationMinutes: exerciseDurations[index] ?? 0,
+    })),
+  });
+
+  if (values.date > getTodayIsoDate()) {
+    throw new Error("Backfill date cannot be in the future.");
+  }
+
+  const { coach } = await requireCoach();
+  const client = await getClientBundleByCoachAndId(coach.id, values.clientId);
+
+  if (!client) {
+    redirect("/coach/clients?error=missing-client");
+  }
+
+  const progressPhoto = formData.get("progressPhoto");
+
+  await saveDailyCheckInForClient({
+    client,
+    date: values.date,
+    values,
+    progressPhoto: progressPhoto instanceof File ? progressPhoto : null,
+  });
+
+  revalidatePath("/coach");
+  revalidatePath("/coach/clients");
+  revalidatePath(`/coach/clients/${client.id}`);
+  revalidatePath(`/coach/clients/${client.id}/backfill`);
+  revalidatePath("/client");
+  revalidatePath("/client/history");
+  revalidatePath("/client/weekly");
+  revalidatePath("/client/photos");
+
+  redirect(`/coach/clients/${client.id}/backfill?saved=1&date=${encodeURIComponent(values.date)}`);
 }

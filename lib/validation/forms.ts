@@ -63,3 +63,8 @@ export const dailyCheckInSchema = z.object({
   bodyWeight: z.coerce.number().min(0).max(999),
   mealNotes: z.string().max(280).optional().or(z.literal("")),
 });
+
+export const coachBackfillCheckInSchema = dailyCheckInSchema.extend({
+  clientId: z.string().uuid().or(z.string().min(3)),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+});

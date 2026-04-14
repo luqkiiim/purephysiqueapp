@@ -86,6 +86,14 @@ export default async function CoachClientDetailPage({
               Edit profile
             </Button>
           </Link>
+          <Link
+            href={`/coach/clients/${data.client.id}/backfill`}
+            className="block w-full sm:inline-block sm:w-auto"
+          >
+            <Button variant="secondary" size="sm" fullWidth>
+              Backfill log
+            </Button>
+          </Link>
         </>
       }
     >
