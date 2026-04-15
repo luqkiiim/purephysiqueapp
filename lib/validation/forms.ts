@@ -13,7 +13,6 @@ export const coachLoginSchema = z.object({
 export const clientProfileSchema = z.object({
   clientId: z.string().optional().default(""),
   fullName: z.string().min(2).max(120),
-  email: z.string().email(),
   goalSummary: z.string().min(10).max(400),
   trainingPhase: z.string().min(2).max(80),
   proteinTargetGrams: z.coerce.number().int().min(60).max(350),
@@ -21,13 +20,8 @@ export const clientProfileSchema = z.object({
   exerciseExpectation: z.string().min(2).max(120),
   probioticsEnabled: booleanField,
   fishOilEnabled: booleanField,
-  reminderTime: z.string().regex(/^\d{2}:\d{2}$/),
-  weeklySummaryEnabled: booleanField,
-  emailRemindersEnabled: booleanField,
-  missedDayNudgesEnabled: booleanField,
   timezone: z.string().min(2).max(80),
   welcomeMessage: z.string().min(10).max(240),
-  sendInvite: booleanField.optional().default(false),
 });
 
 export const coachNoteSchema = z.object({

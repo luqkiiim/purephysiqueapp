@@ -91,7 +91,7 @@ export default async function CoachDashboardPage() {
                         >
                           {client.fullName}
                         </Link>
-                        <p className="text-sm text-slate-600">{client.email}</p>
+                        <p className="text-sm text-slate-600">Private link access</p>
                       </div>
                       <div className="flex flex-wrap gap-2">
                         <Badge

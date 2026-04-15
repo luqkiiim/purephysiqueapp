@@ -8,13 +8,12 @@ Pure Physique is a mobile-first coaching app that replaces a client tracking spr
 - One coach account manages multiple client profiles and targets.
 - Clients access the app through a private invite link.
 - The coach can track adherence, streaks, missed check-ins, body weight, protein, steps, exercise, supplements, notes, and visible feedback.
-- Version one includes progress photos, weekly summaries, reminder emails, and server-side access control around Supabase data.
+- Version one includes progress photos, weekly summaries, manual private-link access, and server-side access control around Supabase data.
 
 ## Architecture
 
 - Frontend: Next.js App Router, TypeScript, Tailwind CSS.
 - Backend: Supabase Postgres for coaching data, Supabase Auth for coach login, and Supabase Storage for private progress photos.
-- Email: Resend service wrapper for optional invite emails, reminders, nudges, and weekly summaries.
 - Charts: Recharts for mobile-friendly trend and target visualisation.
 - Mutations: Next.js Server Actions for coach and client flows.
 
@@ -63,7 +62,6 @@ lib/
   database/
   data/
   demo/
-  email/
   supabase/
   types/
   validation/
@@ -94,12 +92,10 @@ docs/
 4. Configure a private storage bucket named `progress-photos` and keep `SUPABASE_SERVICE_ROLE_KEY` available server-side for uploads and signed URLs.
 5. Add the remaining environment variables from [.env.example](./.env.example).
 
-## Email and reminder logic
+## Access model
 
-- Invite emails are sent after client creation if `sendInvite` is checked.
-- Daily reminders, missed-day nudges, and weekly summaries are sent through `app/api/cron/reminders/route.ts`.
-- Resend is optional if you only want manual link sharing during previews.
-- Schedule the cron route every 15 minutes and send `Authorization: Bearer $CRON_SECRET`.
+- Share the private access link manually from the client detail page or `/access/[token]`.
+- The legacy `app/api/cron/reminders/route.ts` endpoint now returns a skipped response because outbound email reminders are disabled in this version.
 
 ## Progress photo storage
 
@@ -113,7 +109,7 @@ The seed file creates:
 
 - one coach profile
 - three demo clients
-- client targets and reminder settings
+- client targets and access settings
 - recent check-ins
 - coach notes and feedback messages
 

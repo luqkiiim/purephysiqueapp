@@ -1,4 +1,4 @@
-import { BellRing, Database, ShieldCheck } from "lucide-react";
+import { Database, Link2, ShieldCheck } from "lucide-react";
 
 import { CoachShell } from "@/components/layout/coach-shell";
 import { Badge } from "@/components/ui/badge";
@@ -7,15 +7,15 @@ import { isLiveAppEnabled } from "@/lib/supabase/config";
 
 const settingsCards = [
   {
-    title: "Email flows",
-    description: "Daily reminders, missed-day nudges, and weekly summaries should stay predictable and concise.",
-    icon: BellRing,
+    title: "Manual access",
+    description: "Client access is shared directly through the private link instead of outbound email flows.",
+    icon: Link2,
     items: [
-      "Reminder timing is set per client so follow-up stays local to their routine.",
-      "Missed-day nudges work best when the coach only enables them for clients who need accountability.",
-      "Weekly summaries should reinforce consistency, not overload the inbox.",
+      "Use the client detail page to copy or open the private access link when you need to share it.",
+      "Because access is link-based, setup stays lighter and avoids email deliverability issues.",
+      "Coach notes and client-facing feedback remain clearly separated in the workflow.",
     ],
-    badge: "Mobile-first",
+    badge: "Direct",
   },
   {
     title: "Client access security",
@@ -23,7 +23,7 @@ const settingsCards = [
     icon: ShieldCheck,
     items: [
       "Invite tokens open the app directly, which keeps client access friction low on phones.",
-      "Resend invites only when access needs to be refreshed or re-shared.",
+      "Share the link manually only with the client who should have access.",
       "Coach notes and client-facing feedback remain clearly separated in the workflow.",
     ],
     badge: "Private",
@@ -44,17 +44,17 @@ const settingsCards = [
 export default function CoachSettingsPage() {
   return (
     <CoachShell
-      heading="Settings and reminders"
-      subheading="Operational guidance for email reminders, storage, and access control in version one."
+      heading="Settings and access"
+      subheading="Operational guidance for manual access sharing, storage, and access control in version one."
       demoMode={!isLiveAppEnabled}
     >
       <section className="grid gap-4 sm:grid-cols-3">
         <div className="surface-card p-4 sm:p-5">
-          <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Reminder model</p>
-          <p className="mt-2 text-lg font-semibold text-slate-900">Per-client schedule</p>
+          <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Access model</p>
+          <p className="mt-2 text-lg font-semibold text-slate-900">Manual private link</p>
         </div>
         <div className="surface-card p-4 sm:p-5">
-          <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Access model</p>
+          <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Security model</p>
           <p className="mt-2 text-lg font-semibold text-slate-900">Private invite links</p>
         </div>
         <div className="surface-card p-4 sm:p-5">

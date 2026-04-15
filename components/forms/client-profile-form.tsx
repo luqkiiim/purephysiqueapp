@@ -35,19 +35,6 @@ export function ClientProfileForm({
               />
             </label>
             <label className="block space-y-2">
-              <span className="text-sm font-semibold text-slate-900">Email</span>
-              <Input
-                name="email"
-                type="email"
-                placeholder="ava@example.com"
-                defaultValue={client?.email}
-                required
-              />
-            </label>
-          </section>
-
-          <section className="grid gap-4 sm:grid-cols-2">
-            <label className="block space-y-2">
               <span className="text-sm font-semibold text-slate-900">Training phase</span>
               <Input
                 name="trainingPhase"
@@ -56,6 +43,9 @@ export function ClientProfileForm({
                 required
               />
             </label>
+          </section>
+
+          <section className="grid gap-4 sm:grid-cols-1">
             <label className="block space-y-2">
               <span className="text-sm font-semibold text-slate-900">Timezone</span>
               <Input
@@ -150,62 +140,6 @@ export function ClientProfileForm({
             description="Show fish oil tracking in the client check-in."
           />
         </section>
-      </div>
-
-      <div className="surface-muted p-4 sm:p-5">
-        <SectionHeading
-          eyebrow="Reminders"
-          title="Delivery and follow-up"
-          description="Keep reminders predictable without forcing the client into a desktop-style setup flow."
-          className="mb-4"
-        />
-        <div className="grid gap-4">
-          <label className="block max-w-sm space-y-2">
-            <span className="text-sm font-semibold text-slate-900">Reminder time</span>
-            <Input
-              name="reminderTime"
-              type="time"
-              defaultValue={client?.reminderSettings.reminderTime.slice(0, 5) ?? "19:00"}
-              required
-            />
-          </label>
-
-          <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            <Checkbox
-              name="emailRemindersEnabled"
-              defaultChecked={client?.reminderSettings.emailRemindersEnabled ?? true}
-              label="Daily reminder emails"
-              description="Send a daily check-in reminder."
-            />
-            <Checkbox
-              name="weeklySummaryEnabled"
-              defaultChecked={client?.reminderSettings.weeklySummaryEnabled ?? true}
-              label="Weekly summary email"
-              description="Send a weekly consistency summary."
-            />
-            <Checkbox
-              name="missedDayNudgesEnabled"
-              defaultChecked={client?.reminderSettings.missedDayNudgesEnabled ?? true}
-              label="Missed-day nudges"
-              description="Prompt the client when they miss a check-in."
-            />
-          </section>
-        </div>
-      </div>
-
-      <div className="surface-muted p-4 sm:p-5">
-        <SectionHeading
-          eyebrow="Invite"
-          title="Access delivery"
-          description="Keep the private link distribution explicit so invite behavior is obvious before you save."
-          className="mb-4"
-        />
-        <Checkbox
-          name="sendInvite"
-          defaultChecked={!client}
-          label={client ? "Send updated invite after saving" : "Send invite email after saving"}
-          description="Includes the private access link for the client."
-        />
       </div>
 
       <FormSubmitButton variant="teal" size="lg" fullWidth pendingLabel="Saving client...">

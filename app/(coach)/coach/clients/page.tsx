@@ -54,7 +54,7 @@ export default async function CoachClientsPage() {
   return (
     <CoachShell
       heading="Clients"
-      subheading="This is the roster-management home for profiles, targets, invite links, reminder settings, and direct links into each client record."
+      subheading="This is the roster-management home for profiles, manual access links, targets, and direct links into each client record."
       demoMode={!isLiveAppEnabled}
       actions={
         <Link href="/coach/clients/new" className="block w-full sm:inline-block sm:w-auto">
@@ -95,7 +95,7 @@ export default async function CoachClientsPage() {
                   </div>
                   <div>
                     <CardTitle>{client.fullName}</CardTitle>
-                    <CardDescription>{client.email}</CardDescription>
+                    <CardDescription>Private link access</CardDescription>
                   </div>
                 </div>
                 <div className="grid gap-2 sm:flex sm:flex-wrap">
@@ -144,7 +144,7 @@ export default async function CoachClientsPage() {
             <CardHeader>
               <CardTitle>No clients yet</CardTitle>
               <CardDescription>
-                Start with one client profile, then add targets and send the private access link.
+                Start with one client profile, then add targets and share the private access link.
               </CardDescription>
             </CardHeader>
           </Card>

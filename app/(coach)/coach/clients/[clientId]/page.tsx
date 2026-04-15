@@ -1,13 +1,11 @@
 import Link from "next/link";
 
 import {
-  resendInviteAction,
   saveCoachNoteAction,
   saveFeedbackMessageAction,
 } from "@/app/actions/coach";
 import { CoachNoteForm } from "@/components/forms/coach-note-form";
 import { FeedbackMessageForm } from "@/components/forms/feedback-message-form";
-import { FormSubmitButton } from "@/components/forms/form-submit-button";
 import { AdherenceTrendChart } from "@/components/charts/adherence-trend-chart";
 import { TargetComparisonChart } from "@/components/charts/target-comparison-chart";
 import { WeightTrendChart } from "@/components/charts/weight-trend-chart";
@@ -120,8 +118,10 @@ export default async function CoachClientDetailPage({
                 <Badge tone="accent">{data.client.currentStreak} day streak</Badge>
               </div>
               <div className="surface-muted p-4">
-                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Email</p>
-                <p className="mt-2 text-sm font-semibold text-slate-900">{data.client.email}</p>
+                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Access link</p>
+                <p className="mt-2 break-words text-sm font-semibold text-slate-900">
+                  Manual private link
+                </p>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="surface-muted p-4">
@@ -201,9 +201,10 @@ export default async function CoachClientDetailPage({
 
           <Card>
             <CardHeader>
-              <CardTitle>Access and reminders</CardTitle>
+              <CardTitle>Access</CardTitle>
               <CardDescription>
-                Private client access plus reminder settings you may need to confirm or resend.
+                Private client access is manual in this version. Share the link directly when the
+                client needs entry.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -213,61 +214,19 @@ export default async function CoachClientDetailPage({
                   {inviteLink}
                 </p>
               </div>
-              <form action={resendInviteAction} className="grid gap-3 sm:flex sm:flex-wrap">
-                <input type="hidden" name="clientId" value={data.client.id} />
-                <FormSubmitButton
-                  variant="coral"
-                  fullWidth
-                  className="sm:w-auto"
-                  pendingLabel="Sending..."
-                >
-                  Resend invite email
-                </FormSubmitButton>
-                <Link
-                  href={`/access/${data.client.inviteToken}`}
-                  className="block w-full sm:inline-block sm:w-auto"
-                >
-                  <Button variant="secondary" fullWidth>
-                    Open access page
-                  </Button>
-                </Link>
-              </form>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="surface-muted p-4">
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
-                    Reminder schedule
-                  </p>
-                  <p className="mt-2 text-sm font-semibold text-slate-900">
-                    {data.client.reminderSettings.reminderTime.slice(0, 5)}
-                  </p>
-                  <p className="mt-1 text-xs text-slate-500">
-                    {data.client.reminderSettings.timezone}
-                  </p>
-                </div>
-                <div className="surface-muted p-4">
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
-                    Email reminders
-                  </p>
-                  <p className="mt-2 text-sm font-semibold text-slate-900">
-                    {data.client.reminderSettings.emailRemindersEnabled ? "On" : "Off"}
-                  </p>
-                </div>
-                <div className="surface-muted p-4">
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
-                    Missed-day nudges
-                  </p>
-                  <p className="mt-2 text-sm font-semibold text-slate-900">
-                    {data.client.reminderSettings.missedDayNudgesEnabled ? "On" : "Off"}
-                  </p>
-                </div>
-                <div className="surface-muted p-4">
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
-                    Weekly summary
-                  </p>
-                  <p className="mt-2 text-sm font-semibold text-slate-900">
-                    {data.client.reminderSettings.weeklySummaryEnabled ? "On" : "Off"}
-                  </p>
-                </div>
+              <Link
+                href={`/access/${data.client.inviteToken}`}
+                className="block w-full sm:inline-block sm:w-auto"
+              >
+                <Button variant="secondary" fullWidth>
+                  Open access page
+                </Button>
+              </Link>
+              <div className="surface-muted p-4">
+                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Timezone</p>
+                <p className="mt-2 text-sm font-semibold text-slate-900">
+                  {data.client.profile.timezone}
+                </p>
               </div>
             </CardContent>
           </Card>

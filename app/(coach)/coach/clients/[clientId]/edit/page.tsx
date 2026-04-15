@@ -16,7 +16,7 @@ export default async function EditClientPage({
   return (
     <CoachShell
       heading={`Edit ${data.client.fullName}`}
-      subheading="Adjust targets, reminders, and client-facing context without changing the underlying workflow."
+      subheading="Adjust targets and client-facing context without changing the underlying workflow."
       demoMode={!isLiveAppEnabled}
     >
       <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
@@ -24,7 +24,7 @@ export default async function EditClientPage({
           <CardHeader>
             <CardTitle>Profile settings</CardTitle>
             <CardDescription>
-              Update the client&apos;s targets, reminders, supplements, and onboarding copy.
+              Update the client&apos;s targets, supplements, and onboarding copy.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -48,15 +48,17 @@ export default async function EditClientPage({
               </p>
             </div>
             <div className="surface-muted p-4">
-              <p className="text-sm font-semibold text-slate-900">Check reminder timing</p>
+              <p className="text-sm font-semibold text-slate-900">Keep the access flow simple</p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Reminder time and nudges should match the client&apos;s actual timezone and routine.
+                Client access is manual now, so the main operational step is just sharing the
+                private link when needed.
               </p>
             </div>
             <div className="surface-muted p-4">
-              <p className="text-sm font-semibold text-slate-900">Resend access only when needed</p>
+              <p className="text-sm font-semibold text-slate-900">Review timezone and welcome copy</p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Leave the invite toggle off unless the client needs a fresh link after your changes.
+                Those two details shape the client-facing experience more than anything else in
+                this screen.
               </p>
             </div>
           </CardContent>

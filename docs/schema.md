@@ -36,5 +36,5 @@
 - `daily_check_ins` keeps most daily fields in one record so the main mobile flow stays simple.
 - `protein_target_snapshot` and `step_target_snapshot` preserve context if targets change later.
 - `current_streak` and `last_check_in_date` are stored on `clients` so the dashboard can stay fast.
-- `notification_logs` tracks email activity and prevents duplicate reminders in the cron handler.
+- `notification_logs` is now only needed for lightweight internal audit events such as coach feedback.
 - The Supabase SQL schema lives in [schema.sql](../supabase/schema.sql).

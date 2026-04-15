@@ -19,8 +19,8 @@ The product is designed around one coach managing multiple clients. The coach si
 
 1. Coach signs in with Supabase Auth.
 2. Coach creates a client profile and targets.
-3. App stores the client record, targets, reminders, and invite token in Supabase Postgres.
-4. Optional invite email is sent immediately.
+3. App stores the client record, targets, access settings, and invite token in Supabase Postgres.
+4. Coach shares the private access link manually when needed.
 5. Coach monitors dashboard status, trends, notes, and visible feedback.
 
 ## Client flow

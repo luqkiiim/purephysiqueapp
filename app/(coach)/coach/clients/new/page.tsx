@@ -8,7 +8,7 @@ export default function NewClientPage() {
   return (
     <CoachShell
       heading="Create client"
-      subheading="Set the client up once, define targets, then send the private access link."
+      subheading="Set the client up once, define targets, then share the private access link manually."
       demoMode={!isLiveAppEnabled}
     >
       <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
@@ -16,8 +16,8 @@ export default function NewClientPage() {
           <CardHeader>
             <CardTitle>Client profile and targets</CardTitle>
             <CardDescription>
-              Version one keeps setup lightweight: identity, goal context, daily targets,
-              supplements, and reminder settings.
+              Version one keeps setup lightweight: identity, goal context, daily targets, and
+              supplements.
             </CardDescription>
           </CardHeader>
           <CardContent>
