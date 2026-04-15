@@ -51,7 +51,7 @@ export default async function EditClientPage({
               <p className="text-sm font-semibold text-slate-900">Keep the access flow simple</p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 Client access is manual now, so the main operational step is just sharing the
-                private link when needed.
+                current access code when first sign-in is needed.
               </p>
             </div>
             <div className="surface-muted p-4">

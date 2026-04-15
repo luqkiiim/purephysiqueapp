@@ -6,6 +6,12 @@ import { redirect } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { z } from "zod";
 
+import {
+  buildInternalClientEmail,
+  generateUniqueClientAccessCode,
+  rotateClientAccessCode,
+  seedClientAccessCode,
+} from "@/lib/access-codes";
 import { requireCoach } from "@/lib/auth";
 import { saveDailyCheckInForClient } from "@/lib/check-ins";
 import { getClientBundleByCoachAndId } from "@/lib/database/queries";
@@ -20,10 +26,6 @@ import {
 import { getTodayIsoDate } from "@/lib/utils";
 
 type ClientProfileValues = z.infer<typeof clientProfileSchema>;
-
-function buildInternalClientEmail(clientId: string) {
-  return `client-${clientId}@purephysique.local`;
-}
 
 async function upsertClientSetupRows(
   admin: SupabaseClient,
@@ -108,7 +110,6 @@ export async function saveClientAction(formData: FormData) {
   const { coach } = await requireCoach();
   const admin = createSupabaseAdminClient();
   const nowIso = new Date().toISOString();
-  const inviteToken = randomUUID().replaceAll("-", "");
 
   let clientId = values.clientId || "";
 
@@ -180,6 +181,7 @@ export async function saveClientAction(formData: FormData) {
     }
   } else {
     clientId = randomUUID();
+    const inviteToken = await generateUniqueClientAccessCode(admin);
 
     const clientInsertResult = await admin.from("clients").insert({
       id: clientId,
@@ -224,6 +226,22 @@ export async function saveClientAction(formData: FormData) {
       }
 
       throw new Error(`Failed to create reminder settings: ${setupResults.reminderResult.error?.message}.${cleanupHint}`);
+    }
+
+    try {
+      await seedClientAccessCode(admin, clientId, inviteToken, nowIso);
+    } catch (error) {
+      const cleanupResult = await admin
+        .from("clients")
+        .delete()
+        .eq("id", clientId)
+        .eq("coach_id", coach.id);
+      const cleanupHint =
+        cleanupResult.error ? ` Cleanup failed: ${cleanupResult.error.message}` : "";
+
+      throw new Error(
+        `${error instanceof Error ? error.message : "Failed to seed client access code."}.${cleanupHint}`,
+      );
     }
   }
 
@@ -285,6 +303,30 @@ export async function saveFeedbackMessageAction(formData: FormData) {
   });
 
   revalidatePath(`/coach/clients/${values.clientId}`);
+}
+
+export async function regenerateClientAccessCodeAction(formData: FormData) {
+  const clientId = String(formData.get("clientId") ?? "");
+
+  if (!isLiveAppEnabled) {
+    redirect(`/coach/clients/${clientId}`);
+  }
+
+  const { coach } = await requireCoach();
+  const client = await getClientBundleByCoachAndId(coach.id, clientId);
+
+  if (!client) {
+    redirect("/coach/clients?error=missing-client");
+  }
+
+  const admin = createSupabaseAdminClient();
+  await rotateClientAccessCode(admin, client.id, new Date().toISOString());
+
+  revalidatePath("/coach");
+  revalidatePath("/coach/clients");
+  revalidatePath(`/coach/clients/${client.id}`);
+
+  redirect(`/coach/clients/${client.id}?access=regenerated`);
 }
 
 export async function saveCoachBackfillCheckInAction(formData: FormData) {

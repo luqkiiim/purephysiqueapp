@@ -10,6 +10,17 @@ export const coachLoginSchema = z.object({
   password: z.string().min(8),
 });
 
+export const clientAccessClaimSchema = z.object({
+  email: z.string().trim().email(),
+  password: z.string().min(8),
+  accessCode: z.string().trim().min(6).max(64),
+});
+
+export const clientAccessLoginSchema = z.object({
+  email: z.string().trim().email(),
+  password: z.string().min(8),
+});
+
 export const clientProfileSchema = z.object({
   clientId: z.string().optional().default(""),
   fullName: z.string().min(2).max(120),
@@ -33,10 +44,6 @@ export const coachNoteSchema = z.object({
 export const feedbackMessageSchema = z.object({
   clientId: z.string().uuid().or(z.string().min(3)),
   message: z.string().min(4).max(600),
-});
-
-export const clientInviteAccessSchema = z.object({
-  inviteToken: z.string().min(8),
 });
 
 const exerciseEntrySchema = z.object({

@@ -100,21 +100,21 @@ export default async function CoachLoginPage({
                     {demoClientCredentials.fullName}
                   </p>
                   <p className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">
-                    Access link
+                    Access code
                   </p>
                   <p className="mt-1 font-mono text-[0.8rem] font-medium text-slate-900 sm:text-sm">
-                    /access/{demoClientCredentials.inviteToken}
+                    {demoClientCredentials.inviteToken}
                   </p>
                 </div>
               </div>
 
               <div className="grid gap-3 sm:flex sm:flex-wrap">
                 <Link
-                  href={`/access/${demoClientCredentials.inviteToken}`}
+                  href={`/access?code=${demoClientCredentials.inviteToken}`}
                   className="block w-full sm:inline-block sm:w-auto"
                 >
                   <Button variant="secondary" fullWidth>
-                    Open client access demo
+                    Open client access
                   </Button>
                 </Link>
                 <Link href="/preview/client" className="block w-full sm:inline-block sm:w-auto">

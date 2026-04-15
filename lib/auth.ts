@@ -1,12 +1,11 @@
 import { redirect } from "next/navigation";
 
 import {
-  getClientBundleByInviteToken,
+  getClientBundleById,
   getCoachByAuthUserId,
   getCoachByEmail,
   linkCoachAuthIdentityByEmail,
 } from "@/lib/database/queries";
-import { clearClientSessionInviteToken, getClientSessionInviteToken } from "@/lib/client-session";
 import { demoClients, demoCoachProfile } from "@/lib/demo/data";
 import type { Client, CoachProfile } from "@/lib/types/app";
 import { isLiveAppEnabled } from "@/lib/supabase/config";
@@ -64,17 +63,26 @@ export async function requireClient(): Promise<ClientSession> {
     };
   }
 
-  const inviteToken = await getClientSessionInviteToken();
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!inviteToken) {
-    redirect("/");
+  if (!user) {
+    redirect("/access");
   }
 
-  const client = await getClientBundleByInviteToken(inviteToken);
+  const clientId =
+    typeof user.app_metadata?.client_id === "string" ? user.app_metadata.client_id : null;
+
+  if (!clientId) {
+    redirect("/access?mode=login&error=client-session-required");
+  }
+
+  const client = await getClientBundleById(clientId);
 
   if (!client || client.activeStatus !== "active") {
-    await clearClientSessionInviteToken();
-    redirect("/");
+    redirect("/access?mode=login&error=invalid-client-session");
   }
 
   return {

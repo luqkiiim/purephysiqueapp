@@ -15,7 +15,6 @@ import type {
 import {
   calculateCompletionPercentage,
   describeCheckInStatus,
-  formatShortDate,
   getTodayIsoDate,
   percentageAgainstTarget,
 } from "@/lib/utils";
@@ -478,20 +477,11 @@ export function getDemoLandingHighlights() {
         "See who logged, who missed, current streaks, trend snapshots, and client notes in one view.",
     },
     {
-      title: "Private-link access",
+      title: "Claim-code access",
       description:
-        "Clients open a private invite link and land directly in their check-in flow.",
+        "Clients use a coach-issued access code once, then sign in with email and password.",
     },
   ];
-}
-
-export function getDemoClientInviteSummary(inviteToken: string) {
-  const client = demoClients.find((entry) => entry.inviteToken === inviteToken) ?? demoClients[0];
-
-  return {
-    client,
-    inviteLinkLabel: formatShortDate(client.createdAt),
-  };
 }
 
 export { coach as demoCoachProfile };

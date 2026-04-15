@@ -18,7 +18,7 @@ const landingCards = [
   {
     title: "Private client access",
     icon: ShieldCheck,
-    description: "Invite links open straight into the check-in flow with minimal friction.",
+    description: "Coach-issued access codes handle first setup, then clients sign in normally.",
   },
 ];
 
@@ -42,7 +42,7 @@ export default function LandingPage() {
                   Coach login
                 </Button>
               </Link>
-              <Link href="/preview/client" className="block w-full sm:inline-block sm:w-auto">
+              <Link href="/access" className="block w-full sm:inline-block sm:w-auto">
                 <Button variant="teal" size="lg" fullWidth>
                   Client app
                 </Button>

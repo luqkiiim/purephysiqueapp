@@ -1,4 +1,4 @@
-import { Database, Link2, ShieldCheck } from "lucide-react";
+import { Database, KeyRound, ShieldCheck } from "lucide-react";
 
 import { CoachShell } from "@/components/layout/coach-shell";
 import { Badge } from "@/components/ui/badge";
@@ -8,22 +8,22 @@ import { isLiveAppEnabled } from "@/lib/supabase/config";
 const settingsCards = [
   {
     title: "Manual access",
-    description: "Client access is shared directly through the private link instead of outbound email flows.",
-    icon: Link2,
+    description: "Client access is shared directly through coach-issued access codes instead of outbound email flows.",
+    icon: KeyRound,
     items: [
-      "Use the client detail page to copy or open the private access link when you need to share it.",
-      "Because access is link-based, setup stays lighter and avoids email deliverability issues.",
+      "Use the client detail page to view or regenerate the code you want the client to use for first sign-in.",
+      "Because setup is code-based, the workflow stays lightweight and avoids email deliverability issues.",
       "Coach notes and client-facing feedback remain clearly separated in the workflow.",
     ],
     badge: "Direct",
   },
   {
     title: "Client access security",
-    description: "Private invite links keep the client flow direct without forcing a heavier sign-in experience.",
+    description: "One-time access codes gate the first login, then the client account uses standard email and password sign-in.",
     icon: ShieldCheck,
     items: [
-      "Invite tokens open the app directly, which keeps client access friction low on phones.",
-      "Share the link manually only with the client who should have access.",
+      "Access codes are best shared directly with the client who should claim the account.",
+      "Regenerating a code invalidates the previous one and gives you a clean handoff path.",
       "Coach notes and client-facing feedback remain clearly separated in the workflow.",
     ],
     badge: "Private",
@@ -45,17 +45,17 @@ export default function CoachSettingsPage() {
   return (
     <CoachShell
       heading="Settings and access"
-      subheading="Operational guidance for manual access sharing, storage, and access control in version one."
+      subheading="Operational guidance for manual access-code sharing, storage, and access control in version one."
       demoMode={!isLiveAppEnabled}
     >
       <section className="grid gap-4 sm:grid-cols-3">
         <div className="surface-card p-4 sm:p-5">
           <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Access model</p>
-          <p className="mt-2 text-lg font-semibold text-slate-900">Manual private link</p>
+          <p className="mt-2 text-lg font-semibold text-slate-900">Manual access code</p>
         </div>
         <div className="surface-card p-4 sm:p-5">
           <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Security model</p>
-          <p className="mt-2 text-lg font-semibold text-slate-900">Private invite links</p>
+          <p className="mt-2 text-lg font-semibold text-slate-900">Claim then sign in</p>
         </div>
         <div className="surface-card p-4 sm:p-5">
           <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Data posture</p>

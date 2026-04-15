@@ -149,10 +149,6 @@ export function parseExerciseEntries(
   ]);
 }
 
-export function createInviteLink(baseUrl: string, inviteToken: string) {
-  return `${baseUrl.replace(/\/$/, "")}/access/${inviteToken}`;
-}
-
 export function formatClientStatusLabel(status: ClientStatus) {
   switch (status) {
     case "active":

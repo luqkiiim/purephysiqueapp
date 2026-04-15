@@ -380,27 +380,39 @@ export async function getCoachByEmail(email: string) {
   return result.data ? mapCoach(result.data as CoachProfileRow) : null;
 }
 
-export async function getClientBundleByInviteToken(inviteToken: string) {
+export async function getClientBundleById(clientId: string) {
   const admin = createSupabaseAdminClient();
   const result = await admin
     .from("clients")
     .select("*")
-    .eq("invite_token", inviteToken)
+    .eq("id", clientId)
     .maybeSingle();
 
-  throwIfError(result.error, "Failed to fetch client by invite token");
+  throwIfError(result.error, "Failed to fetch client by id");
   return hydrateClient((result.data as ClientRow | null) ?? null);
 }
 
-export async function getClientInviteSummary(inviteToken: string) {
+export async function getClientBundleByAccessCode(accessCode: string) {
+  const admin = createSupabaseAdminClient();
+  const result = await admin
+    .from("clients")
+    .select("*")
+    .ilike("invite_token", accessCode.trim())
+    .maybeSingle();
+
+  throwIfError(result.error, "Failed to fetch client by access code");
+  return hydrateClient((result.data as ClientRow | null) ?? null);
+}
+
+export async function getClientAccessCodeSummary(accessCode: string) {
   const admin = createSupabaseAdminClient();
   const result = await admin
     .from("clients")
     .select("id, full_name, email, invite_token, active_status, created_at")
-    .eq("invite_token", inviteToken)
+    .ilike("invite_token", accessCode.trim())
     .maybeSingle();
 
-  throwIfError(result.error, "Failed to fetch client invite summary");
+  throwIfError(result.error, "Failed to fetch client access code summary");
 
   const row = result.data as ClientInviteSummaryRow | null;
 

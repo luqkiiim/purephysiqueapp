@@ -1,11 +1,13 @@
 import Link from "next/link";
 
 import {
+  regenerateClientAccessCodeAction,
   saveCoachNoteAction,
   saveFeedbackMessageAction,
 } from "@/app/actions/coach";
 import { CoachNoteForm } from "@/components/forms/coach-note-form";
 import { FeedbackMessageForm } from "@/components/forms/feedback-message-form";
+import { FormSubmitButton } from "@/components/forms/form-submit-button";
 import { AdherenceTrendChart } from "@/components/charts/adherence-trend-chart";
 import { TargetComparisonChart } from "@/components/charts/target-comparison-chart";
 import { WeightTrendChart } from "@/components/charts/weight-trend-chart";
@@ -15,23 +17,27 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getCoachClientDetailData } from "@/lib/data/coach";
+import { formatAccessCode, isInternalClientEmail } from "@/lib/access-codes";
 import { isLiveAppEnabled } from "@/lib/supabase/config";
 import {
-  createInviteLink,
   formatClientStatusLabel,
   formatCoachNoteVisibilityLabel,
   formatFullDate,
   formatShortDate,
   getTodayIsoDate,
 } from "@/lib/utils";
-import { appEnv } from "@/lib/supabase/config";
 
 export default async function CoachClientDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ clientId: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { clientId } = await params;
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const accessValue = resolvedSearchParams.access;
+  const access = Array.isArray(accessValue) ? accessValue[0] : accessValue;
   const data = await getCoachClientDetailData(clientId);
 
   const weightData = data.recentCheckIns.slice(-10).map((entry) => ({
@@ -51,7 +57,6 @@ export default async function CoachClientDetailPage({
   }));
 
   const latestCheckIns = data.recentCheckIns.slice(-10).reverse();
-  const inviteLink = createInviteLink(appEnv.appUrl, data.client.inviteToken);
   const latestCheckIn = data.todaysCheckIn;
   const hasLoggedToday = latestCheckIn?.date === getTodayIsoDate();
   const latestCheckInLabel = latestCheckIn
@@ -63,6 +68,8 @@ export default async function CoachClientDetailPage({
     data.client.targets.probioticsEnabled ? "Probiotics" : null,
     data.client.targets.fishOilEnabled ? "Fish oil" : null,
   ].filter(Boolean);
+  const clientHasClaimedAccount = !isInternalClientEmail(data.client.email);
+  const formattedAccessCode = formatAccessCode(data.client.inviteToken);
 
   return (
     <CoachShell
@@ -95,6 +102,12 @@ export default async function CoachClientDetailPage({
         </>
       }
     >
+      {access === "regenerated" ? (
+        <div className="rounded-[1.6rem] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          A new client access code is ready. Share only the latest code with the client.
+        </div>
+      ) : null}
+
       <section className="space-y-3">
         <SectionHeading
           eyebrow="Overview"
@@ -118,9 +131,9 @@ export default async function CoachClientDetailPage({
                 <Badge tone="accent">{data.client.currentStreak} day streak</Badge>
               </div>
               <div className="surface-muted p-4">
-                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Access link</p>
+                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Account status</p>
                 <p className="mt-2 break-words text-sm font-semibold text-slate-900">
-                  Manual private link
+                  {clientHasClaimedAccount ? "Claimed" : "Waiting for first sign-in"}
                 </p>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
@@ -203,25 +216,39 @@ export default async function CoachClientDetailPage({
             <CardHeader>
               <CardTitle>Access</CardTitle>
               <CardDescription>
-                Private client access is manual in this version. Share the link directly when the
-                client needs entry.
+                Share the access code for first-time setup. After claim, the client signs in with
+                email and password only.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="surface-muted p-4">
-                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Invite link</p>
-                <p className="mt-2 break-words font-mono text-[0.8rem] leading-6 text-slate-700 sm:text-sm">
-                  {inviteLink}
+                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Access code</p>
+                <p className="mt-2 font-mono text-xl tracking-[0.22em] text-slate-900 sm:text-2xl">
+                  {formattedAccessCode}
                 </p>
               </div>
-              <Link
-                href={`/access/${data.client.inviteToken}`}
-                className="block w-full sm:inline-block sm:w-auto"
-              >
-                <Button variant="secondary" fullWidth>
-                  Open access page
-                </Button>
-              </Link>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Link
+                  href={`/access?code=${encodeURIComponent(formattedAccessCode)}`}
+                  className="block w-full"
+                >
+                  <Button variant="secondary" fullWidth>
+                    Open access page
+                  </Button>
+                </Link>
+                <form action={regenerateClientAccessCodeAction}>
+                  <input type="hidden" name="clientId" value={data.client.id} />
+                  <FormSubmitButton variant="ghost" fullWidth pendingLabel="Regenerating...">
+                    Regenerate code
+                  </FormSubmitButton>
+                </form>
+              </div>
+              <div className="surface-muted p-4">
+                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Client email</p>
+                <p className="mt-2 text-sm font-semibold text-slate-900">
+                  {clientHasClaimedAccount ? data.client.email : "Not claimed yet"}
+                </p>
+              </div>
               <div className="surface-muted p-4">
                 <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Timezone</p>
                 <p className="mt-2 text-sm font-semibold text-slate-900">
