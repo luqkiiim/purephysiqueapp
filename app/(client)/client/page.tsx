@@ -34,7 +34,7 @@ export default async function ClientHomePage({
         </CardHeader>
         <CardContent>
           <p className="text-sm leading-6 text-slate-700 sm:text-base">
-            {data.client.profile.welcomeMessage}
+            {data.client.profile.welcomeMessage || "Keep today's check-in quick and consistent."}
           </p>
         </CardContent>
       </Card>

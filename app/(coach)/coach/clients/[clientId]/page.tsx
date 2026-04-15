@@ -67,7 +67,7 @@ export default async function CoachClientDetailPage({
   return (
     <CoachShell
       heading={data.client.fullName}
-      subheading={data.client.profile.goalSummary}
+      subheading={data.client.profile.goalSummary || "No goal summary added yet."}
       demoMode={!isLiveAppEnabled}
       actions={
         <>

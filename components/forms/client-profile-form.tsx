@@ -61,9 +61,8 @@ export function ClientProfileForm({
             <span className="text-sm font-semibold text-slate-900">Goal summary</span>
             <Textarea
               name="goalSummary"
-              placeholder="What is the current focus for this client?"
+              placeholder="Optional"
               defaultValue={client?.profile.goalSummary}
-              required
             />
           </label>
 
@@ -71,9 +70,8 @@ export function ClientProfileForm({
             <span className="text-sm font-semibold text-slate-900">Welcome message</span>
             <Textarea
               name="welcomeMessage"
-              placeholder="The client sees this message on their check-in home."
+              placeholder="Optional"
               defaultValue={client?.profile.welcomeMessage}
-              required
             />
           </label>
         </div>
