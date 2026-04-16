@@ -8,7 +8,16 @@ import { StatCard } from "@/components/ui/stat-card";
 import { getCoachClientsPageData } from "@/lib/data/coach";
 import { isLiveAppEnabled } from "@/lib/supabase/config";
 
-export default async function CoachClientsPage() {
+export default async function CoachClientsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const deletedValue = resolvedSearchParams.deleted;
+  const errorValue = resolvedSearchParams.error;
+  const deleted = Array.isArray(deletedValue) ? deletedValue[0] : deletedValue;
+  const error = Array.isArray(errorValue) ? errorValue[0] : errorValue;
   const data = await getCoachClientsPageData();
   const loggedTodayCount = data.clients.filter((client) => client.statusLabel === "Logged today").length;
   const longestStreak = data.clients.reduce(
@@ -64,6 +73,17 @@ export default async function CoachClientsPage() {
         </Link>
       }
     >
+      {deleted ? (
+        <div className="rounded-[1.6rem] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          Client deleted permanently.
+        </div>
+      ) : null}
+      {error === "missing-client" ? (
+        <div className="rounded-[1.6rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+          That client record could not be found.
+        </div>
+      ) : null}
+
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {rosterSummaryCards.map((card) => (
           <StatCard key={card.label} {...card} />

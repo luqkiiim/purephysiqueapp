@@ -18,6 +18,7 @@ on conflict (id) do nothing;
 insert into clients (
   id,
   coach_id,
+  auth_user_id,
   full_name,
   email,
   invite_token,
@@ -31,6 +32,7 @@ insert into clients (
   (
     'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
     '11111111-1111-1111-1111-111111111111',
+    null,
     'Ava Morgan',
     'ava@example.com',
     'invite-client-ava',
@@ -44,6 +46,7 @@ insert into clients (
   (
     'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
     '11111111-1111-1111-1111-111111111111',
+    null,
     'Noah Bennett',
     'noah@example.com',
     'invite-client-noah',
@@ -57,6 +60,7 @@ insert into clients (
   (
     'cccccccc-cccc-cccc-cccc-cccccccccccc',
     '11111111-1111-1111-1111-111111111111',
+    null,
     'Mia Patel',
     'mia@example.com',
     'invite-client-mia',

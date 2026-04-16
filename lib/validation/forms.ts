@@ -66,6 +66,11 @@ export const feedbackMessageSchema = z.object({
   message: z.string().min(4).max(600),
 });
 
+export const deleteClientSchema = z.object({
+  clientId: z.string().uuid().or(z.string().min(3)),
+  confirmationName: z.string().trim().min(2).max(120),
+});
+
 const exerciseEntrySchema = z.object({
   type: z.string().trim().min(2).max(80),
   durationMinutes: z.coerce.number().int().min(0).max(360),

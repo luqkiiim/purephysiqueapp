@@ -26,6 +26,7 @@ interface CoachProfileRow {
 interface ClientRow {
   id: string;
   coach_id: string;
+  auth_user_id: string | null;
   full_name: string;
   email: string;
   invite_token: string;
@@ -181,6 +182,7 @@ function mapClientBundle(
   return {
     id: client.id,
     coachId: client.coach_id,
+    authUserId: client.auth_user_id,
     fullName: client.full_name,
     email: client.email,
     inviteToken: client.invite_token,

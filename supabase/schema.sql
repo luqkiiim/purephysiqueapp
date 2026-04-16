@@ -10,6 +10,7 @@ create table if not exists coach_profiles (
 create table if not exists clients (
   id text primary key,
   coach_id text not null references coach_profiles(id) on delete cascade,
+  auth_user_id text,
   full_name text not null,
   email text not null,
   invite_token text not null unique,
@@ -132,8 +133,13 @@ create table if not exists notification_logs (
   created_at timestamptz not null
 );
 
+alter table public.clients add column if not exists auth_user_id text;
+
 create index if not exists clients_coach_id_idx on clients (coach_id);
 create index if not exists clients_invite_token_idx on clients (invite_token);
+create unique index if not exists clients_auth_user_id_idx
+  on clients (auth_user_id)
+  where auth_user_id is not null;
 create index if not exists daily_check_ins_client_date_idx on daily_check_ins (client_id, date desc);
 create index if not exists progress_photos_client_date_idx on progress_photos (client_id, date desc);
 create index if not exists coach_notes_client_created_idx on coach_notes (client_id, created_at desc);

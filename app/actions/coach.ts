@@ -9,6 +9,7 @@ import type { z } from "zod";
 import {
   buildInternalClientEmail,
   generateUniqueClientAccessCode,
+  isInternalClientEmail,
   rotateClientAccessCode,
   seedClientAccessCode,
 } from "@/lib/access-codes";
@@ -21,7 +22,7 @@ import {
 import { saveDailyCheckInForClient } from "@/lib/check-ins";
 import { getClientBundleByCoachAndId } from "@/lib/database/queries";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { isLiveAppEnabled } from "@/lib/supabase/config";
+import { appEnv, isLiveAppEnabled } from "@/lib/supabase/config";
 import {
   coachClientDefaultsSettingsSchema,
   coachBackfillCheckInSchema,
@@ -29,6 +30,7 @@ import {
   coachProfileSettingsSchema,
   clientProfileSchema,
   coachNoteSchema,
+  deleteClientSchema,
   feedbackMessageSchema,
 } from "@/lib/validation/forms";
 import { getTodayIsoDate } from "@/lib/utils";
@@ -104,6 +106,62 @@ async function logNotification(
 
   if (result.error) {
     throw new Error(`Failed to log notification: ${result.error.message}`);
+  }
+}
+
+async function findAuthUserIdByEmail(email: string) {
+  const admin = createSupabaseAdminClient();
+  const normalizedEmail = email.trim().toLowerCase();
+
+  for (let page = 1; page <= 10; page += 1) {
+    const result = await admin.auth.admin.listUsers({
+      page,
+      perPage: 200,
+    });
+
+    if (result.error) {
+      throw new Error(`Failed to search auth users: ${result.error.message}`);
+    }
+
+    const matchedUser = result.data.users.find(
+      (user) => user.email?.trim().toLowerCase() === normalizedEmail,
+    );
+
+    if (matchedUser) {
+      return matchedUser.id;
+    }
+
+    if (!result.data.nextPage) {
+      break;
+    }
+  }
+
+  return null;
+}
+
+async function deleteClientStoragePaths(clientId: string) {
+  const admin = createSupabaseAdminClient();
+  const result = await admin
+    .from("progress_photos")
+    .select("storage_path")
+    .eq("client_id", clientId);
+
+  if (result.error) {
+    throw new Error(`Failed to load progress photo storage paths: ${result.error.message}`);
+  }
+
+  const storagePaths = (result.data ?? [])
+    .map((row) => String(row.storage_path ?? "").trim())
+    .filter(Boolean);
+
+  if (!storagePaths.length) {
+    return;
+  }
+
+  const removeResult = await admin.storage.from(appEnv.storageBucket).remove(storagePaths);
+
+  if (removeResult.error) {
+    throw new Error(`Failed to remove client progress photos: ${removeResult.error.message}`);
   }
 }
 
@@ -305,6 +363,62 @@ export async function saveCoachDashboardPreferencesAction(formData: FormData) {
   revalidatePath("/coach/clients");
   revalidatePath("/coach/settings");
   redirect("/coach/settings?saved=dashboard");
+}
+
+export async function deleteClientAction(formData: FormData) {
+  const values = deleteClientSchema.parse(Object.fromEntries(formData.entries()));
+
+  if (!isLiveAppEnabled) {
+    redirect("/coach/clients?deleted=1");
+  }
+
+  const { coach } = await requireCoach();
+  const client = await getClientBundleByCoachAndId(coach.id, values.clientId);
+
+  if (!client) {
+    redirect("/coach/clients?error=missing-client");
+  }
+
+  const normalizedConfirmationName = values.confirmationName
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+  const normalizedClientName = client.fullName.trim().replace(/\s+/g, " ").toLowerCase();
+
+  if (normalizedConfirmationName !== normalizedClientName) {
+    redirect(`/coach/clients/${client.id}?error=delete-confirmation`);
+  }
+
+  await deleteClientStoragePaths(client.id);
+
+  const authUserId =
+    client.authUserId ||
+    (!isInternalClientEmail(client.email) ? await findAuthUserIdByEmail(client.email) : null);
+
+  if (authUserId) {
+    const admin = createSupabaseAdminClient();
+    const deleteUserResult = await admin.auth.admin.deleteUser(authUserId);
+
+    if (deleteUserResult.error && !/not found/i.test(deleteUserResult.error.message)) {
+      throw new Error(`Failed to delete linked client auth account: ${deleteUserResult.error.message}`);
+    }
+  }
+
+  const admin = createSupabaseAdminClient();
+  const deleteClientResult = await admin
+    .from("clients")
+    .delete()
+    .eq("id", client.id)
+    .eq("coach_id", coach.id);
+
+  if (deleteClientResult.error) {
+    throw new Error(`Failed to delete client: ${deleteClientResult.error.message}`);
+  }
+
+  revalidatePath("/coach");
+  revalidatePath("/coach/clients");
+  revalidatePath("/coach/settings");
+  redirect("/coach/clients?deleted=1");
 }
 
 export async function saveCoachNoteAction(formData: FormData) {

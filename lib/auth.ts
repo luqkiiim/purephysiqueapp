@@ -115,6 +115,10 @@ export async function requireClient(): Promise<ClientSession> {
     redirect("/access?mode=login&error=invalid-client-session");
   }
 
+  if (client.authUserId && client.authUserId !== user.id) {
+    redirect("/access?mode=login&error=invalid-client-session");
+  }
+
   return {
     client,
     isDemo: false,

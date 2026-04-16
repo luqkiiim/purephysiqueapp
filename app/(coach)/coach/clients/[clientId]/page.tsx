@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import {
+  deleteClientAction,
   regenerateClientAccessCodeAction,
   saveCoachNoteAction,
   saveFeedbackMessageAction,
@@ -16,6 +17,7 @@ import { SectionHeading } from "@/components/layout/section-heading";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { getCoachClientDetailData } from "@/lib/data/coach";
 import { formatAccessCode, isInternalClientEmail } from "@/lib/access-codes";
 import { isLiveAppEnabled } from "@/lib/supabase/config";
@@ -37,7 +39,9 @@ export default async function CoachClientDetailPage({
   const { clientId } = await params;
   const resolvedSearchParams = (await searchParams) ?? {};
   const accessValue = resolvedSearchParams.access;
+  const errorValue = resolvedSearchParams.error;
   const access = Array.isArray(accessValue) ? accessValue[0] : accessValue;
+  const error = Array.isArray(errorValue) ? errorValue[0] : errorValue;
   const data = await getCoachClientDetailData(clientId);
 
   const weightData = data.recentCheckIns.slice(-10).map((entry) => ({
@@ -105,6 +109,11 @@ export default async function CoachClientDetailPage({
       {access === "regenerated" ? (
         <div className="rounded-[1.6rem] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
           A new client access code is ready. Share only the latest code with the client.
+        </div>
+      ) : null}
+      {error === "delete-confirmation" ? (
+        <div className="rounded-[1.6rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+          Type the client&apos;s name correctly to confirm deletion.
         </div>
       ) : null}
 
@@ -466,6 +475,40 @@ export default async function CoachClientDetailPage({
             </CardContent>
           </Card>
         </div>
+      </section>
+
+      <section className="space-y-3">
+        <SectionHeading
+          eyebrow="Danger zone"
+          title="Delete client"
+          description="This permanently removes the client record, linked auth account, check-ins, messages, notes, and progress photo storage."
+        />
+        <Card className="border border-rose-200">
+          <CardHeader>
+            <CardTitle>Permanent delete</CardTitle>
+            <CardDescription>
+              Type <span className="font-semibold text-slate-900">{data.client.fullName}</span> to
+              confirm. This cannot be undone.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <form action={deleteClientAction} className="space-y-4">
+              <input type="hidden" name="clientId" value={data.client.id} />
+              <label className="block space-y-2">
+                <span className="text-sm font-semibold text-slate-900">Confirm client name</span>
+                <Input
+                  name="confirmationName"
+                  placeholder={data.client.fullName}
+                  autoComplete="off"
+                  required
+                />
+              </label>
+              <FormSubmitButton variant="coral" fullWidth pendingLabel="Deleting client...">
+                Delete client
+              </FormSubmitButton>
+            </form>
+          </CardContent>
+        </Card>
       </section>
     </CoachShell>
   );

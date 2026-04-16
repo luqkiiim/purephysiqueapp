@@ -48,18 +48,25 @@ function redirectToAccess(
   redirect(buildAccessRedirect(mode, options) as Parameters<typeof redirect>[0]);
 }
 
-async function updateClientLastAccessed(clientId: string, nowIso: string) {
+async function syncClientAuthIdentity(
+  clientId: string,
+  userId: string,
+  email: string,
+  nowIso: string,
+) {
   const admin = createSupabaseAdminClient();
   const result = await admin
     .from("clients")
     .update({
+      auth_user_id: userId,
+      email,
       last_accessed_at: nowIso,
       updated_at: nowIso,
     })
     .eq("id", clientId);
 
   if (result.error) {
-    throw new Error(`Failed to update client access time: ${result.error.message}`);
+    throw new Error(`Failed to link client auth identity: ${result.error.message}`);
   }
 }
 
@@ -151,6 +158,8 @@ export async function claimClientAccessAction(formData: FormData) {
       await supabase.auth.signOut();
       redirectToClaim("email-already-in-use");
     }
+
+    await syncClientAuthIdentity(activeClient.id, signedInUser.id, normalizedEmail, nowIso);
   } else {
     const signInResult = await supabase.auth.signInWithPassword({
       email: normalizedEmail,
@@ -160,19 +169,13 @@ export async function claimClientAccessAction(formData: FormData) {
     if (signInResult.error || !signInResult.data.user) {
       throw new Error(`Failed to sign in claimed client account: ${signInResult.error?.message ?? "Unknown error"}`);
     }
-  }
 
-  const clientUpdateResult = await admin
-    .from("clients")
-    .update({
-      email: normalizedEmail,
-      last_accessed_at: nowIso,
-      updated_at: nowIso,
-    })
-    .eq("id", activeClient.id);
-
-  if (clientUpdateResult.error) {
-    throw new Error(`Failed to update client account email: ${clientUpdateResult.error.message}`);
+    await syncClientAuthIdentity(
+      activeClient.id,
+      signInResult.data.user.id,
+      normalizedEmail,
+      nowIso,
+    );
   }
 
   await rotateClientAccessCode(admin, activeClient.id, nowIso);
@@ -232,7 +235,19 @@ export async function loginClientAccessAction(formData: FormData) {
   }
 
   const activeClient = client!;
-  await updateClientLastAccessed(activeClient.id, new Date().toISOString());
+  if (activeClient.authUserId && activeClient.authUserId !== signedInUser.id) {
+    await supabase.auth.signOut();
+    redirectToAccess("login", {
+      error: "invalid-client-login",
+    });
+  }
+
+  await syncClientAuthIdentity(
+    activeClient.id,
+    signedInUser.id,
+    values.email.trim().toLowerCase(),
+    new Date().toISOString(),
+  );
   redirect("/client");
 }
 

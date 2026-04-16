@@ -63,6 +63,7 @@ export interface ReminderSettings {
 export interface Client {
   id: string;
   coachId: string;
+  authUserId?: string | null;
   fullName: string;
   email: string;
   inviteToken: string;
