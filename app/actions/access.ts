@@ -6,12 +6,12 @@ import { redirect } from "next/navigation";
 import { hashAccessCode, formatAccessCode, normalizeAccessCode, rotateClientAccessCode } from "@/lib/access-codes";
 import {
   getClientAccessCodeSummary,
-  getClientBundleById,
+  syncClientAuthIdentity,
 } from "@/lib/database/queries";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { isLiveAppEnabled } from "@/lib/supabase/config";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { clientAccessClaimSchema, clientAccessLoginSchema } from "@/lib/validation/forms";
+import { clientAccessClaimSchema } from "@/lib/validation/forms";
 
 function buildAccessRedirect(
   mode: "claim" | "login",
@@ -38,36 +38,11 @@ function buildAccessRedirect(
   return queryString ? `/access?${queryString}` : "/access";
 }
 
-function redirectToAccess(
-  mode: "claim" | "login",
-  options?: {
-    accessCode?: string;
-    error?: string;
-  },
-): never {
+function redirectToAccess(mode: "claim" | "login", options?: {
+  accessCode?: string;
+  error?: string;
+}): never {
   redirect(buildAccessRedirect(mode, options) as Parameters<typeof redirect>[0]);
-}
-
-async function syncClientAuthIdentity(
-  clientId: string,
-  userId: string,
-  email: string,
-  nowIso: string,
-) {
-  const admin = createSupabaseAdminClient();
-  const result = await admin
-    .from("clients")
-    .update({
-      auth_user_id: userId,
-      email,
-      last_accessed_at: nowIso,
-      updated_at: nowIso,
-    })
-    .eq("id", clientId);
-
-  if (result.error) {
-    throw new Error(`Failed to link client auth identity: ${result.error.message}`);
-  }
 }
 
 export async function claimClientAccessAction(formData: FormData) {
@@ -186,76 +161,11 @@ export async function claimClientAccessAction(formData: FormData) {
   redirect("/client");
 }
 
-export async function loginClientAccessAction(formData: FormData) {
-  if (!isLiveAppEnabled) {
-    redirect("/client");
-  }
-
-  const parsedValues = clientAccessLoginSchema.safeParse(Object.fromEntries(formData.entries()));
-
-  if (!parsedValues.success) {
-    redirectToAccess("login", {
-      error: "invalid-client-login",
-    });
-  }
-
-  const values = parsedValues.data!;
-  const supabase = await createServerSupabaseClient();
-  const signInResult = await supabase.auth.signInWithPassword({
-    email: values.email.trim().toLowerCase(),
-    password: values.password,
-  });
-
-  if (signInResult.error || !signInResult.data.user) {
-    redirectToAccess("login", {
-      error: "invalid-client-login",
-    });
-  }
-
-  const signedInUser = signInResult.data.user!;
-  const clientId =
-    typeof signedInUser.app_metadata?.client_id === "string"
-      ? signedInUser.app_metadata.client_id
-      : null;
-
-  if (signedInUser.app_metadata?.role !== "client" || !clientId) {
-    await supabase.auth.signOut();
-    redirectToAccess("login", {
-      error: "invalid-client-login",
-    });
-  }
-
-  const client = await getClientBundleById(clientId);
-
-  if (!client || client.activeStatus !== "active") {
-    await supabase.auth.signOut();
-    redirectToAccess("login", {
-      error: "inactive-client-account",
-    });
-  }
-
-  const activeClient = client!;
-  if (activeClient.authUserId && activeClient.authUserId !== signedInUser.id) {
-    await supabase.auth.signOut();
-    redirectToAccess("login", {
-      error: "invalid-client-login",
-    });
-  }
-
-  await syncClientAuthIdentity(
-    activeClient.id,
-    signedInUser.id,
-    values.email.trim().toLowerCase(),
-    new Date().toISOString(),
-  );
-  redirect("/client");
-}
-
 export async function clearClientAccessAction() {
   if (isLiveAppEnabled) {
     const supabase = await createServerSupabaseClient();
     await supabase.auth.signOut();
   }
 
-  redirect("/access");
+  redirect("/");
 }

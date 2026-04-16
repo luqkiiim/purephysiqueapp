@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Activity, KeyRound, LockKeyhole, Users } from "lucide-react";
 
-import { loginCoachAction } from "@/app/actions/auth";
+import { loginAppAction } from "@/app/actions/auth";
 import { CoachLoginForm } from "@/components/forms/coach-login-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,10 +10,22 @@ import { getAuthenticatedAppPath } from "@/lib/auth";
 import { demoClientCredentials, demoCoachCredentials } from "@/lib/demo/credentials";
 import { isLiveAppEnabled } from "@/lib/supabase/config";
 
-function getCoachErrorMessage(error: string) {
+function getLoginErrorMessage(error: string) {
   switch (error) {
+    case "invalid-login":
+      return "Email or password is incorrect.";
+    case "inactive-client-account":
+      return "This account is inactive.";
+    case "client-session-required":
+      return "Log in to continue.";
+    case "invalid-client-session":
+      return "That session is no longer valid. Log in again.";
     case "missing-profile":
       return "This account is authenticated but is not linked to a coach profile yet.";
+    case "no-app-access":
+      return "This account does not have access to the app.";
+    case "demo-login-only":
+      return "Use the demo coach credentials shown below while live auth is off.";
     default:
       return decodeURIComponent(error);
   }
@@ -33,7 +45,7 @@ export default async function AuthEntryPage({
   const resolvedSearchParams = (await searchParams) ?? {};
   const errorValue = resolvedSearchParams.error;
   const error = Array.isArray(errorValue) ? errorValue[0] : errorValue;
-  const coachError = error ? getCoachErrorMessage(error) : null;
+  const loginError = error ? getLoginErrorMessage(error) : null;
   const isDemoMode = !isLiveAppEnabled;
 
   return (
@@ -41,8 +53,9 @@ export default async function AuthEntryPage({
       <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
         <section className="order-2 space-y-5 lg:order-1">
           <p className="eyebrow">Pure Physique</p>
-          <h1 className="font-display text-[2.2rem] leading-[0.96] text-slate-900 sm:text-5xl lg:text-6xl">
-            Small check-ins. Real momentum.
+          <h1 className="font-display text-[1.95rem] leading-[0.94] text-slate-900 sm:text-5xl lg:text-6xl">
+            <span className="block">Small check-ins.</span>
+            <span className="block">Real momentum.</span>
           </h1>
           <p className="max-w-2xl text-sm leading-6 text-slate-700 sm:text-base">
             One workspace for coach decisions, one clear entry for client follow-through, and a
@@ -85,42 +98,24 @@ export default async function AuthEntryPage({
             <CardHeader>
               <CardTitle>Log in</CardTitle>
               <CardDescription>
-                Coach access is provisioned by the company. Use your assigned email and password to
-                open the workspace.
+                Use your email and password to enter the app.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {coachError ? (
+              {loginError ? (
                 <div className="rounded-3xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-                  {coachError}
+                  {loginError}
                 </div>
               ) : null}
               <CoachLoginForm
-                action={loginCoachAction}
+                action={loginAppAction}
                 defaultEmail={isDemoMode ? demoCoachCredentials.email : undefined}
                 defaultPassword={isDemoMode ? demoCoachCredentials.password : undefined}
               />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Client access</CardTitle>
-              <CardDescription>
-                Returning clients log in normally. First-time clients claim the account with the
-                code shared by their coach.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-3 sm:grid-cols-2">
-                <Link href="/access?mode=login" className="block w-full">
-                  <Button variant="secondary" fullWidth>
-                    Client log in
-                  </Button>
-                </Link>
+              <div className="pt-1">
                 <Link href="/access" className="block w-full">
-                  <Button variant="teal" fullWidth>
-                    First-time setup
+                  <Button variant="secondary" size="lg" fullWidth>
+                    Sign up
                   </Button>
                 </Link>
               </div>

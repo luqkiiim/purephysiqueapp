@@ -2,14 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowLeft, KeyRound, LockKeyhole } from "lucide-react";
 
-import {
-  claimClientAccessAction,
-  loginClientAccessAction,
-} from "@/app/actions/access";
-import {
-  ClientAccessClaimForm,
-  ClientAccessLoginForm,
-} from "@/components/forms/client-auth-forms";
+import { claimClientAccessAction } from "@/app/actions/access";
+import { ClientAccessClaimForm } from "@/components/forms/client-auth-forms";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAuthenticatedAppPath } from "@/lib/auth";
@@ -28,14 +22,6 @@ function getAccessErrorMessage(error: string) {
       return "That email is already linked to a different account.";
     case "invalid-claim-input":
       return "Enter a valid access code, email, and password to claim the client account.";
-    case "invalid-client-login":
-      return "Email or password is incorrect.";
-    case "inactive-client-account":
-      return "This client account is inactive.";
-    case "client-session-required":
-      return "Sign in as a client to open the check-in app.";
-    case "invalid-client-session":
-      return "That client session is no longer valid. Sign in again.";
     default:
       return decodeURIComponent(error);
   }
@@ -54,13 +40,10 @@ export default async function ClientAccessPage({
 
   const resolvedSearchParams = (await searchParams) ?? {};
   const errorValue = resolvedSearchParams.error;
-  const modeValue = resolvedSearchParams.mode;
   const codeValue = resolvedSearchParams.code;
   const error = Array.isArray(errorValue) ? errorValue[0] : errorValue;
-  const mode = Array.isArray(modeValue) ? modeValue[0] : modeValue;
   const code = Array.isArray(codeValue) ? codeValue[0] : codeValue;
-  const claimError = error && mode !== "login" ? getAccessErrorMessage(error) : null;
-  const loginError = error && mode === "login" ? getAccessErrorMessage(error) : null;
+  const claimError = error ? getAccessErrorMessage(error) : null;
 
   return (
     <main className="page-shell">
@@ -84,7 +67,7 @@ export default async function ClientAccessPage({
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="tap-card">
                   <KeyRound className="h-5 w-5 text-accent-teal" />
-                  <p className="mt-3 text-sm font-semibold text-slate-900">First access</p>
+                  <p className="mt-3 text-sm font-semibold text-slate-900">Sign up</p>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
                     Enter your coach-issued code, email, and password.
                   </p>
@@ -125,44 +108,25 @@ export default async function ClientAccessPage({
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid gap-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Claim account</CardTitle>
-                    <CardDescription>
-                      Use this the first time you open the client app.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {claimError ? (
-                      <div className="rounded-3xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-                        {claimError}
-                      </div>
-                    ) : null}
-                    <ClientAccessClaimForm
-                      action={claimClientAccessAction}
-                      defaultAccessCode={code}
-                    />
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Sign in</CardTitle>
-                    <CardDescription>
-                      Use this after your client account has already been claimed.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {loginError ? (
-                      <div className="rounded-3xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-                        {loginError}
-                      </div>
-                    ) : null}
-                    <ClientAccessLoginForm action={loginClientAccessAction} />
-                  </CardContent>
-                </Card>
-              </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Sign up</CardTitle>
+                  <CardDescription>
+                    Use this the first time you open the client app.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {claimError ? (
+                    <div className="rounded-3xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+                      {claimError}
+                    </div>
+                  ) : null}
+                  <ClientAccessClaimForm
+                    action={claimClientAccessAction}
+                    defaultAccessCode={code}
+                  />
+                </CardContent>
+              </Card>
             )}
           </div>
         </section>

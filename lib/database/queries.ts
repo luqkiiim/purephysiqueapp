@@ -358,6 +358,26 @@ export async function linkCoachAuthIdentityByEmail(userId: string, email: string
   }
 }
 
+export async function syncClientAuthIdentity(
+  clientId: string,
+  userId: string,
+  email: string,
+  nowIso: string,
+) {
+  const admin = createSupabaseAdminClient();
+  const result = await admin
+    .from("clients")
+    .update({
+      auth_user_id: userId,
+      email,
+      last_accessed_at: nowIso,
+      updated_at: nowIso,
+    })
+    .eq("id", clientId);
+
+  throwIfError(result.error, "Failed to link client auth identity");
+}
+
 export async function getCoachByAuthUserId(authUserId: string) {
   const admin = createSupabaseAdminClient();
   const result = await admin

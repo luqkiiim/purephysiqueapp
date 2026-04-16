@@ -44,7 +44,7 @@ export function ClientAccessClaimForm({
         />
       </label>
       <FormSubmitButton variant="teal" size="lg" fullWidth pendingLabel="Creating account...">
-        Claim client account
+        Sign up
       </FormSubmitButton>
     </form>
   );

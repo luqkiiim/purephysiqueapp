@@ -17,7 +17,7 @@ export function CoachLoginForm({
         <Input
           name="email"
           type="email"
-          placeholder="coach@purephysique.app"
+          placeholder="you@example.com"
           defaultValue={defaultEmail}
           autoComplete="email"
           required

@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import type { User } from "@supabase/supabase-js";
 
 import {
   getClientBundleById,
@@ -21,6 +22,38 @@ interface ClientSession {
   isDemo: boolean;
 }
 
+async function resolveAuthenticatedAppPathForUser(user: User) {
+  let coach = await getCoachByAuthUserId(user.id);
+
+  if (!coach && user.email) {
+    await linkCoachAuthIdentityByEmail(user.id, user.email);
+    coach = await getCoachByEmail(user.email);
+  }
+
+  if (coach) {
+    return "/coach";
+  }
+
+  const clientId =
+    typeof user.app_metadata?.client_id === "string" ? user.app_metadata.client_id : null;
+
+  if (!clientId || user.app_metadata?.role !== "client") {
+    return null;
+  }
+
+  const client = await getClientBundleById(clientId);
+
+  if (!client || client.activeStatus !== "active") {
+    return null;
+  }
+
+  if (client.authUserId && client.authUserId !== user.id) {
+    return null;
+  }
+
+  return "/client";
+}
+
 export async function getAuthenticatedAppPath() {
   if (!isLiveAppEnabled) {
     return null;
@@ -35,20 +68,7 @@ export async function getAuthenticatedAppPath() {
     return null;
   }
 
-  const coach = await getCoachByAuthUserId(user.id);
-
-  if (coach) {
-    return "/coach";
-  }
-
-  const clientId =
-    typeof user.app_metadata?.client_id === "string" ? user.app_metadata.client_id : null;
-
-  if (clientId) {
-    return "/client";
-  }
-
-  return null;
+  return resolveAuthenticatedAppPathForUser(user);
 }
 
 export async function requireCoach(): Promise<CoachSession> {
@@ -99,24 +119,24 @@ export async function requireClient(): Promise<ClientSession> {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/access");
+    redirect("/");
   }
 
   const clientId =
     typeof user.app_metadata?.client_id === "string" ? user.app_metadata.client_id : null;
 
   if (!clientId) {
-    redirect("/access?mode=login&error=client-session-required");
+    redirect("/?error=client-session-required");
   }
 
   const client = await getClientBundleById(clientId);
 
   if (!client || client.activeStatus !== "active") {
-    redirect("/access?mode=login&error=invalid-client-session");
+    redirect("/?error=invalid-client-session");
   }
 
   if (client.authUserId && client.authUserId !== user.id) {
-    redirect("/access?mode=login&error=invalid-client-session");
+    redirect("/?error=invalid-client-session");
   }
 
   return {
