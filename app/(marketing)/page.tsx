@@ -1,6 +1,6 @@
 import Link from "next/link";
+import Image from "next/image";
 import { redirect } from "next/navigation";
-import { Activity, KeyRound, LockKeyhole, Users } from "lucide-react";
 
 import { loginAppAction } from "@/app/actions/auth";
 import { CoachLoginForm } from "@/components/forms/coach-login-form";
@@ -49,51 +49,32 @@ export default async function AuthEntryPage({
   const isDemoMode = !isLiveAppEnabled;
 
   return (
-    <main className="page-shell">
-      <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
-        <section className="order-2 space-y-5 lg:order-1">
-          <p className="eyebrow">Pure Physique</p>
-          <h1 className="font-display text-[1.95rem] leading-[0.94] text-slate-900 sm:text-5xl lg:text-6xl">
-            <span className="block">Small check-ins.</span>
-            <span className="block">Real momentum.</span>
-          </h1>
-          <p className="max-w-2xl text-sm leading-6 text-slate-700 sm:text-base">
-            One workspace for coach decisions, one clear entry for client follow-through, and a
-            daily rhythm built around consistency instead of clutter.
-          </p>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <div className="tap-card">
-              <Activity className="h-5 w-5 text-accent-teal" />
-              <p className="mt-3 text-sm font-semibold text-slate-900">Daily visibility</p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                See who checked in, who slipped, and where to follow up next.
-              </p>
-            </div>
-            <div className="tap-card">
-              <Users className="h-5 w-5 text-accent-coral" />
-              <p className="mt-3 text-sm font-semibold text-slate-900">Coach workspace</p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                Manage clients, targets, access codes, and progress from one roster.
-              </p>
-            </div>
-            <div className="tap-card">
-              <KeyRound className="h-5 w-5 text-accent-gold" />
-              <p className="mt-3 text-sm font-semibold text-slate-900">First-time setup</p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                Clients claim the account once with a coach-issued access code.
-              </p>
-            </div>
-            <div className="tap-card">
-              <LockKeyhole className="h-5 w-5 text-accent-magenta" />
-              <p className="mt-3 text-sm font-semibold text-slate-900">Return sign-in</p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                After claim, clients log in normally with email and password.
-              </p>
-            </div>
+    <main className="page-shell flex min-h-screen items-center justify-center py-10 sm:py-12">
+      <div className="mx-auto flex w-full max-w-md flex-col items-center gap-5 text-center sm:gap-6">
+        <div className="space-y-4">
+          <div className="mx-auto w-fit rounded-[2rem] border border-white/10 bg-white/96 p-3 shadow-[0_22px_44px_rgba(0,0,0,0.26)] sm:p-4">
+            <Image
+              src="/brand/logo.jpeg"
+              alt="Pure Physique"
+              width={128}
+              height={128}
+              className="h-24 w-24 rounded-[1.35rem] object-cover sm:h-28 sm:w-28"
+              priority
+            />
           </div>
-        </section>
+          <div className="space-y-3">
+            <p className="eyebrow text-center text-slate-200/70">Pure Physique</p>
+            <h1 className="font-display text-[1.95rem] leading-[0.94] text-white sm:text-[2.6rem]">
+              <span className="block">Small check-ins.</span>
+              <span className="block">Real momentum.</span>
+            </h1>
+            <p className="mx-auto max-w-sm text-sm leading-6 text-slate-300 sm:text-base">
+              Log in to pick up where you left off.
+            </p>
+          </div>
+        </div>
 
-        <div className="order-1 mx-auto w-full max-w-md space-y-4 lg:order-2">
+        <div className="w-full space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Log in</CardTitle>
