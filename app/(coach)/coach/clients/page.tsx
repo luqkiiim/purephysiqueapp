@@ -74,7 +74,7 @@ export default async function CoachClientsPage() {
         {data.clients.length ? (
           data.clients.map((client) => (
             <Card key={client.id}>
-              <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <CardHeader>
                 <div className="min-w-0 space-y-3">
                   <div className="flex flex-wrap gap-2">
                     <Badge
@@ -94,27 +94,16 @@ export default async function CoachClientsPage() {
                     </Badge>
                   </div>
                   <div>
-                    <CardTitle>{client.fullName}</CardTitle>
+                    <CardTitle>
+                      <Link
+                        href={`/coach/clients/${client.id}`}
+                        className="transition hover:text-accent-teal"
+                      >
+                        {client.fullName}
+                      </Link>
+                    </CardTitle>
                     <CardDescription>Access code managed by coach</CardDescription>
                   </div>
-                </div>
-                <div className="grid gap-2 sm:flex sm:flex-wrap">
-                  <Link
-                    href={`/coach/clients/${client.id}`}
-                    className="block w-full sm:inline-block sm:w-auto"
-                  >
-                    <Button variant="secondary" size="sm" fullWidth>
-                      View client
-                    </Button>
-                  </Link>
-                  <Link
-                    href={`/coach/clients/${client.id}/edit`}
-                    className="block w-full sm:inline-block sm:w-auto"
-                  >
-                    <Button variant="ghost" size="sm" fullWidth>
-                      Edit profile
-                    </Button>
-                  </Link>
                 </div>
               </CardHeader>
               <CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
