@@ -1,109 +1,191 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Activity, ShieldCheck, Smartphone } from "lucide-react";
+import { Activity, KeyRound, LockKeyhole, Users } from "lucide-react";
 
+import { loginCoachAction } from "@/app/actions/auth";
+import { CoachLoginForm } from "@/components/forms/coach-login-form";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAuthenticatedAppPath } from "@/lib/auth";
+import { demoClientCredentials, demoCoachCredentials } from "@/lib/demo/credentials";
+import { isLiveAppEnabled } from "@/lib/supabase/config";
 
-const landingCards = [
-  {
-    title: "Fast client logging",
-    icon: Smartphone,
-    description: "Built to be completed comfortably on a phone in under a minute.",
-  },
-  {
-    title: "Clear coach overview",
-    icon: Activity,
-    description: "Mobile dashboards keep follow-up visible without spreadsheet density.",
-  },
-  {
-    title: "Private client access",
-    icon: ShieldCheck,
-    description: "Coach-issued access codes handle first setup, then clients sign in normally.",
-  },
-];
+function getCoachErrorMessage(error: string) {
+  switch (error) {
+    case "missing-profile":
+      return "This account is authenticated but is not linked to a coach profile yet.";
+    default:
+      return decodeURIComponent(error);
+  }
+}
 
-export default async function LandingPage() {
+export default async function AuthEntryPage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const authenticatedAppPath = await getAuthenticatedAppPath();
 
   if (authenticatedAppPath) {
     redirect(authenticatedAppPath);
   }
 
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const errorValue = resolvedSearchParams.error;
+  const error = Array.isArray(errorValue) ? errorValue[0] : errorValue;
+  const coachError = error ? getCoachErrorMessage(error) : null;
+  const isDemoMode = !isLiveAppEnabled;
+
   return (
-    <main className="page-shell space-y-6">
-      <section className="surface-card overflow-hidden px-4 py-6 sm:px-8 sm:py-10">
-        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-          <div className="min-w-0 space-y-5">
-            <p className="eyebrow">Pure Physique</p>
-            <h1 className="text-safe-wrap font-display text-[2.2rem] leading-[0.96] text-slate-900 sm:text-5xl lg:text-6xl">
-              Daily client check-ins, clear coach follow-up, no spreadsheet mess.
-            </h1>
-            <p className="max-w-2xl text-sm leading-6 text-slate-700 sm:text-base">
-              Designed for phone use first so clients can log quickly and coaches can act without
-              pinching, zooming, or fighting cramped layouts.
-            </p>
-            <div className="grid w-full max-w-full gap-3 sm:flex sm:flex-wrap">
-              <Link href="/coach/login" className="block w-full sm:inline-block sm:w-auto">
-                <Button variant="primary" size="lg" fullWidth>
-                  Coach login
-                </Button>
-              </Link>
-              <Link href="/access" className="block w-full sm:inline-block sm:w-auto">
-                <Button variant="teal" size="lg" fullWidth>
-                  Client app
-                </Button>
-              </Link>
+    <main className="page-shell">
+      <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
+        <section className="order-2 space-y-5 lg:order-1">
+          <p className="eyebrow">Pure Physique</p>
+          <h1 className="font-display text-[2.2rem] leading-[0.96] text-slate-900 sm:text-5xl lg:text-6xl">
+            Small check-ins. Real momentum.
+          </h1>
+          <p className="max-w-2xl text-sm leading-6 text-slate-700 sm:text-base">
+            One workspace for coach decisions, one clear entry for client follow-through, and a
+            daily rhythm built around consistency instead of clutter.
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="tap-card">
+              <Activity className="h-5 w-5 text-accent-teal" />
+              <p className="mt-3 text-sm font-semibold text-slate-900">Daily visibility</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                See who checked in, who slipped, and where to follow up next.
+              </p>
+            </div>
+            <div className="tap-card">
+              <Users className="h-5 w-5 text-accent-coral" />
+              <p className="mt-3 text-sm font-semibold text-slate-900">Coach workspace</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Manage clients, targets, access codes, and progress from one roster.
+              </p>
+            </div>
+            <div className="tap-card">
+              <KeyRound className="h-5 w-5 text-accent-gold" />
+              <p className="mt-3 text-sm font-semibold text-slate-900">First-time setup</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Clients claim the account once with a coach-issued access code.
+              </p>
+            </div>
+            <div className="tap-card">
+              <LockKeyhole className="h-5 w-5 text-accent-magenta" />
+              <p className="mt-3 text-sm font-semibold text-slate-900">Return sign-in</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                After claim, clients log in normally with email and password.
+              </p>
             </div>
           </div>
+        </section>
 
-          <div className="surface-muted relative overflow-hidden p-4 shadow-float sm:p-6">
-            <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-accent-coral/15 blur-3xl" />
-            <div className="absolute -bottom-12 -left-12 h-40 w-40 rounded-full bg-accent-magenta/16 blur-3xl" />
-            <div className="absolute right-12 top-20 h-24 w-24 rounded-full bg-accent-teal/14 blur-3xl" />
-            <div className="relative space-y-4">
-              <div className="tap-card animate-float">
-                <p className="text-sm text-slate-500">Client check-in</p>
-                <p className="mt-2 font-display text-[1.7rem] leading-[1.02] text-slate-900 sm:text-3xl">
-                  Under 60 seconds
-                </p>
-                <p className="mt-3 text-sm leading-6 text-slate-600">
-                  Clear prompts, larger targets, and less crowding on narrow screens.
-                </p>
-              </div>
+        <div className="order-1 mx-auto w-full max-w-md space-y-4 lg:order-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Log in</CardTitle>
+              <CardDescription>
+                Coach access is provisioned by the company. Use your assigned email and password to
+                open the workspace.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {coachError ? (
+                <div className="rounded-3xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+                  {coachError}
+                </div>
+              ) : null}
+              <CoachLoginForm
+                action={loginCoachAction}
+                defaultEmail={isDemoMode ? demoCoachCredentials.email : undefined}
+                defaultPassword={isDemoMode ? demoCoachCredentials.password : undefined}
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Client access</CardTitle>
+              <CardDescription>
+                Returning clients log in normally. First-time clients claim the account with the
+                code shared by their coach.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="tap-card">
-                  <p className="text-sm text-slate-500">Coach sees</p>
-                  <p className="mt-2 text-xl font-semibold text-slate-900">Who logged today</p>
-                </div>
-                <div className="tap-card">
-                  <p className="text-sm text-slate-500">Coach tracks</p>
-                  <p className="mt-2 text-xl font-semibold text-slate-900">Streaks and trends</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto grid max-w-5xl gap-4 sm:gap-5 md:grid-cols-3">
-        {landingCards.map(({ title, description, icon: Icon }) => (
-          <Card key={title} className="h-full w-full max-w-[30rem] justify-self-center">
-            <CardContent className="flex h-full flex-col items-center px-5 pb-5 pt-5 text-center sm:px-6 sm:pb-6 sm:pt-6">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-accent-teal/25 bg-accent-teal/10">
-                <Icon className="h-5 w-5 text-accent-teal" />
-              </div>
-              <div className="mt-4 space-y-2">
-                <CardTitle className="text-lg sm:text-xl">{title}</CardTitle>
-                <CardDescription className="mx-auto max-w-[18rem]">
-                  {description}
-                </CardDescription>
+                <Link href="/access?mode=login" className="block w-full">
+                  <Button variant="secondary" fullWidth>
+                    Client log in
+                  </Button>
+                </Link>
+                <Link href="/access" className="block w-full">
+                  <Button variant="teal" fullWidth>
+                    First-time setup
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
-        ))}
-      </section>
+
+          {isDemoMode ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Demo access</CardTitle>
+                <CardDescription>
+                  Use these local preview details while live auth is turned off.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4">
+                  <div className="surface-muted p-4 text-sm">
+                    <p className="font-semibold text-slate-900">Coach</p>
+                    <p className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">Email</p>
+                    <p className="mt-1 font-mono text-[0.8rem] font-medium text-slate-900 sm:text-sm">
+                      {demoCoachCredentials.email}
+                    </p>
+                    <p className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">
+                      Password
+                    </p>
+                    <p className="mt-1 font-medium text-slate-900">
+                      {demoCoachCredentials.password}
+                    </p>
+                  </div>
+
+                  <div className="surface-muted p-4 text-sm">
+                    <p className="font-semibold text-slate-900">Client</p>
+                    <p className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">Name</p>
+                    <p className="mt-1 font-medium text-slate-900">
+                      {demoClientCredentials.fullName}
+                    </p>
+                    <p className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">
+                      Access code
+                    </p>
+                    <p className="mt-1 font-mono text-[0.8rem] font-medium text-slate-900 sm:text-sm">
+                      {demoClientCredentials.inviteToken}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid gap-3 sm:flex sm:flex-wrap">
+                  <Link
+                    href={`/access?code=${demoClientCredentials.inviteToken}`}
+                    className="block w-full sm:inline-block sm:w-auto"
+                  >
+                    <Button variant="secondary" fullWidth>
+                      Open client access
+                    </Button>
+                  </Link>
+                  <Link href="/preview/client" className="block w-full sm:inline-block sm:w-auto">
+                    <Button variant="ghost" fullWidth>
+                      Open client preview
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          ) : null}
+        </div>
+      </div>
     </main>
   );
 }

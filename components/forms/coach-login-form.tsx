@@ -19,6 +19,7 @@ export function CoachLoginForm({
           type="email"
           placeholder="coach@purephysique.app"
           defaultValue={defaultEmail}
+          autoComplete="email"
           required
         />
       </label>
@@ -29,11 +30,12 @@ export function CoachLoginForm({
           type="password"
           placeholder="********"
           defaultValue={defaultPassword}
+          autoComplete="current-password"
           required
         />
       </label>
       <FormSubmitButton variant="teal" size="lg" fullWidth pendingLabel="Signing in...">
-        Enter coach dashboard
+        Log in
       </FormSubmitButton>
     </form>
   );

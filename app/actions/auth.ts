@@ -19,7 +19,7 @@ export async function loginCoachAction(formData: FormData) {
       values.data.password !== demoCoachCredentials.password
     ) {
       redirect(
-        `/coach/login?error=${encodeURIComponent(
+        `/?error=${encodeURIComponent(
           "Use the demo coach email and password shown on the page.",
         )}`,
       );
@@ -42,7 +42,7 @@ export async function loginCoachAction(formData: FormData) {
       ? "Create a Supabase Auth user for this coach email and sign in with that password. The demo password only works when live Supabase mode is off."
       : error.message;
 
-    redirect(`/coach/login?error=${encodeURIComponent(errorMessage)}`);
+    redirect(`/?error=${encodeURIComponent(errorMessage)}`);
   }
 
   redirect("/coach");

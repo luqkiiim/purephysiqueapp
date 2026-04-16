@@ -65,7 +65,7 @@ export async function requireCoach(): Promise<CoachSession> {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/coach/login");
+    redirect("/");
   }
 
   let coach = await getCoachByAuthUserId(user.id);
@@ -76,7 +76,7 @@ export async function requireCoach(): Promise<CoachSession> {
   }
 
   if (!coach) {
-    redirect("/coach/login?error=missing-profile");
+    redirect("/?error=missing-profile");
   }
 
   return {

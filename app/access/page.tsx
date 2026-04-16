@@ -67,7 +67,7 @@ export default async function ClientAccessPage({
       <div className="mx-auto max-w-5xl space-y-5">
         <Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700">
           <ArrowLeft className="h-4 w-4" />
-          Back
+          Back to login
         </Link>
 
         <section className="surface-card overflow-hidden px-4 py-6 sm:px-8 sm:py-8">
