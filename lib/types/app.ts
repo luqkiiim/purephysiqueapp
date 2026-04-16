@@ -9,6 +9,23 @@ export interface CoachProfile {
   createdAt: string;
 }
 
+export interface CoachClientDefaults {
+  trainingPhase: string;
+  proteinTargetGrams: number;
+  stepTarget: number;
+  exerciseExpectation: string;
+  probioticsEnabled: boolean;
+  fishOilEnabled: boolean;
+  welcomeMessage: string;
+}
+
+export interface CoachDashboardPreferences {
+  rosterSort: "name" | "streak" | "adherence";
+  chartWindowDays: 14 | 30 | 42;
+  followUpCount: 4 | 6 | 8;
+  highlightMissedClients: boolean;
+}
+
 export interface ClientProfile {
   id: string;
   clientId: string;
@@ -147,6 +164,7 @@ export interface ClientStatusRow {
 
 export interface CoachDashboardData {
   coach: CoachProfile;
+  dashboardPreferences: CoachDashboardPreferences;
   summaryCards: DashboardSummaryCard[];
   clients: ClientStatusRow[];
   adherenceTrend: Array<{ label: string; adherence: number; weightDelta: number }>;

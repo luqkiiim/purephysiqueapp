@@ -1,7 +1,13 @@
 import { parseISO, subDays } from "date-fns";
 import { notFound } from "next/navigation";
 
+import { isInternalClientEmail } from "@/lib/access-codes";
 import { requireCoach } from "@/lib/auth";
+import {
+  getCoachClientDefaults,
+  getCoachDashboardPreferences,
+  sortClientStatusRows,
+} from "@/lib/coach-settings";
 import {
   getDailyCheckInForClientByDate,
   getClientBundleByCoachAndId,
@@ -37,14 +43,15 @@ function average(values: number[]) {
   return values.reduce((total, value) => total + value, 0) / values.length;
 }
 
-function buildAdherenceTrend(checkIns: DailyCheckIn[]) {
+function buildAdherenceTrend(checkIns: DailyCheckIn[], chartWindowDays: number) {
   const sortedCheckIns = [...checkIns].sort((left, right) => left.date.localeCompare(right.date));
   const anchorDate = sortedCheckIns.length
     ? parseISO(sortedCheckIns.at(-1)!.date)
     : new Date();
+  const bucketCount = Math.max(1, Math.ceil(chartWindowDays / 7));
 
-  return Array.from({ length: 6 }, (_, index) => {
-    const windowEnd = subDays(anchorDate, (5 - index) * 7);
+  return Array.from({ length: bucketCount }, (_, index) => {
+    const windowEnd = subDays(anchorDate, (bucketCount - 1 - index) * 7);
     const windowStartIso = subDays(windowEnd, 6).toISOString().slice(0, 10);
     const windowEndIso = windowEnd.toISOString().slice(0, 10);
     const bucket = sortedCheckIns.filter(
@@ -84,13 +91,23 @@ function buildMomentumClients(clients: Client[], checkInsByClientId: Map<string,
 
 export async function getCoachDashboardData() {
   const { coach, isDemo } = await requireCoach();
+  const dashboardPreferences = await getCoachDashboardPreferences();
 
   if (!isLiveAppEnabled || isDemo) {
-    return getDemoCoachDashboardData();
+    const demo = getDemoCoachDashboardData();
+
+    return {
+      ...demo,
+      dashboardPreferences,
+      clients: sortClientStatusRows(demo.clients, dashboardPreferences),
+      adherenceTrend: demo.adherenceTrend.slice(-Math.max(1, Math.ceil(dashboardPreferences.chartWindowDays / 7))),
+    };
   }
 
   const clients = await listClientBundlesByCoachId(coach.id);
-  const sinceDate = subDays(new Date(), 41).toISOString().slice(0, 10);
+  const sinceDate = subDays(new Date(), dashboardPreferences.chartWindowDays - 1)
+    .toISOString()
+    .slice(0, 10);
   const allRecentCheckIns = await listDailyCheckInsForClients(
     clients.map((client) => client.id),
     sinceDate,
@@ -99,6 +116,7 @@ export async function getCoachDashboardData() {
   const rows = clients.map((client) =>
     buildClientStatusRow(client, checkInsByClientId.get(client.id) ?? []),
   );
+  const sortedRows = sortClientStatusRows(rows, dashboardPreferences);
   const todaysEntries = new Map(
     allRecentCheckIns
       .filter((entry) => entry.date === getTodayIsoDate())
@@ -107,6 +125,7 @@ export async function getCoachDashboardData() {
 
   return {
     coach,
+    dashboardPreferences,
     summaryCards: [
       {
         label: "Total clients",
@@ -133,8 +152,8 @@ export async function getCoachDashboardData() {
         tone: "accent" as const,
       },
     ],
-    clients: rows,
-    adherenceTrend: buildAdherenceTrend(allRecentCheckIns),
+    clients: sortedRows,
+    adherenceTrend: buildAdherenceTrend(allRecentCheckIns, dashboardPreferences.chartWindowDays),
     todayCheckInSnapshot: buildTodaySnapshot(clients, todaysEntries),
     momentumClients: buildMomentumClients(clients, checkInsByClientId),
   };
@@ -142,13 +161,15 @@ export async function getCoachDashboardData() {
 
 export async function getCoachClientsPageData() {
   const { coach, isDemo } = await requireCoach();
+  const dashboardPreferences = await getCoachDashboardPreferences();
 
   if (!isLiveAppEnabled || isDemo) {
     const demo = getDemoCoachDashboardData();
 
     return {
       coach: demo.coach,
-      clients: demo.clients,
+      dashboardPreferences,
+      clients: sortClientStatusRows(demo.clients, dashboardPreferences),
     };
   }
 
@@ -162,8 +183,12 @@ export async function getCoachClientsPageData() {
 
   return {
     coach,
-    clients: clients.map((client) =>
-      buildClientStatusRow(client, checkInsByClientId.get(client.id) ?? []),
+    dashboardPreferences,
+    clients: sortClientStatusRows(
+      clients.map((client) =>
+        buildClientStatusRow(client, checkInsByClientId.get(client.id) ?? []),
+      ),
+      dashboardPreferences,
     ),
   };
 }
@@ -234,5 +259,28 @@ export async function getCoachClientBackfillPageData(clientId: string, date?: st
     coach,
     client,
     existingCheckIn: date ? await getDailyCheckInForClientByDate(client.id, date) : null,
+  };
+}
+
+export async function getCoachSettingsPageData() {
+  const { coach, isDemo } = await requireCoach();
+  const [clientDefaults, dashboardPreferences] = await Promise.all([
+    getCoachClientDefaults(),
+    getCoachDashboardPreferences(),
+  ]);
+
+  const clients = !isLiveAppEnabled || isDemo
+    ? demoClients
+    : await listClientBundlesByCoachId(coach.id);
+
+  return {
+    coach,
+    clientDefaults,
+    dashboardPreferences,
+    accessSummary: {
+      totalClients: clients.length,
+      claimedClients: clients.filter((client) => !isInternalClientEmail(client.email)).length,
+      pendingClaims: clients.filter((client) => isInternalClientEmail(client.email)).length,
+    },
   };
 }

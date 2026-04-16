@@ -55,7 +55,7 @@ export default async function EditClientPage({
               </p>
             </div>
             <div className="surface-muted p-4">
-              <p className="text-sm font-semibold text-slate-900">Review timezone and welcome copy</p>
+              <p className="text-sm font-semibold text-slate-900">Review training phase and welcome copy</p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 Those two details shape the client-facing experience more than anything else in
                 this screen.

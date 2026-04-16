@@ -13,8 +13,7 @@ export default async function CoachDashboardPage() {
   const data = await getCoachDashboardData();
   const needsFollowUpClients = data.clients
     .filter((client) => client.statusLabel !== "Logged today")
-    .sort((left, right) => left.streak - right.streak)
-    .slice(0, 4);
+    .slice(0, data.dashboardPreferences.followUpCount);
 
   return (
     <CoachShell
@@ -38,7 +37,7 @@ export default async function CoachDashboardPage() {
       <section className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
         <AdherenceTrendChart
           title="Adherence trend"
-          description="Six-week view of average client completion."
+          description={`${data.dashboardPreferences.chartWindowDays}-day view of average client completion.`}
           data={data.adherenceTrend}
         />
         <Card>
@@ -91,7 +90,7 @@ export default async function CoachDashboardPage() {
                         >
                           {client.fullName}
                         </Link>
-                        <p className="text-sm text-slate-600">Private link access</p>
+                        <p className="text-sm text-slate-600">Coach-managed client access</p>
                       </div>
                       <div className="flex flex-wrap gap-2">
                         <Badge

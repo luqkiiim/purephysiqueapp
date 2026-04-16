@@ -3,15 +3,27 @@ import { SectionHeading } from "@/components/layout/section-heading";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import type { Client } from "@/lib/types/app";
+import type { Client, CoachClientDefaults } from "@/lib/types/app";
 
 export function ClientProfileForm({
   action,
   client,
+  defaults,
 }: {
   action: (formData: FormData) => Promise<void>;
   client?: Client;
+  defaults?: CoachClientDefaults;
 }) {
+  const resolvedDefaults = defaults ?? {
+    trainingPhase: "Lean phase",
+    proteinTargetGrams: 150,
+    stepTarget: 9000,
+    exerciseExpectation: "4 training sessions / week",
+    probioticsEnabled: true,
+    fishOilEnabled: true,
+    welcomeMessage: "",
+  };
+
   return (
     <form action={action} className="space-y-5">
       <input type="hidden" name="clientId" value={client?.id ?? ""} />
@@ -20,7 +32,7 @@ export function ClientProfileForm({
         <SectionHeading
           eyebrow="Profile"
           title="Identity and coaching context"
-          description="Set the basics first so the client sees the right name, timezone, phase, and onboarding copy on mobile."
+          description="Set the basics first so the client sees the right name, phase, and onboarding copy on mobile."
           className="mb-4"
         />
         <div className="grid gap-4">
@@ -39,19 +51,7 @@ export function ClientProfileForm({
               <Input
                 name="trainingPhase"
                 placeholder="Lean phase"
-                defaultValue={client?.profile.trainingPhase}
-                required
-              />
-            </label>
-          </section>
-
-          <section className="grid gap-4 sm:grid-cols-1">
-            <label className="block space-y-2">
-              <span className="text-sm font-semibold text-slate-900">Timezone</span>
-              <Input
-                name="timezone"
-                placeholder="Asia/Kuala_Lumpur"
-                defaultValue={client?.profile.timezone ?? "Asia/Kuala_Lumpur"}
+                defaultValue={client?.profile.trainingPhase ?? resolvedDefaults.trainingPhase}
                 required
               />
             </label>
@@ -71,7 +71,7 @@ export function ClientProfileForm({
             <Textarea
               name="welcomeMessage"
               placeholder="Optional"
-              defaultValue={client?.profile.welcomeMessage}
+              defaultValue={client?.profile.welcomeMessage ?? resolvedDefaults.welcomeMessage}
             />
           </label>
         </div>
@@ -91,7 +91,7 @@ export function ClientProfileForm({
               name="proteinTargetGrams"
               type="number"
               placeholder="150"
-              defaultValue={client?.targets.proteinTargetGrams}
+              defaultValue={client?.targets.proteinTargetGrams ?? resolvedDefaults.proteinTargetGrams}
               required
             />
           </label>
@@ -101,7 +101,7 @@ export function ClientProfileForm({
               name="stepTarget"
               type="number"
               placeholder="9000"
-              defaultValue={client?.targets.stepTarget}
+              defaultValue={client?.targets.stepTarget ?? resolvedDefaults.stepTarget}
               required
             />
           </label>
@@ -110,7 +110,7 @@ export function ClientProfileForm({
             <Input
               name="exerciseExpectation"
               placeholder="4 training sessions / week"
-              defaultValue={client?.targets.exerciseExpectation}
+              defaultValue={client?.targets.exerciseExpectation ?? resolvedDefaults.exerciseExpectation}
               required
             />
           </label>
@@ -127,13 +127,13 @@ export function ClientProfileForm({
         <section className="grid gap-4 sm:grid-cols-2">
           <Checkbox
             name="probioticsEnabled"
-            defaultChecked={client?.targets.probioticsEnabled ?? true}
+            defaultChecked={client?.targets.probioticsEnabled ?? resolvedDefaults.probioticsEnabled}
             label="Track probiotics"
             description="Show probiotic supplement tracking in the client check-in."
           />
           <Checkbox
             name="fishOilEnabled"
-            defaultChecked={client?.targets.fishOilEnabled ?? true}
+            defaultChecked={client?.targets.fishOilEnabled ?? resolvedDefaults.fishOilEnabled}
             label="Track fish oil"
             description="Show fish oil tracking in the client check-in."
           />

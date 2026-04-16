@@ -1,5 +1,6 @@
 import { subDays } from "date-fns";
 
+import { defaultCoachDashboardPreferences } from "@/lib/coach-settings";
 import type {
   Client,
   ClientFeedbackMessage,
@@ -382,6 +383,7 @@ export function getDemoCoachDashboardData(): CoachDashboardData {
 
   return {
     coach,
+    dashboardPreferences: defaultCoachDashboardPreferences,
     summaryCards: [
       {
         label: "Total clients",

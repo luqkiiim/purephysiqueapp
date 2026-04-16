@@ -2,9 +2,12 @@ import { saveClientAction } from "@/app/actions/coach";
 import { ClientProfileForm } from "@/components/forms/client-profile-form";
 import { CoachShell } from "@/components/layout/coach-shell";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getCoachClientDefaults } from "@/lib/coach-settings";
 import { isLiveAppEnabled } from "@/lib/supabase/config";
 
-export default function NewClientPage() {
+export default async function NewClientPage() {
+  const defaults = await getCoachClientDefaults();
+
   return (
     <CoachShell
       heading="Create client"
@@ -21,7 +24,7 @@ export default function NewClientPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ClientProfileForm action={saveClientAction} />
+            <ClientProfileForm action={saveClientAction} defaults={defaults} />
           </CardContent>
         </Card>
 

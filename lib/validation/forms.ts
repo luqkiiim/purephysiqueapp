@@ -31,8 +31,28 @@ export const clientProfileSchema = z.object({
   exerciseExpectation: z.string().min(2).max(120),
   probioticsEnabled: booleanField,
   fishOilEnabled: booleanField,
-  timezone: z.string().min(2).max(80),
   welcomeMessage: z.string().trim().max(240),
+});
+
+export const coachProfileSettingsSchema = z.object({
+  fullName: z.string().trim().min(2).max(120),
+});
+
+export const coachClientDefaultsSettingsSchema = z.object({
+  trainingPhase: z.string().trim().min(2).max(80),
+  proteinTargetGrams: z.coerce.number().int().min(60).max(350),
+  stepTarget: z.coerce.number().int().min(1000).max(30000),
+  exerciseExpectation: z.string().trim().min(2).max(120),
+  probioticsEnabled: booleanField,
+  fishOilEnabled: booleanField,
+  welcomeMessage: z.string().trim().max(240),
+});
+
+export const coachDashboardPreferencesSchema = z.object({
+  rosterSort: z.enum(["name", "streak", "adherence"]),
+  chartWindowDays: z.union([z.literal(14), z.literal(30), z.literal(42)]),
+  followUpCount: z.union([z.literal(4), z.literal(6), z.literal(8)]),
+  highlightMissedClients: booleanField,
 });
 
 export const coachNoteSchema = z.object({

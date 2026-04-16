@@ -13,12 +13,20 @@ import {
   seedClientAccessCode,
 } from "@/lib/access-codes";
 import { requireCoach } from "@/lib/auth";
+import {
+  DEFAULT_CLIENT_TIMEZONE,
+  setCoachClientDefaultsCookie,
+  setCoachDashboardPreferencesCookie,
+} from "@/lib/coach-settings";
 import { saveDailyCheckInForClient } from "@/lib/check-ins";
 import { getClientBundleByCoachAndId } from "@/lib/database/queries";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { isLiveAppEnabled } from "@/lib/supabase/config";
 import {
+  coachClientDefaultsSettingsSchema,
   coachBackfillCheckInSchema,
+  coachDashboardPreferencesSchema,
+  coachProfileSettingsSchema,
   clientProfileSchema,
   coachNoteSchema,
   feedbackMessageSchema,
@@ -39,7 +47,7 @@ async function upsertClientSetupRows(
       client_id: clientId,
       goal_summary: values.goalSummary,
       training_phase: values.trainingPhase,
-      timezone: values.timezone,
+      timezone: DEFAULT_CLIENT_TIMEZONE,
       coaching_start_date: new Date().toISOString().slice(0, 10),
       welcome_message: values.welcomeMessage,
       created_at: nowIso,
@@ -63,7 +71,7 @@ async function upsertClientSetupRows(
       missed_day_nudges_enabled: false,
       reminder_time: "19:00:00",
       weekly_summary_enabled: false,
-      timezone: values.timezone,
+      timezone: DEFAULT_CLIENT_TIMEZONE,
       created_at: nowIso,
       updated_at: nowIso,
     }),
@@ -135,7 +143,7 @@ export async function saveClientAction(formData: FormData) {
           .update({
             goal_summary: values.goalSummary,
             training_phase: values.trainingPhase,
-            timezone: values.timezone,
+            timezone: DEFAULT_CLIENT_TIMEZONE,
             welcome_message: values.welcomeMessage,
             updated_at: nowIso,
           })
@@ -158,7 +166,7 @@ export async function saveClientAction(formData: FormData) {
             missed_day_nudges_enabled: false,
             reminder_time: "19:00:00",
             weekly_summary_enabled: false,
-            timezone: values.timezone,
+            timezone: DEFAULT_CLIENT_TIMEZONE,
             updated_at: nowIso,
           })
           .eq("client_id", clientId),
@@ -249,6 +257,54 @@ export async function saveClientAction(formData: FormData) {
   revalidatePath("/coach/clients");
   revalidatePath(`/coach/clients/${clientId}`);
   redirect(`/coach/clients/${clientId}`);
+}
+
+export async function saveCoachProfileSettingsAction(formData: FormData) {
+  const values = coachProfileSettingsSchema.parse(Object.fromEntries(formData.entries()));
+
+  if (!isLiveAppEnabled) {
+    redirect("/coach/settings?saved=profile");
+  }
+
+  const { coach } = await requireCoach();
+  const admin = createSupabaseAdminClient();
+  const result = await admin
+    .from("coach_profiles")
+    .update({
+      full_name: values.fullName,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", coach.id);
+
+  if (result.error) {
+    throw new Error(`Failed to update coach profile: ${result.error.message}`);
+  }
+
+  revalidatePath("/coach");
+  revalidatePath("/coach/clients");
+  revalidatePath("/coach/settings");
+  redirect("/coach/settings?saved=profile");
+}
+
+export async function saveCoachClientDefaultsAction(formData: FormData) {
+  const values = coachClientDefaultsSettingsSchema.parse(Object.fromEntries(formData.entries()));
+
+  await setCoachClientDefaultsCookie(values);
+
+  revalidatePath("/coach/settings");
+  revalidatePath("/coach/clients/new");
+  redirect("/coach/settings?saved=defaults");
+}
+
+export async function saveCoachDashboardPreferencesAction(formData: FormData) {
+  const values = coachDashboardPreferencesSchema.parse(Object.fromEntries(formData.entries()));
+
+  await setCoachDashboardPreferencesCookie(values);
+
+  revalidatePath("/coach");
+  revalidatePath("/coach/clients");
+  revalidatePath("/coach/settings");
+  redirect("/coach/settings?saved=dashboard");
 }
 
 export async function saveCoachNoteAction(formData: FormData) {

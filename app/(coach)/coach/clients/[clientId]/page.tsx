@@ -249,12 +249,6 @@ export default async function CoachClientDetailPage({
                   {clientHasClaimedAccount ? data.client.email : "Not claimed yet"}
                 </p>
               </div>
-              <div className="surface-muted p-4">
-                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Timezone</p>
-                <p className="mt-2 text-sm font-semibold text-slate-900">
-                  {data.client.profile.timezone}
-                </p>
-              </div>
             </CardContent>
           </Card>
         </div>
