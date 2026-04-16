@@ -1,10 +1,12 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Activity, KeyRound, Users } from "lucide-react";
 
 import { loginCoachAction } from "@/app/actions/auth";
 import { CoachLoginForm } from "@/components/forms/coach-login-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getAuthenticatedAppPath } from "@/lib/auth";
 import { demoClientCredentials, demoCoachCredentials } from "@/lib/demo/credentials";
 import { isLiveAppEnabled } from "@/lib/supabase/config";
 
@@ -13,6 +15,12 @@ export default async function CoachLoginPage({
 }: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const authenticatedAppPath = await getAuthenticatedAppPath();
+
+  if (authenticatedAppPath) {
+    redirect(authenticatedAppPath);
+  }
+
   const resolvedSearchParams = (await searchParams) ?? {};
   const errorValue = resolvedSearchParams.error;
   const error = Array.isArray(errorValue) ? errorValue[0] : errorValue;

@@ -1,7 +1,7 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-import { appEnv, isSupabaseAuthEnabled } from "@/lib/supabase/config";
+import { appEnv, isSupabaseAuthEnabled, supabaseCookieOptions } from "@/lib/supabase/config";
 
 type SupabaseCookie = {
   name: string;
@@ -17,6 +17,7 @@ export async function createServerSupabaseClient() {
   const cookieStore = await cookies();
 
   return createServerClient(appEnv.supabaseUrl!, appEnv.supabaseAnonKey!, {
+    cookieOptions: supabaseCookieOptions,
     cookies: {
       getAll() {
         return cookieStore.getAll();

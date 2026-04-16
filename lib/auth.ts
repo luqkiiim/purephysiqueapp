@@ -21,6 +21,36 @@ interface ClientSession {
   isDemo: boolean;
 }
 
+export async function getAuthenticatedAppPath() {
+  if (!isLiveAppEnabled) {
+    return null;
+  }
+
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return null;
+  }
+
+  const coach = await getCoachByAuthUserId(user.id);
+
+  if (coach) {
+    return "/coach";
+  }
+
+  const clientId =
+    typeof user.app_metadata?.client_id === "string" ? user.app_metadata.client_id : null;
+
+  if (clientId) {
+    return "/client";
+  }
+
+  return null;
+}
+
 export async function requireCoach(): Promise<CoachSession> {
   if (!isLiveAppEnabled) {
     return {

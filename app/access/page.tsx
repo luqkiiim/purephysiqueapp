@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ArrowLeft, KeyRound, LockKeyhole } from "lucide-react";
 
 import {
@@ -11,6 +12,7 @@ import {
 } from "@/components/forms/client-auth-forms";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getAuthenticatedAppPath } from "@/lib/auth";
 import { demoClientCredentials } from "@/lib/demo/credentials";
 import { isLiveAppEnabled } from "@/lib/supabase/config";
 
@@ -44,6 +46,12 @@ export default async function ClientAccessPage({
 }: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const authenticatedAppPath = await getAuthenticatedAppPath();
+
+  if (authenticatedAppPath) {
+    redirect(authenticatedAppPath);
+  }
+
   const resolvedSearchParams = (await searchParams) ?? {};
   const errorValue = resolvedSearchParams.error;
   const modeValue = resolvedSearchParams.mode;

@@ -1,7 +1,7 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-import { appEnv, isSupabaseAuthEnabled } from "@/lib/supabase/config";
+import { appEnv, isSupabaseAuthEnabled, supabaseCookieOptions } from "@/lib/supabase/config";
 
 type SupabaseCookie = {
   name: string;
@@ -21,6 +21,7 @@ export async function updateSession(request: NextRequest) {
   });
 
   const supabase = createServerClient(appEnv.supabaseUrl!, appEnv.supabaseAnonKey!, {
+    cookieOptions: supabaseCookieOptions,
     cookies: {
       getAll() {
         return request.cookies.getAll();

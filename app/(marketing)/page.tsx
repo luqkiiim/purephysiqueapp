@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Activity, ShieldCheck, Smartphone } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
+import { getAuthenticatedAppPath } from "@/lib/auth";
 
 const landingCards = [
   {
@@ -22,7 +24,13 @@ const landingCards = [
   },
 ];
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const authenticatedAppPath = await getAuthenticatedAppPath();
+
+  if (authenticatedAppPath) {
+    redirect(authenticatedAppPath);
+  }
+
   return (
     <main className="page-shell space-y-6">
       <section className="surface-card overflow-hidden px-4 py-6 sm:px-8 sm:py-10">
