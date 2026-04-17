@@ -5,6 +5,11 @@ export const appEnv = {
   supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
   storageBucket: process.env.NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET ?? "progress-photos",
   cronSecret: process.env.CRON_SECRET,
+  enableTestQuickLogin: process.env.ENABLE_TEST_QUICK_LOGIN,
+  testCoachEmail: process.env.TEST_COACH_EMAIL,
+  testCoachPassword: process.env.TEST_COACH_PASSWORD,
+  testClientEmail: process.env.TEST_CLIENT_EMAIL,
+  testClientPassword: process.env.TEST_CLIENT_PASSWORD,
 };
 
 export const isSupabaseAuthEnabled = Boolean(
@@ -17,6 +22,15 @@ export const isSupabaseAdminEnabled = Boolean(
 
 export const isLiveAppEnabled = Boolean(
   isSupabaseAuthEnabled && isSupabaseAdminEnabled,
+);
+
+export const isTestQuickLoginEnabled = Boolean(
+  isLiveAppEnabled &&
+    appEnv.enableTestQuickLogin?.toLowerCase() === "true" &&
+    appEnv.testCoachEmail &&
+    appEnv.testCoachPassword &&
+    appEnv.testClientEmail &&
+    appEnv.testClientPassword,
 );
 
 export const supabaseCookieOptions = {

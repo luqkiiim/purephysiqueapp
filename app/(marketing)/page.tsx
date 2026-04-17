@@ -2,13 +2,19 @@ import Link from "next/link";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 
-import { loginAppAction } from "@/app/actions/auth";
+import {
+  loginAppAction,
+  quickLoginClientAction,
+  quickLoginCoachAction,
+} from "@/app/actions/auth";
 import { CoachLoginForm } from "@/components/forms/coach-login-form";
+import { FormSubmitButton } from "@/components/forms/form-submit-button";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAuthenticatedAppPath } from "@/lib/auth";
 import { demoClientCredentials, demoCoachCredentials } from "@/lib/demo/credentials";
-import { isLiveAppEnabled } from "@/lib/supabase/config";
+import { isLiveAppEnabled, isTestQuickLoginEnabled } from "@/lib/supabase/config";
 
 function getLoginErrorMessage(error: string) {
   switch (error) {
@@ -26,6 +32,10 @@ function getLoginErrorMessage(error: string) {
       return "This account does not have access to the app.";
     case "demo-login-only":
       return "Use the demo coach credentials shown below while live auth is off.";
+    case "quick-login-disabled":
+      return "Quick log in is not enabled on this deployment.";
+    case "quick-login-unavailable":
+      return "The testing account could not be signed in. Check the staging credentials.";
     default:
       return decodeURIComponent(error);
   }
@@ -102,6 +112,32 @@ export default async function AuthEntryPage({
               </div>
             </CardContent>
           </Card>
+
+          {isTestQuickLoginEnabled ? (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between gap-3">
+                  <CardTitle>Quick log in</CardTitle>
+                  <Badge tone="accent">Testing mode</Badge>
+                </div>
+                <CardDescription>
+                  Direct access to the staging coach and client accounts for review.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-3">
+                <form action={quickLoginCoachAction}>
+                  <FormSubmitButton variant="teal" size="lg" fullWidth pendingLabel="Signing in...">
+                    Quick log in as coach
+                  </FormSubmitButton>
+                </form>
+                <form action={quickLoginClientAction}>
+                  <FormSubmitButton variant="ghost" size="lg" fullWidth pendingLabel="Signing in...">
+                    Quick log in as client
+                  </FormSubmitButton>
+                </form>
+              </CardContent>
+            </Card>
+          ) : null}
 
           {isDemoMode ? (
             <Card>
