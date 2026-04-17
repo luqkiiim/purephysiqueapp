@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { CoachShell } from "@/components/layout/coach-shell";
-import { AdherenceTrendChart } from "@/components/charts/adherence-trend-chart";
+import { LazyAdherenceTrendChart } from "@/components/charts/lazy-adherence-trend-chart";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,7 +35,7 @@ export default async function CoachDashboardPage() {
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
-        <AdherenceTrendChart
+        <LazyAdherenceTrendChart
           title="Adherence trend"
           description={`${data.dashboardPreferences.chartWindowDays}-day view of average client completion.`}
           data={data.adherenceTrend}

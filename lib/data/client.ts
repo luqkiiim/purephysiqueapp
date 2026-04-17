@@ -2,16 +2,18 @@ import { cache } from "react";
 
 import { requireClient } from "@/lib/auth";
 import {
+  getLatestDailyCheckInForClient,
   listCoachNotesForClient,
-  listDailyCheckInsForClient,
   listFeedbackMessagesForClient,
   listProgressPhotosForClient,
+  listRecentDailyCheckInsForClient,
 } from "@/lib/database/queries";
 import { getDemoClientHomeData } from "@/lib/demo/data";
-import { buildWeeklySummary, getTodaysOrLatestCheckIn, resolveProgressPhotoUrls } from "@/lib/data/shared";
+import { buildWeeklySummary, resolveProgressPhotoUrls } from "@/lib/data/shared";
 import { isLiveAppEnabled } from "@/lib/supabase/config";
 
 const getClientSessionData = cache(async () => requireClient());
+const RECENT_CLIENT_CHECK_IN_LIMIT = 45;
 
 function getDemoData(clientId: string) {
   return getDemoClientHomeData(clientId);
@@ -38,11 +40,9 @@ export const getClientCheckInPageData = cache(async () => {
     };
   }
 
-  const recentCheckIns = await listDailyCheckInsForClient(client.id);
-
   return {
     client,
-    todaysCheckIn: getTodaysOrLatestCheckIn(recentCheckIns),
+    todaysCheckIn: await getLatestDailyCheckInForClient(client.id),
   };
 });
 
@@ -58,7 +58,7 @@ export const getClientHistoryPageData = cache(async () => {
   }
 
   return {
-    recentCheckIns: await listDailyCheckInsForClient(client.id),
+    recentCheckIns: await listRecentDailyCheckInsForClient(client.id, RECENT_CLIENT_CHECK_IN_LIMIT),
   };
 });
 
@@ -74,7 +74,10 @@ export const getClientWeeklyPageData = cache(async () => {
     };
   }
 
-  const recentCheckIns = await listDailyCheckInsForClient(client.id);
+  const recentCheckIns = await listRecentDailyCheckInsForClient(
+    client.id,
+    RECENT_CLIENT_CHECK_IN_LIMIT,
+  );
 
   return {
     recentCheckIns,

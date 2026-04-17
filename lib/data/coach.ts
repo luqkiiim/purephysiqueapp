@@ -11,12 +11,13 @@ import {
 import {
   getDailyCheckInForClientByDate,
   getClientBundleByCoachAndId,
-  listClientBundlesByCoachId,
+  listClientStatusSourcesByCoachId,
+  listClientSupplementTargets,
   listCoachNotesForClient,
-  listDailyCheckInsForClient,
   listDailyCheckInsForClients,
   listFeedbackMessagesForClient,
   listProgressPhotosForClient,
+  listRecentDailyCheckInsForClient,
 } from "@/lib/database/queries";
 import {
   getDemoClientDetailData,
@@ -24,7 +25,7 @@ import {
   demoClients,
 } from "@/lib/demo/data";
 import { isLiveAppEnabled } from "@/lib/supabase/config";
-import type { Client, DailyCheckIn } from "@/lib/types/app";
+import type { ClientStatusSource, DailyCheckIn } from "@/lib/types/app";
 import {
   buildClientStatusRow,
   buildTodaySnapshot,
@@ -70,7 +71,10 @@ function buildAdherenceTrend(checkIns: DailyCheckIn[], chartWindowDays: number) 
   });
 }
 
-function buildMomentumClients(clients: Client[], checkInsByClientId: Map<string, DailyCheckIn[]>) {
+function buildMomentumClients(
+  clients: ClientStatusSource[],
+  checkInsByClientId: Map<string, DailyCheckIn[]>,
+) {
   return clients
     .map((client) => buildClientStatusRow(client, checkInsByClientId.get(client.id) ?? []))
     .sort((left, right) => {
@@ -104,19 +108,23 @@ export async function getCoachDashboardData() {
     };
   }
 
-  const clients = await listClientBundlesByCoachId(coach.id);
+  const clients = await listClientStatusSourcesByCoachId(coach.id);
   const sinceDate = subDays(new Date(), dashboardPreferences.chartWindowDays - 1)
     .toISOString()
     .slice(0, 10);
-  const allRecentCheckIns = await listDailyCheckInsForClients(
-    clients.map((client) => client.id),
-    sinceDate,
-  );
+  const clientIds = clients.map((client) => client.id);
+  const [allRecentCheckIns, supplementTargets] = await Promise.all([
+    listDailyCheckInsForClients(clientIds, sinceDate),
+    listClientSupplementTargets(clientIds),
+  ]);
   const checkInsByClientId = groupCheckInsByClientId(allRecentCheckIns);
   const rows = clients.map((client) =>
     buildClientStatusRow(client, checkInsByClientId.get(client.id) ?? []),
   );
   const sortedRows = sortClientStatusRows(rows, dashboardPreferences);
+  const supplementTargetsByClientId = new Map(
+    supplementTargets.map((target) => [target.clientId, target] as const),
+  );
   const todaysEntries = new Map(
     allRecentCheckIns
       .filter((entry) => entry.date === getTodayIsoDate())
@@ -154,7 +162,11 @@ export async function getCoachDashboardData() {
     ],
     clients: sortedRows,
     adherenceTrend: buildAdherenceTrend(allRecentCheckIns, dashboardPreferences.chartWindowDays),
-    todayCheckInSnapshot: buildTodaySnapshot(clients, todaysEntries),
+    todayCheckInSnapshot: buildTodaySnapshot(
+      clients,
+      supplementTargetsByClientId,
+      todaysEntries,
+    ),
     momentumClients: buildMomentumClients(clients, checkInsByClientId),
   };
 }
@@ -173,7 +185,7 @@ export async function getCoachClientsPageData() {
     };
   }
 
-  const clients = await listClientBundlesByCoachId(coach.id);
+  const clients = await listClientStatusSourcesByCoachId(coach.id);
   const sinceDate = subDays(new Date(), 6).toISOString().slice(0, 10);
   const recentCheckIns = await listDailyCheckInsForClients(
     clients.map((client) => client.id),
@@ -211,7 +223,7 @@ export async function getCoachClientDetailData(clientId: string) {
   }
 
   const [recentCheckIns, rawProgressPhotos, coachNotes, feedbackMessages] = await Promise.all([
-    listDailyCheckInsForClient(client.id),
+    listRecentDailyCheckInsForClient(client.id),
     listProgressPhotosForClient(client.id),
     listCoachNotesForClient(client.id),
     listFeedbackMessagesForClient(client.id),
@@ -271,7 +283,7 @@ export async function getCoachSettingsPageData() {
 
   const clients = !isLiveAppEnabled || isDemo
     ? demoClients
-    : await listClientBundlesByCoachId(coach.id);
+    : await listClientStatusSourcesByCoachId(coach.id);
 
   return {
     coach,

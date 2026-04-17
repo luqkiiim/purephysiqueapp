@@ -1,4 +1,4 @@
-import { AdherenceTrendChart } from "@/components/charts/adherence-trend-chart";
+import { LazyAdherenceTrendChart } from "@/components/charts/lazy-adherence-trend-chart";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getClientWeeklyPageData } from "@/lib/data/client";
 import { formatShortDate } from "@/lib/utils";
@@ -55,7 +55,7 @@ export default async function ClientWeeklyPage() {
         ))}
       </section>
 
-      <AdherenceTrendChart
+      <LazyAdherenceTrendChart
         title="Weekly adherence rhythm"
         description="Your recent completion pattern at a glance."
         data={adherenceData}

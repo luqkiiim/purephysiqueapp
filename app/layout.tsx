@@ -1,3 +1,4 @@
+import { Montserrat } from "next/font/google";
 import localFont from "next/font/local";
 import type { Metadata, Viewport } from "next";
 
@@ -9,6 +10,12 @@ const luloCleanDisplay = localFont({
     { path: "./fonts/Lulo Clean One Bold.otf", weight: "700", style: "normal" },
   ],
   variable: "--font-display",
+  display: "swap",
+});
+
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  variable: "--font-body",
   display: "swap",
 });
 
@@ -40,7 +47,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className={luloCleanDisplay.variable}>{children}</body>
+      <body className={`${luloCleanDisplay.variable} ${montserrat.variable}`}>{children}</body>
     </html>
   );
 }

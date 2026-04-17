@@ -4,6 +4,8 @@ import type {
   ClientFeedbackMessage,
   CoachNote,
   CoachProfile,
+  ClientStatusSource,
+  ClientSupplementTargetSource,
   DailyCheckIn,
   ProgressPhoto,
   ReminderSettings,
@@ -48,6 +50,21 @@ interface ClientProfileRow {
   welcome_message: string;
   created_at: string;
   updated_at: string;
+}
+
+interface ClientStatusSourceRow {
+  id: string;
+  full_name: string;
+  email: string;
+  active_status: Client["activeStatus"];
+  current_streak: number;
+  last_check_in_date: string | null;
+}
+
+interface ClientSupplementTargetSourceRow {
+  client_id: string;
+  probiotics_enabled: boolean;
+  fish_oil_enabled: boolean;
 }
 
 interface ClientTargetRow {
@@ -166,6 +183,27 @@ function mapReminderSettings(row: ReminderSettingsRow): ReminderSettings {
     reminderTime: row.reminder_time,
     weeklySummaryEnabled: asBoolean(row.weekly_summary_enabled),
     timezone: row.timezone,
+  };
+}
+
+function mapClientStatusSource(row: ClientStatusSourceRow): ClientStatusSource {
+  return {
+    id: row.id,
+    fullName: row.full_name,
+    email: row.email,
+    activeStatus: row.active_status,
+    currentStreak: Number(row.current_streak ?? 0),
+    lastCheckInDate: row.last_check_in_date,
+  };
+}
+
+function mapClientSupplementTargetSource(
+  row: ClientSupplementTargetSourceRow,
+): ClientSupplementTargetSource {
+  return {
+    clientId: row.client_id,
+    probioticsEnabled: asBoolean(row.probiotics_enabled),
+    fishOilEnabled: asBoolean(row.fish_oil_enabled),
   };
 }
 
@@ -464,6 +502,35 @@ export async function listClientBundlesByCoachId(coachId: string) {
   return hydrateClients((result.data ?? []) as ClientRow[]);
 }
 
+export async function listClientStatusSourcesByCoachId(coachId: string) {
+  const admin = createSupabaseAdminClient();
+  const result = await admin
+    .from("clients")
+    .select("id, full_name, email, active_status, current_streak, last_check_in_date")
+    .eq("coach_id", coachId)
+    .order("full_name", { ascending: true });
+
+  throwIfError(result.error, "Failed to list client status sources by coach");
+  return ((result.data ?? []) as ClientStatusSourceRow[]).map(mapClientStatusSource);
+}
+
+export async function listClientSupplementTargets(clientIds: string[]) {
+  if (!clientIds.length) {
+    return [];
+  }
+
+  const admin = createSupabaseAdminClient();
+  const result = await admin
+    .from("client_targets")
+    .select("client_id, probiotics_enabled, fish_oil_enabled")
+    .in("client_id", clientIds);
+
+  throwIfError(result.error, "Failed to list client supplement targets");
+  return ((result.data ?? []) as ClientSupplementTargetSourceRow[]).map(
+    mapClientSupplementTargetSource,
+  );
+}
+
 export async function getClientBundleByCoachAndId(coachId: string, clientId: string) {
   const admin = createSupabaseAdminClient();
   const result = await admin
@@ -487,6 +554,36 @@ export async function listDailyCheckInsForClient(clientId: string) {
 
   throwIfError(result.error, "Failed to list client check-ins");
   return ((result.data ?? []) as DailyCheckInRow[]).map(mapDailyCheckIn);
+}
+
+export async function getLatestDailyCheckInForClient(clientId: string) {
+  const admin = createSupabaseAdminClient();
+  const result = await admin
+    .from("daily_check_ins")
+    .select("*")
+    .eq("client_id", clientId)
+    .order("date", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  throwIfError(result.error, "Failed to fetch latest client check-in");
+  return result.data ? mapDailyCheckIn(result.data as DailyCheckInRow) : null;
+}
+
+export async function listRecentDailyCheckInsForClient(clientId: string, limit = 45) {
+  const admin = createSupabaseAdminClient();
+  const result = await admin
+    .from("daily_check_ins")
+    .select("*")
+    .eq("client_id", clientId)
+    .order("date", { ascending: false })
+    .limit(limit);
+
+  throwIfError(result.error, "Failed to list recent client check-ins");
+
+  return ((result.data ?? []) as DailyCheckInRow[])
+    .reverse()
+    .map(mapDailyCheckIn);
 }
 
 export async function getDailyCheckInForClientByDate(clientId: string, date: string) {

@@ -1,13 +1,9 @@
-@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap");
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
   color-scheme: dark;
-  --font-body: "Montserrat", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  --font-display: "Lulo Clean", "Montserrat", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 }
 
 html {
@@ -17,13 +13,20 @@ html {
 
 body {
   min-height: 100vh;
-  background-image: radial-gradient(circle at top left, rgba(232, 192, 97, 0.16), transparent 28%),
-    radial-gradient(circle at top right, rgba(224, 5, 137, 0.14), transparent 24%),
-    radial-gradient(circle at 18% 78%, rgba(3, 255, 247, 0.1), transparent 26%),
-    linear-gradient(180deg, #2d2e2d 0%, #181818 52%, #0a0a0a 100%);
+  background-image: linear-gradient(180deg, #2d2e2d 0%, #181818 52%, #0a0a0a 100%);
   color: #ffffff;
-  font-family: var(--font-body);
+  font-family: var(--font-body, "Montserrat", "Segoe UI", "Helvetica Neue", Arial, sans-serif);
   overflow-x: hidden;
+}
+
+@media (min-width: 640px) {
+  body {
+    background-image:
+      radial-gradient(circle at top left, rgba(232, 192, 97, 0.16), transparent 28%),
+      radial-gradient(circle at top right, rgba(224, 5, 137, 0.14), transparent 24%),
+      radial-gradient(circle at 18% 78%, rgba(3, 255, 247, 0.1), transparent 26%),
+      linear-gradient(180deg, #2d2e2d 0%, #181818 52%, #0a0a0a 100%);
+  }
 }
 
 * {
@@ -52,7 +55,15 @@ input[type="number"] {
   h4,
   h5,
   h6 {
-    font-family: var(--font-display);
+    font-family: var(
+      --font-display,
+      "Lulo Clean",
+      "Montserrat",
+      "Segoe UI",
+      "Helvetica Neue",
+      Arial,
+      sans-serif
+    );
     font-weight: 700;
     letter-spacing: -0.03em;
     line-height: 1.08;
@@ -80,11 +91,11 @@ input[type="number"] {
   }
 
   .surface-card {
-    @apply rounded-[1.6rem] border border-white/10 bg-slate-50/90 shadow-soft backdrop-blur sm:rounded-4xl;
+    @apply rounded-[1.6rem] border border-white/10 bg-slate-50/95 shadow-soft sm:rounded-4xl sm:bg-slate-50/90 sm:backdrop-blur;
   }
 
   .surface-muted {
-    @apply rounded-[1.3rem] border border-white/10 bg-slate-100/85 backdrop-blur sm:rounded-3xl;
+    @apply rounded-[1.3rem] border border-white/10 bg-slate-100/95 sm:rounded-3xl sm:bg-slate-100/85 sm:backdrop-blur;
   }
 
   .eyebrow {

@@ -163,6 +163,21 @@ export interface ClientStatusRow {
   lastCheckInDate?: string | null;
 }
 
+export interface ClientStatusSource {
+  id: string;
+  fullName: string;
+  email: string;
+  activeStatus: ClientStatus;
+  currentStreak: number;
+  lastCheckInDate?: string | null;
+}
+
+export interface ClientSupplementTargetSource {
+  clientId: string;
+  probioticsEnabled: boolean;
+  fishOilEnabled: boolean;
+}
+
 export interface CoachDashboardData {
   coach: CoachProfile;
   dashboardPreferences: CoachDashboardPreferences;

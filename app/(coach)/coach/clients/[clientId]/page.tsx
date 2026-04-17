@@ -9,9 +9,9 @@ import {
 import { CoachNoteForm } from "@/components/forms/coach-note-form";
 import { FeedbackMessageForm } from "@/components/forms/feedback-message-form";
 import { FormSubmitButton } from "@/components/forms/form-submit-button";
-import { AdherenceTrendChart } from "@/components/charts/adherence-trend-chart";
-import { TargetComparisonChart } from "@/components/charts/target-comparison-chart";
-import { WeightTrendChart } from "@/components/charts/weight-trend-chart";
+import { LazyAdherenceTrendChart } from "@/components/charts/lazy-adherence-trend-chart";
+import { LazyTargetComparisonChart } from "@/components/charts/lazy-target-comparison-chart";
+import { LazyWeightTrendChart } from "@/components/charts/lazy-weight-trend-chart";
 import { CoachShell } from "@/components/layout/coach-shell";
 import { SectionHeading } from "@/components/layout/section-heading";
 import { Badge } from "@/components/ui/badge";
@@ -270,13 +270,13 @@ export default async function CoachClientDetailPage({
           description="Recent weight, protein, and completion patterns stay separate from the admin controls so the page is easier to scan."
         />
         <div className="grid gap-4 xl:grid-cols-3">
-          <WeightTrendChart data={weightData} />
-          <TargetComparisonChart
+          <LazyWeightTrendChart data={weightData} />
+          <LazyTargetComparisonChart
             title="Protein vs target"
             description="Last seven check-ins against the personalised target."
             data={targetData}
           />
-          <AdherenceTrendChart
+          <LazyAdherenceTrendChart
             title="Completion trend"
             description="Daily check-in completion over recent entries."
             data={adherenceData}

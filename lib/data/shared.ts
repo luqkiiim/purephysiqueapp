@@ -4,7 +4,9 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { appEnv, isSupabaseAdminEnabled } from "@/lib/supabase/config";
 import type {
   Client,
+  ClientStatusSource,
   ClientStatusRow,
+  ClientSupplementTargetSource,
   DailyCheckIn,
   ProgressPhoto,
   WeeklySummary,
@@ -122,7 +124,7 @@ export function buildWeeklySummary(client: Client, checkIns: DailyCheckIn[]) {
 }
 
 export function buildClientStatusRow(
-  client: Client,
+  client: ClientStatusSource,
   checkIns: DailyCheckIn[],
 ): ClientStatusRow {
   const recentCheckIns = sortCheckInsAsc(checkIns).slice(-7);
@@ -206,7 +208,8 @@ export async function resolveProgressPhotoUrls(photos: ProgressPhoto[]) {
 }
 
 export function buildTodaySnapshot(
-  clients: Client[],
+  clients: ClientStatusSource[],
+  supplementTargetsByClientId: Map<string, ClientSupplementTargetSource>,
   todaysCheckIns: Map<string, DailyCheckIn>,
 ) {
   return [
@@ -245,14 +248,15 @@ export function buildTodaySnapshot(
       value: percentageFromCount(
         clients.filter((client) => {
           const entry = todaysCheckIns.get(client.id);
+          const supplementTargets = supplementTargetsByClientId.get(client.id);
 
           if (!entry) {
             return false;
           }
 
           return (
-            (!client.targets.probioticsEnabled || entry.probioticsChecked) &&
-            (!client.targets.fishOilEnabled || entry.fishOilChecked)
+            (!(supplementTargets?.probioticsEnabled ?? false) || entry.probioticsChecked) &&
+            (!(supplementTargets?.fishOilEnabled ?? false) || entry.fishOilChecked)
           );
         }).length,
         clients.length,

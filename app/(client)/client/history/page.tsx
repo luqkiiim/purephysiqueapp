@@ -1,6 +1,6 @@
-import { AdherenceTrendChart } from "@/components/charts/adherence-trend-chart";
-import { TargetComparisonChart } from "@/components/charts/target-comparison-chart";
-import { WeightTrendChart } from "@/components/charts/weight-trend-chart";
+import { LazyAdherenceTrendChart } from "@/components/charts/lazy-adherence-trend-chart";
+import { LazyTargetComparisonChart } from "@/components/charts/lazy-target-comparison-chart";
+import { LazyWeightTrendChart } from "@/components/charts/lazy-weight-trend-chart";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getClientHistoryPageData } from "@/lib/data/client";
 import { formatFullDate, formatShortDate } from "@/lib/utils";
@@ -26,13 +26,13 @@ export default async function ClientHistoryPage() {
 
   return (
     <div className="space-y-5">
-      <WeightTrendChart data={weightData} />
-      <TargetComparisonChart
+      <LazyWeightTrendChart data={weightData} />
+      <LazyTargetComparisonChart
         title="Protein vs target"
         description="How your recent protein intake compares with the target your coach set."
         data={proteinData}
       />
-      <AdherenceTrendChart
+      <LazyAdherenceTrendChart
         title="Check-in completion"
         description="A light weekly rhythm view to keep the habit visible."
         data={adherenceData}
