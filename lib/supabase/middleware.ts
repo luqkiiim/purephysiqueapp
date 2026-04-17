@@ -1,6 +1,7 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { hasSupabaseAuthCookies } from "@/lib/supabase/auth-cookies";
 import { appEnv, isSupabaseAuthEnabled, supabaseCookieOptions } from "@/lib/supabase/config";
 
 type SupabaseCookie = {
@@ -11,6 +12,12 @@ type SupabaseCookie = {
 
 export async function updateSession(request: NextRequest) {
   if (!isSupabaseAuthEnabled) {
+    return NextResponse.next({
+      request,
+    });
+  }
+
+  if (!hasSupabaseAuthCookies(request.cookies)) {
     return NextResponse.next({
       request,
     });

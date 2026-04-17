@@ -1,5 +1,7 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
 
 import {
   getClientBundleById,
@@ -9,6 +11,7 @@ import {
 } from "@/lib/database/queries";
 import { demoClients, demoCoachProfile } from "@/lib/demo/data";
 import type { Client, CoachProfile } from "@/lib/types/app";
+import { hasSupabaseAuthCookies } from "@/lib/supabase/auth-cookies";
 import { isLiveAppEnabled } from "@/lib/supabase/config";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -54,8 +57,14 @@ async function resolveAuthenticatedAppPathForUser(user: User) {
   return "/client";
 }
 
-export async function getAuthenticatedAppPath() {
+const getAuthenticatedSupabaseUser = cache(async () => {
   if (!isLiveAppEnabled) {
+    return null;
+  }
+
+  const cookieStore = await cookies();
+
+  if (!hasSupabaseAuthCookies(cookieStore)) {
     return null;
   }
 
@@ -63,6 +72,12 @@ export async function getAuthenticatedAppPath() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  return user;
+});
+
+export async function getAuthenticatedAppPath() {
+  const user = await getAuthenticatedSupabaseUser();
 
   if (!user) {
     return null;
@@ -79,10 +94,7 @@ export async function requireCoach(): Promise<CoachSession> {
     };
   }
 
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthenticatedSupabaseUser();
 
   if (!user) {
     redirect("/");
@@ -113,10 +125,7 @@ export async function requireClient(): Promise<ClientSession> {
     };
   }
 
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthenticatedSupabaseUser();
 
   if (!user) {
     redirect("/");
