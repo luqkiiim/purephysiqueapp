@@ -154,6 +154,12 @@ interface ClientInviteSummaryRow {
   created_at: string;
 }
 
+interface ClientAccessValidationRow {
+  id: string;
+  auth_user_id: string | null;
+  active_status: Client["activeStatus"];
+}
+
 function asBoolean(value: boolean | number | string | null | undefined) {
   return value === true || value === 1 || value === "1";
 }
@@ -450,6 +456,29 @@ export async function getClientBundleById(clientId: string) {
 
   throwIfError(result.error, "Failed to fetch client by id");
   return hydrateClient((result.data as ClientRow | null) ?? null);
+}
+
+export async function getClientAccessValidationById(clientId: string) {
+  const admin = createSupabaseAdminClient();
+  const result = await admin
+    .from("clients")
+    .select("id, auth_user_id, active_status")
+    .eq("id", clientId)
+    .maybeSingle();
+
+  throwIfError(result.error, "Failed to fetch client access validation");
+
+  const row = (result.data as ClientAccessValidationRow | null) ?? null;
+
+  if (!row) {
+    return null;
+  }
+
+  return {
+    id: row.id,
+    authUserId: row.auth_user_id,
+    activeStatus: row.active_status,
+  };
 }
 
 export async function getClientBundleByAccessCode(accessCode: string) {

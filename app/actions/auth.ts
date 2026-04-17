@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 
 import {
-  getClientBundleById,
+  getClientAccessValidationById,
   getCoachByAuthUserId,
   getCoachByEmail,
   linkCoachAuthIdentityByEmail,
@@ -41,7 +41,7 @@ async function completeAppLogin(
       : null;
 
   if (signedInUser.app_metadata?.role === "client" && clientId) {
-    const client = await getClientBundleById(clientId);
+    const client = await getClientAccessValidationById(clientId);
 
     if (!client || client.activeStatus !== "active") {
       await supabase.auth.signOut();

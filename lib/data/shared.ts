@@ -184,27 +184,40 @@ export async function resolveProgressPhotoUrls(photos: ProgressPhoto[]) {
   }
 
   const admin = createSupabaseAdminClient();
+  const signablePaths = photos
+    .map((photo) => photo.imageUrl)
+    .filter((imageUrl) => imageUrl && !imageUrl.startsWith("http"));
 
-  return Promise.all(
-    photos.map(async (photo) => {
-      if (!photo.imageUrl || photo.imageUrl.startsWith("http")) {
-        return photo;
-      }
+  if (!signablePaths.length) {
+    return photos;
+  }
 
-      const { data, error } = await admin.storage
-        .from(appEnv.storageBucket)
-        .createSignedUrl(photo.imageUrl, 60 * 60);
+  const { data, error } = await admin.storage
+    .from(appEnv.storageBucket)
+    .createSignedUrls(signablePaths, 60 * 60);
 
-      if (error || !data?.signedUrl) {
-        return photo;
-      }
+  if (error || !data?.length) {
+    return photos;
+  }
 
-      return {
-        ...photo,
-        imageUrl: data.signedUrl,
-      };
-    }),
+  const signedUrlsByPath = new Map(
+    data
+      .filter((entry) => entry.path && entry.signedUrl && !entry.error)
+      .map((entry) => [entry.path!, entry.signedUrl] as const),
   );
+
+  return photos.map((photo) => {
+    const signedUrl = signedUrlsByPath.get(photo.imageUrl);
+
+    if (!signedUrl) {
+      return photo;
+    }
+
+    return {
+      ...photo,
+      imageUrl: signedUrl,
+    };
+  });
 }
 
 export function buildTodaySnapshot(

@@ -4,6 +4,7 @@ import type { User } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
 import {
+  getClientAccessValidationById,
   getClientBundleById,
   getCoachByAuthUserId,
   getCoachByEmail,
@@ -44,7 +45,7 @@ async function resolveAuthenticatedAppPathForUser(user: User) {
     return null;
   }
 
-  const client = await getClientBundleById(clientId);
+  const client = await getClientAccessValidationById(clientId);
 
   if (!client || client.activeStatus !== "active") {
     return null;
