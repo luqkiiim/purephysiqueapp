@@ -661,6 +661,17 @@ export async function listProgressPhotosForClient(clientId: string) {
   return ((result.data ?? []) as ProgressPhotoRow[]).map(mapProgressPhoto);
 }
 
+export async function countProgressPhotosForClient(clientId: string) {
+  const admin = createSupabaseAdminClient();
+  const result = await admin
+    .from("progress_photos")
+    .select("id", { count: "exact", head: true })
+    .eq("client_id", clientId);
+
+  throwIfError(result.error, "Failed to count progress photos");
+  return result.count ?? 0;
+}
+
 export async function listCoachNotesForClient(
   clientId: string,
   visibility?: "private" | "shared",

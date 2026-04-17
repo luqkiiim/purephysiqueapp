@@ -9,6 +9,7 @@ import {
   sortClientStatusRows,
 } from "@/lib/coach-settings";
 import {
+  countProgressPhotosForClient,
   getDailyCheckInForClientByDate,
   getClientBundleByCoachAndId,
   listClientStatusSourcesByCoachId,
@@ -16,7 +17,6 @@ import {
   listCoachNotesForClient,
   listDailyCheckInsForClients,
   listFeedbackMessagesForClient,
-  listProgressPhotosForClient,
   listRecentDailyCheckInsForClient,
 } from "@/lib/database/queries";
 import {
@@ -32,7 +32,6 @@ import {
   buildWeeklySummary,
   getTodaysOrLatestCheckIn,
   groupCheckInsByClientId,
-  resolveProgressPhotoUrls,
 } from "@/lib/data/shared";
 import { getTodayIsoDate } from "@/lib/utils";
 
@@ -222,20 +221,19 @@ export async function getCoachClientDetailData(clientId: string) {
     notFound();
   }
 
-  const [recentCheckIns, rawProgressPhotos, coachNotes, feedbackMessages] = await Promise.all([
+  const [recentCheckIns, progressPhotoCount, coachNotes, feedbackMessages] = await Promise.all([
     listRecentDailyCheckInsForClient(client.id),
-    listProgressPhotosForClient(client.id),
+    countProgressPhotosForClient(client.id),
     listCoachNotesForClient(client.id),
     listFeedbackMessagesForClient(client.id),
   ]);
-  const progressPhotos = await resolveProgressPhotoUrls(rawProgressPhotos);
 
   return {
     coach,
     client,
     todaysCheckIn: getTodaysOrLatestCheckIn(recentCheckIns),
     recentCheckIns,
-    progressPhotos,
+    progressPhotoCount,
     coachNotes,
     feedbackMessages,
     weeklySummary: buildWeeklySummary(client, recentCheckIns),

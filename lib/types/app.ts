@@ -203,7 +203,7 @@ export interface CoachClientDetailData {
   client: Client;
   todaysCheckIn?: DailyCheckIn | null;
   recentCheckIns: DailyCheckIn[];
-  progressPhotos: ProgressPhoto[];
+  progressPhotoCount: number;
   coachNotes: CoachNote[];
   feedbackMessages: ClientFeedbackMessage[];
   weeklySummary: WeeklySummary[];

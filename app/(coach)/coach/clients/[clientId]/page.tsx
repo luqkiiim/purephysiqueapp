@@ -175,7 +175,7 @@ export default async function CoachClientDetailPage({
                     Progress photos
                   </p>
                   <p className="mt-2 text-sm font-semibold text-slate-900">
-                    {data.progressPhotos.length ? `${data.progressPhotos.length} uploaded` : "None yet"}
+                    {data.progressPhotoCount ? `${data.progressPhotoCount} uploaded` : "None yet"}
                   </p>
                 </div>
               </div>
