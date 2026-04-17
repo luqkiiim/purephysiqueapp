@@ -4,6 +4,8 @@ import { useState } from "react";
 import {
   Camera,
   CalendarDays,
+  ChevronDown,
+  ChevronUp,
   Dumbbell,
   Droplets,
   Footprints,
@@ -78,6 +80,7 @@ function createExerciseEntryDraft(
 
 function buildExerciseEntryDrafts(
   defaults?: DailyCheckInDefaults | null,
+  fallbackEntry?: Partial<ExerciseEntry>,
 ) {
   const existingEntries =
     defaults?.exerciseEntries?.length
@@ -91,7 +94,7 @@ function buildExerciseEntryDrafts(
     return existingEntries.map((entry) => createExerciseEntryDraft(entry));
   }
 
-  return [createExerciseEntryDraft({ type: "Strength", durationMinutes: 45 })];
+  return [createExerciseEntryDraft(fallbackEntry ?? { type: "Strength", durationMinutes: 45 })];
 }
 
 function normalizeExerciseEntries(
@@ -122,6 +125,7 @@ export function DailyCheckInForm({
   submittedMessage = "Check-in complete. Keep tomorrow simple and protect the streak.",
   submitLabel = "Submit today's check-in",
   pendingLabel = "Saving check-in...",
+  compactMode = false,
 }: {
   action: (formData: FormData) => Promise<void>;
   defaults?: DailyCheckInDefaults | null;
@@ -138,7 +142,9 @@ export function DailyCheckInForm({
   submittedMessage?: string;
   submitLabel?: string;
   pendingLabel?: string;
+  compactMode?: boolean;
 }) {
+  const [showMoreDetails, setShowMoreDetails] = useState(!compactMode);
   const [checkInDate, setCheckInDate] = useState(dateField?.defaultValue ?? "");
   const [bedtime, setBedtime] = useState(defaults?.bedtime ?? "22:30");
   const [wakeTime, setWakeTime] = useState(defaults?.wakeTime ?? "06:30");
@@ -151,7 +157,10 @@ export function DailyCheckInForm({
     defaults?.hydrationLiters ?? 0,
   );
   const [exerciseEntries, setExerciseEntries] = useState(() =>
-    buildExerciseEntryDrafts(defaults),
+    buildExerciseEntryDrafts(
+      defaults,
+      compactMode ? { type: "Rest day", durationMinutes: 0 } : { type: "Strength", durationMinutes: 45 },
+    ),
   );
   const [probioticsChecked, setProbioticsChecked] = useState(
     defaults?.probioticsChecked ?? false,
@@ -165,6 +174,8 @@ export function DailyCheckInForm({
   const [mealNotes, setMealNotes] = useState(defaults?.mealNotes ?? "");
 
   const normalizedExerciseEntries = normalizeExerciseEntries(exerciseEntries);
+  const showExpandedDetails = !compactMode || showMoreDetails;
+  const primaryExerciseEntry = exerciseEntries[0]!;
   const exerciseSummary = formatExerciseSummary(normalizedExerciseEntries);
   const totalExerciseDurationMinutes = getExerciseTotalDuration(
     normalizedExerciseEntries,
@@ -218,6 +229,33 @@ export function DailyCheckInForm({
       {hiddenFields.map((field) => (
         <input key={field.name} type="hidden" name={field.name} value={field.value} />
       ))}
+      {compactMode && !showExpandedDetails ? (
+        <>
+          <input type="hidden" name="bedtime" value={bedtime} />
+          <input type="hidden" name="wakeTime" value={wakeTime} />
+          <input
+            type="hidden"
+            name="probioticsChecked"
+            value={probioticsChecked ? "true" : "false"}
+          />
+          <input
+            type="hidden"
+            name="fishOilChecked"
+            value={fishOilChecked ? "true" : "false"}
+          />
+          <input type="hidden" name="mealNotes" value={mealNotes} />
+          {exerciseEntries.slice(1).map((entry) => (
+            <div key={entry.id}>
+              <input type="hidden" name="exerciseType" value={entry.type} />
+              <input
+                type="hidden"
+                name="exerciseDurationMinutes"
+                value={entry.durationMinutes}
+              />
+            </div>
+          ))}
+        </>
+      ) : null}
 
       {dateField ? (
         <div className="surface-card p-4 sm:p-5">
@@ -311,6 +349,29 @@ export function DailyCheckInForm({
         </div>
       ) : null}
 
+      {compactMode ? (
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowMoreDetails((currentValue) => !currentValue)}
+          >
+            {showExpandedDetails ? (
+              <>
+                <ChevronUp className="mr-2 h-4 w-4" />
+                Hide extra details
+              </>
+            ) : (
+              <>
+                <ChevronDown className="mr-2 h-4 w-4" />
+                Add more details
+              </>
+            )}
+          </Button>
+        </div>
+      ) : null}
+
       <section className="grid gap-4">
         <div className="surface-card p-4 sm:p-5">
           <div className="mb-5 flex items-start gap-3">
@@ -323,32 +384,36 @@ export function DailyCheckInForm({
             </div>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            <label className="field-shell">
-              <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                Bedtime
-              </span>
-              <input
-                name="bedtime"
-                type="time"
-                className="mt-2 w-full bg-transparent text-lg font-semibold outline-none sm:text-xl"
-                value={bedtime}
-                onChange={(event) => setBedtime(event.target.value)}
-                required
-              />
-            </label>
-            <label className="field-shell">
-              <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                Wake time
-              </span>
-              <input
-                name="wakeTime"
-                type="time"
-                className="mt-2 w-full bg-transparent text-lg font-semibold outline-none sm:text-xl"
-                value={wakeTime}
-                onChange={(event) => setWakeTime(event.target.value)}
-                required
-              />
-            </label>
+            {showExpandedDetails ? (
+              <>
+                <label className="field-shell">
+                  <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    Bedtime
+                  </span>
+                  <input
+                    name="bedtime"
+                    type="time"
+                    className="mt-2 w-full bg-transparent text-lg font-semibold outline-none sm:text-xl"
+                    value={bedtime}
+                    onChange={(event) => setBedtime(event.target.value)}
+                    required
+                  />
+                </label>
+                <label className="field-shell">
+                  <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    Wake time
+                  </span>
+                  <input
+                    name="wakeTime"
+                    type="time"
+                    className="mt-2 w-full bg-transparent text-lg font-semibold outline-none sm:text-xl"
+                    value={wakeTime}
+                    onChange={(event) => setWakeTime(event.target.value)}
+                    required
+                  />
+                </label>
+              </>
+            ) : null}
             <label className="field-shell">
               <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                 Total sleep hours
@@ -450,119 +515,169 @@ export function DailyCheckInForm({
             </div>
           </div>
           <div className="space-y-3">
-            {exerciseEntries.map((entry, index) => (
-              <div
-                key={entry.id}
-                className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_170px_auto]"
-              >
-                <label className="field-shell">
-                  <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                    Exercise {index + 1}
-                  </span>
-                  <input
-                    name="exerciseType"
-                    type="text"
-                    placeholder="Strength, run, class, sport..."
-                    className="mt-2 w-full bg-transparent text-lg font-semibold outline-none sm:text-xl"
-                    value={entry.type}
-                    onChange={(event) =>
-                      updateExerciseEntry(entry.id, "type", event.target.value)
-                    }
-                    required
-                  />
-                </label>
-                <label className="field-shell">
-                  <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                    Minutes
-                  </span>
-                  <input
-                    name="exerciseDurationMinutes"
-                    type="number"
-                    min="0"
-                    className="mt-2 w-full bg-transparent text-[2rem] font-display outline-none sm:text-3xl"
-                    value={entry.durationMinutes}
-                    onChange={(event) =>
-                      updateExerciseEntry(
-                        entry.id,
-                        "durationMinutes",
-                        event.target.value,
-                      )
-                    }
-                    required
-                  />
-                </label>
-                <div className="flex items-end">
-                  {exerciseEntries.length > 1 ? (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="w-full lg:w-auto"
-                      onClick={() => removeExerciseEntry(entry.id)}
-                    >
-                      <Minus className="mr-2 h-4 w-4" />
-                      Remove
-                    </Button>
-                  ) : null}
+            {showExpandedDetails ? (
+              <>
+                {exerciseEntries.map((entry, index) => (
+                  <div
+                    key={entry.id}
+                    className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_170px_auto]"
+                  >
+                    <label className="field-shell">
+                      <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                        Exercise {index + 1}
+                      </span>
+                      <input
+                        name="exerciseType"
+                        type="text"
+                        placeholder="Strength, run, class, sport..."
+                        className="mt-2 w-full bg-transparent text-lg font-semibold outline-none sm:text-xl"
+                        value={entry.type}
+                        onChange={(event) =>
+                          updateExerciseEntry(entry.id, "type", event.target.value)
+                        }
+                        required
+                      />
+                    </label>
+                    <label className="field-shell">
+                      <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                        Minutes
+                      </span>
+                      <input
+                        name="exerciseDurationMinutes"
+                        type="number"
+                        min="0"
+                        className="mt-2 w-full bg-transparent text-[2rem] font-display outline-none sm:text-3xl"
+                        value={entry.durationMinutes}
+                        onChange={(event) =>
+                          updateExerciseEntry(
+                            entry.id,
+                            "durationMinutes",
+                            event.target.value,
+                          )
+                        }
+                        required
+                      />
+                    </label>
+                    <div className="flex items-end">
+                      {exerciseEntries.length > 1 ? (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="w-full lg:w-auto"
+                          onClick={() => removeExerciseEntry(entry.id)}
+                        >
+                          <Minus className="mr-2 h-4 w-4" />
+                          Remove
+                        </Button>
+                      ) : null}
+                    </div>
+                  </div>
+                ))}
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-sm text-slate-600">
+                    For a day off, enter <span className="font-semibold">Rest day</span> and 0 minutes.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={addExerciseEntry}
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add exercise
+                  </Button>
                 </div>
-              </div>
-            ))}
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm text-slate-600">
-                For a day off, enter <span className="font-semibold">Rest day</span> and 0 minutes.
-              </p>
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={addExerciseEntry}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Add exercise
-              </Button>
-            </div>
+              </>
+            ) : (
+              <>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <label className="field-shell">
+                    <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                      Workout
+                    </span>
+                    <input
+                      name="exerciseType"
+                      type="text"
+                      placeholder="Rest day, strength, walk..."
+                      className="mt-2 w-full bg-transparent text-lg font-semibold outline-none sm:text-xl"
+                      value={primaryExerciseEntry.type}
+                      onChange={(event) =>
+                        updateExerciseEntry(primaryExerciseEntry.id, "type", event.target.value)
+                      }
+                      required
+                    />
+                  </label>
+                  <label className="field-shell">
+                    <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                      Minutes
+                    </span>
+                    <input
+                      name="exerciseDurationMinutes"
+                      type="number"
+                      min="0"
+                      className="mt-2 w-full bg-transparent text-[2rem] font-display outline-none sm:text-3xl"
+                      value={primaryExerciseEntry.durationMinutes}
+                      onChange={(event) =>
+                        updateExerciseEntry(
+                          primaryExerciseEntry.id,
+                          "durationMinutes",
+                          event.target.value,
+                        )
+                      }
+                      required
+                    />
+                  </label>
+                </div>
+                <p className="text-sm text-slate-600">
+                  Keep this simple. Use <span className="font-semibold">Rest day</span> and 0 minutes if you did not train.
+                </p>
+              </>
+            )}
           </div>
         </div>
 
-        <div className="surface-card p-4 sm:p-5">
-          <div className="mb-5 flex items-start gap-3">
-            <ShieldCheck className="h-5 w-5 text-accent-teal" />
-            <div>
-              <h3 className="text-base font-semibold text-slate-900">
-                Supplements
-              </h3>
-              <p className="text-sm text-slate-600">
-                Simple toggles keep it frictionless.
-              </p>
+        {showExpandedDetails ? (
+          <div className="surface-card p-4 sm:p-5">
+            <div className="mb-5 flex items-start gap-3">
+              <ShieldCheck className="h-5 w-5 text-accent-teal" />
+              <div>
+                <h3 className="text-base font-semibold text-slate-900">
+                  Supplements
+                </h3>
+                <p className="text-sm text-slate-600">
+                  Simple toggles keep it frictionless.
+                </p>
+              </div>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {probioticsEnabled ? (
+                <label className="tap-card flex items-center justify-between">
+                  <span className="font-semibold text-slate-900">Probiotics</span>
+                  <input
+                    name="probioticsChecked"
+                    type="checkbox"
+                    checked={probioticsChecked}
+                    onChange={(event) => setProbioticsChecked(event.target.checked)}
+                    className="h-5 w-5 rounded border-slate-300 text-accent-teal focus:ring-accent-teal"
+                  />
+                </label>
+              ) : null}
+              {fishOilEnabled ? (
+                <label className="tap-card flex items-center justify-between">
+                  <span className="font-semibold text-slate-900">Fish oil</span>
+                  <input
+                    name="fishOilChecked"
+                    type="checkbox"
+                    checked={fishOilChecked}
+                    onChange={(event) => setFishOilChecked(event.target.checked)}
+                    className="h-5 w-5 rounded border-slate-300 text-accent-teal focus:ring-accent-teal"
+                  />
+                </label>
+              ) : null}
             </div>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {probioticsEnabled ? (
-              <label className="tap-card flex items-center justify-between">
-                <span className="font-semibold text-slate-900">Probiotics</span>
-                <input
-                  name="probioticsChecked"
-                  type="checkbox"
-                  checked={probioticsChecked}
-                  onChange={(event) => setProbioticsChecked(event.target.checked)}
-                  className="h-5 w-5 rounded border-slate-300 text-accent-teal focus:ring-accent-teal"
-                />
-              </label>
-            ) : null}
-            {fishOilEnabled ? (
-              <label className="tap-card flex items-center justify-between">
-                <span className="font-semibold text-slate-900">Fish oil</span>
-                <input
-                  name="fishOilChecked"
-                  type="checkbox"
-                  checked={fishOilChecked}
-                  onChange={(event) => setFishOilChecked(event.target.checked)}
-                  className="h-5 w-5 rounded border-slate-300 text-accent-teal focus:ring-accent-teal"
-                />
-              </label>
-            ) : null}
-          </div>
-        </div>
+        ) : null}
 
         <div className="surface-card p-4 sm:p-5">
           <div className="mb-5 flex items-start gap-3">
@@ -600,43 +715,45 @@ export function DailyCheckInForm({
           </div>
         </div>
 
-        <div className="surface-card p-4 sm:p-5">
-          <div className="mb-5 flex items-start gap-3">
-            <Camera className="h-5 w-5 text-accent-gold" />
-            <div>
-              <h3 className="text-base font-semibold text-slate-900">
-                Progress photo and meal note
-              </h3>
-              <p className="text-sm text-slate-600">
-                Optional, quick, and lightweight.
-              </p>
+        {showExpandedDetails ? (
+          <div className="surface-card p-4 sm:p-5">
+            <div className="mb-5 flex items-start gap-3">
+              <Camera className="h-5 w-5 text-accent-gold" />
+              <div>
+                <h3 className="text-base font-semibold text-slate-900">
+                  Progress photo and meal note
+                </h3>
+                <p className="text-sm text-slate-600">
+                  Optional, quick, and lightweight.
+                </p>
+              </div>
+            </div>
+            <div className="grid gap-4">
+              <label className="field-shell">
+                <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  Progress photo
+                </span>
+                <input
+                  name="progressPhoto"
+                  type="file"
+                  accept="image/*"
+                  className="mt-2 block w-full text-sm text-slate-600 file:mr-4 file:rounded-full file:border-0 file:bg-accent-coral file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[#2d2e2d]"
+                />
+              </label>
+              <label className="block space-y-2">
+                <span className="text-sm font-semibold text-slate-900">
+                  Meal note
+                </span>
+                <Textarea
+                  name="mealNotes"
+                  placeholder="Short note only. Keep it light."
+                  value={mealNotes}
+                  onChange={(event) => setMealNotes(event.target.value)}
+                />
+              </label>
             </div>
           </div>
-          <div className="grid gap-4">
-            <label className="field-shell">
-              <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                Progress photo
-              </span>
-              <input
-                name="progressPhoto"
-                type="file"
-                accept="image/*"
-                className="mt-2 block w-full text-sm text-slate-600 file:mr-4 file:rounded-full file:border-0 file:bg-accent-coral file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[#2d2e2d]"
-              />
-            </label>
-            <label className="block space-y-2">
-              <span className="text-sm font-semibold text-slate-900">
-                Meal note
-              </span>
-              <Textarea
-                name="mealNotes"
-                placeholder="Short note only. Keep it light."
-                value={mealNotes}
-                onChange={(event) => setMealNotes(event.target.value)}
-              />
-            </label>
-          </div>
-        </div>
+        ) : null}
       </section>
 
       <FormSubmitButton

@@ -675,6 +675,7 @@ export async function countProgressPhotosForClient(clientId: string) {
 export async function listCoachNotesForClient(
   clientId: string,
   visibility?: "private" | "shared",
+  limit?: number,
 ) {
   const admin = createSupabaseAdminClient();
   let query = admin
@@ -687,18 +688,28 @@ export async function listCoachNotesForClient(
     query = query.eq("visibility", visibility);
   }
 
+  if (limit) {
+    query = query.limit(limit);
+  }
+
   const result = await query;
   throwIfError(result.error, "Failed to list coach notes");
   return ((result.data ?? []) as CoachNoteRow[]).map(mapCoachNote);
 }
 
-export async function listFeedbackMessagesForClient(clientId: string) {
+export async function listFeedbackMessagesForClient(clientId: string, limit?: number) {
   const admin = createSupabaseAdminClient();
-  const result = await admin
+  let query = admin
     .from("client_feedback_messages")
     .select("*")
     .eq("client_id", clientId)
     .order("created_at", { ascending: false });
+
+  if (limit) {
+    query = query.limit(limit);
+  }
+
+  const result = await query;
 
   throwIfError(result.error, "Failed to list feedback messages");
   return ((result.data ?? []) as ClientFeedbackMessageRow[]).map(mapFeedbackMessage);

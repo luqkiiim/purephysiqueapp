@@ -3,6 +3,7 @@ import { subDays } from "date-fns";
 import { defaultCoachDashboardPreferences } from "@/lib/coach-settings";
 import type {
   Client,
+  ClientCoachUpdate,
   ClientFeedbackMessage,
   ClientStatusRow,
   CoachClientDetailData,
@@ -454,6 +455,38 @@ export function getDemoClientDetailData(clientId: string): CoachClientDetailData
 
 export function getDemoClientHomeData(clientId = "client_ava") {
   const detail = getDemoClientDetailData(clientId);
+  const latestFeedbackMessage = detail.feedbackMessages[0];
+  const latestSharedCoachNote = detail.coachNotes.find((entry) => entry.visibility === "shared");
+  let latestCoachUpdate: ClientCoachUpdate | null = null;
+
+  if (latestFeedbackMessage || latestSharedCoachNote) {
+    if (!latestSharedCoachNote) {
+      latestCoachUpdate = {
+        type: "message",
+        content: latestFeedbackMessage!.message,
+        createdAt: latestFeedbackMessage!.createdAt,
+      };
+    } else if (!latestFeedbackMessage) {
+      latestCoachUpdate = {
+        type: "note",
+        content: latestSharedCoachNote.note,
+        createdAt: latestSharedCoachNote.createdAt,
+      };
+    } else {
+      latestCoachUpdate =
+        latestFeedbackMessage.createdAt >= latestSharedCoachNote.createdAt
+          ? {
+              type: "message",
+              content: latestFeedbackMessage.message,
+              createdAt: latestFeedbackMessage.createdAt,
+            }
+          : {
+              type: "note",
+              content: latestSharedCoachNote.note,
+              createdAt: latestSharedCoachNote.createdAt,
+            };
+    }
+  }
 
   return {
     client: detail.client,
@@ -462,6 +495,7 @@ export function getDemoClientHomeData(clientId = "client_ava") {
     progressPhotos: demoProgressPhotos.filter((entry) => entry.clientId === detail.client.id),
     feedbackMessages: detail.feedbackMessages,
     sharedCoachNotes: detail.coachNotes.filter((entry) => entry.visibility === "shared"),
+    latestCoachUpdate,
     weeklySummary: detail.weeklySummary,
   };
 }

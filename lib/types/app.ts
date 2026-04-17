@@ -132,6 +132,12 @@ export interface ClientFeedbackMessage {
   createdAt: string;
 }
 
+export interface ClientCoachUpdate {
+  type: "message" | "note";
+  content: string;
+  createdAt: string;
+}
+
 export interface WeeklySummary {
   weekLabel: string;
   adherencePercent: number;
@@ -195,6 +201,7 @@ export interface ClientHomeData {
   progressPhotos: ProgressPhoto[];
   feedbackMessages: ClientFeedbackMessage[];
   sharedCoachNotes: CoachNote[];
+  latestCoachUpdate?: ClientCoachUpdate | null;
   weeklySummary: WeeklySummary[];
 }
 

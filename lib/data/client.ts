@@ -8,6 +8,7 @@ import {
   listProgressPhotosForClient,
   listRecentDailyCheckInsForClient,
 } from "@/lib/database/queries";
+import type { ClientCoachUpdate } from "@/lib/types/app";
 import { getDemoClientHomeData } from "@/lib/demo/data";
 import { buildWeeklySummary, resolveProgressPhotoUrls } from "@/lib/data/shared";
 import { isLiveAppEnabled } from "@/lib/supabase/config";
@@ -17,6 +18,49 @@ const RECENT_CLIENT_CHECK_IN_LIMIT = 45;
 
 function getDemoData(clientId: string) {
   return getDemoClientHomeData(clientId);
+}
+
+function pickLatestCoachUpdate({
+  feedbackMessages,
+  sharedCoachNotes,
+}: {
+  feedbackMessages: Array<{ message: string; createdAt: string }>;
+  sharedCoachNotes: Array<{ note: string; createdAt: string }>;
+}): ClientCoachUpdate | null {
+  const latestMessage = feedbackMessages[0];
+  const latestSharedNote = sharedCoachNotes[0];
+
+  if (!latestMessage && !latestSharedNote) {
+    return null;
+  }
+
+  if (!latestSharedNote) {
+    return {
+      type: "message",
+      content: latestMessage!.message,
+      createdAt: latestMessage!.createdAt,
+    };
+  }
+
+  if (!latestMessage) {
+    return {
+      type: "note",
+      content: latestSharedNote.note,
+      createdAt: latestSharedNote.createdAt,
+    };
+  }
+
+  return latestMessage.createdAt >= latestSharedNote.createdAt
+    ? {
+        type: "message",
+        content: latestMessage.message,
+        createdAt: latestMessage.createdAt,
+      }
+    : {
+        type: "note",
+        content: latestSharedNote.note,
+        createdAt: latestSharedNote.createdAt,
+      };
 }
 
 export const getClientShellData = cache(async () => {
@@ -37,12 +81,20 @@ export const getClientCheckInPageData = cache(async () => {
     return {
       client: demo.client,
       todaysCheckIn: demo.todaysCheckIn,
+      latestCoachUpdate: demo.latestCoachUpdate ?? null,
     };
   }
 
+  const [todaysCheckIn, feedbackMessages, sharedCoachNotes] = await Promise.all([
+    getLatestDailyCheckInForClient(client.id),
+    listFeedbackMessagesForClient(client.id, 1),
+    listCoachNotesForClient(client.id, "shared", 1),
+  ]);
+
   return {
     client,
-    todaysCheckIn: await getLatestDailyCheckInForClient(client.id),
+    todaysCheckIn,
+    latestCoachUpdate: pickLatestCoachUpdate({ feedbackMessages, sharedCoachNotes }),
   };
 });
 
