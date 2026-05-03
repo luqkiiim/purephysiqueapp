@@ -1,4 +1,4 @@
-import { CoachMobileTabs } from "@/components/layout/coach-mobile-tabs";
+import { CoachMobileNavigation } from "@/components/layout/coach-mobile-tabs";
 
 function LoadingBlock({ className }: { className: string }) {
   return <div className={`animate-pulse rounded-3xl bg-slate-200/70 ${className}`} />;
@@ -6,7 +6,7 @@ function LoadingBlock({ className }: { className: string }) {
 
 export default function CoachLoading() {
   return (
-    <div className="page-shell space-y-6 pb-32 sm:pb-12">
+    <CoachMobileNavigation>
       <header className="surface-card overflow-hidden p-4 sm:p-6">
         <div className="flex flex-col gap-5">
           <div className="space-y-3">
@@ -60,7 +60,6 @@ export default function CoachLoading() {
           </div>
         </div>
       </section>
-      <CoachMobileTabs />
-    </div>
+    </CoachMobileNavigation>
   );
 }

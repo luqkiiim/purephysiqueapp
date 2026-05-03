@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { ActiveNav } from "@/components/layout/active-nav";
-import { CoachMobileTabs } from "@/components/layout/coach-mobile-tabs";
+import { CoachMobileNavigation } from "@/components/layout/coach-mobile-tabs";
 import { DemoBanner } from "@/components/layout/demo-banner";
 import { Button } from "@/components/ui/button";
 import { logoutAction } from "@/app/actions/auth";
@@ -20,7 +20,7 @@ export function CoachShell({
   actions?: React.ReactNode;
 }) {
   return (
-    <div className="page-shell space-y-6 pb-32 sm:pb-12">
+    <CoachMobileNavigation>
       <header className="surface-card overflow-hidden p-4 sm:p-6">
         <div className="flex flex-col gap-5">
           <div className="space-y-3">
@@ -55,7 +55,6 @@ export function CoachShell({
       </header>
       <DemoBanner enabled={demoMode} />
       {children}
-      <CoachMobileTabs />
-    </div>
+    </CoachMobileNavigation>
   );
 }
