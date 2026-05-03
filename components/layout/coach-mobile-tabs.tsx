@@ -12,7 +12,9 @@ import {
 } from "lucide-react";
 import {
   Children,
+  useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type CSSProperties,
@@ -94,6 +96,9 @@ const coachTabs: CoachTab[] = [
     },
   },
 ];
+
+const settleDurationMs = 340;
+const settleEasing = "cubic-bezier(0.16, 1, 0.3, 1)";
 
 function getIndexFromTab(tab: CoachPrimaryTab) {
   return Math.max(
@@ -344,8 +349,12 @@ export function CoachTabbedNavigation({
   const router = useRouter();
   const initialIndex = getIndexFromTab(initialTab);
   const [activeIndex, setActiveIndex] = useState(initialIndex);
+  const [targetIndex, setTargetIndex] = useState<number | null>(null);
   const activeIndexRef = useRef(initialIndex);
+  const targetIndexRef = useRef<number | null>(null);
   const gestureRef = useRef<SwipeGesture | null>(null);
+  const viewportRef = useRef<HTMLDivElement | null>(null);
+  const panelRefs = useRef<Array<HTMLElement | null>>([]);
   const frameRef = useRef<number | null>(null);
   const nextDragXRef = useRef(0);
   const settleTimerRef = useRef<number | null>(null);
@@ -354,21 +363,115 @@ export function CoachTabbedNavigation({
   const [dragX, setDragX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [isSettling, setIsSettling] = useState(false);
+  const [panelHeights, setPanelHeights] = useState<number[]>([]);
   const panels = Children.toArray(children);
+  const panelCount = panels.length;
+  const heightIndex = targetIndex ?? activeIndex;
+  const activePanelHeight = panelHeights[heightIndex] ?? panelHeights[activeIndex] ?? 0;
+  const usesMeasuredHeight = activePanelHeight > 0;
+
+  const syncTargetIndex = useCallback((nextIndex: number | null) => {
+    targetIndexRef.current = nextIndex;
+    setTargetIndex(nextIndex);
+  }, []);
+
+  const clearSettleTimer = useCallback(() => {
+    if (settleTimerRef.current !== null) {
+      window.clearTimeout(settleTimerRef.current);
+      settleTimerRef.current = null;
+    }
+  }, []);
+
+  const getViewportWidth = useCallback(
+    () => viewportRef.current?.getBoundingClientRect().width || window.innerWidth,
+    [],
+  );
+
+  const finishSettle = useCallback(
+    (nextIndex: number, historyMode: "push" | "replace" | "none") => {
+      activeIndexRef.current = nextIndex;
+      setActiveIndex(nextIndex);
+      syncTargetIndex(null);
+      setDragX(0);
+      setIsDragging(false);
+      setIsSettling(false);
+      clearSettleTimer();
+
+      if (historyMode === "none") {
+        return;
+      }
+
+      const href = coachTabs[nextIndex].href;
+
+      if (window.location.pathname !== href || window.location.search || window.location.hash) {
+        if (historyMode === "replace") {
+          window.history.replaceState(null, "", href);
+        } else {
+          window.history.pushState(null, "", href);
+        }
+      }
+    },
+    [clearSettleTimer, syncTargetIndex],
+  );
+
+  const beginSettle = useCallback(
+    (nextIndex: number, historyMode: "push" | "replace" | "none" = "push") => {
+      if (nextIndex < 0 || nextIndex >= coachTabs.length) {
+        return;
+      }
+
+      if (nextIndex === activeIndexRef.current) {
+        syncTargetIndex(null);
+        setDragX(0);
+        setIsDragging(false);
+        setIsSettling(false);
+        clearSettleTimer();
+        return;
+      }
+
+      if (!isMobileViewport()) {
+        finishSettle(nextIndex, historyMode);
+        return;
+      }
+
+      if (frameRef.current !== null) {
+        window.cancelAnimationFrame(frameRef.current);
+        frameRef.current = null;
+      }
+
+      const settleX = (activeIndexRef.current - nextIndex) * getViewportWidth();
+
+      clearSettleTimer();
+      syncTargetIndex(nextIndex);
+      setIsDragging(false);
+      setIsSettling(true);
+      setDragX(settleX);
+
+      settleTimerRef.current = window.setTimeout(() => {
+        finishSettle(nextIndex, historyMode);
+      }, settleDurationMs);
+    },
+    [
+      clearSettleTimer,
+      finishSettle,
+      getViewportWidth,
+      syncTargetIndex,
+    ],
+  );
 
   useEffect(() => {
     const nextIndex = getExactCoachTabIndex(pathname);
 
-    if (nextIndex === null || nextIndex === activeIndexRef.current) {
+    if (
+      nextIndex === null ||
+      nextIndex === activeIndexRef.current ||
+      nextIndex === targetIndexRef.current
+    ) {
       return;
     }
 
-    activeIndexRef.current = nextIndex;
-    setActiveIndex(nextIndex);
-    setDragX(0);
-    setIsDragging(false);
-    setIsSettling(true);
-  }, [pathname]);
+    beginSettle(nextIndex, "none");
+  }, [beginSettle, pathname]);
 
   useEffect(() => {
     const handlePopState = () => {
@@ -381,11 +484,12 @@ export function CoachTabbedNavigation({
         return;
       }
 
-      activeIndexRef.current = nextIndex;
-      setActiveIndex(nextIndex);
-      setDragX(0);
-      setIsDragging(false);
-      setIsSettling(true);
+      if (
+        nextIndex !== activeIndexRef.current &&
+        nextIndex !== targetIndexRef.current
+      ) {
+        beginSettle(nextIndex, "none");
+      }
     };
 
     window.addEventListener("popstate", handlePopState);
@@ -393,7 +497,47 @@ export function CoachTabbedNavigation({
     return () => {
       window.removeEventListener("popstate", handlePopState);
     };
-  }, [router]);
+  }, [beginSettle, router]);
+
+  useLayoutEffect(() => {
+    panelRefs.current = panelRefs.current.slice(0, panelCount);
+
+    const updateMeasurements = () => {
+      const nextHeights = Array.from({ length: panelCount }, (_, index) => {
+        const panel = panelRefs.current[index];
+        return panel ? Math.ceil(panel.scrollHeight) : 0;
+      });
+
+      setPanelHeights((currentHeights) => {
+        const hasChanged =
+          currentHeights.length !== nextHeights.length ||
+          currentHeights.some((height, index) => height !== nextHeights[index]);
+
+        return hasChanged ? nextHeights : currentHeights;
+      });
+    };
+
+    updateMeasurements();
+
+    const observer = new ResizeObserver(updateMeasurements);
+
+    if (viewportRef.current) {
+      observer.observe(viewportRef.current);
+    }
+
+    panelRefs.current.forEach((panel) => {
+      if (panel) {
+        observer.observe(panel);
+      }
+    });
+
+    window.addEventListener("resize", updateMeasurements);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", updateMeasurements);
+    };
+  }, [panelCount]);
 
   useEffect(() => {
     return () => {
@@ -425,16 +569,14 @@ export function CoachTabbedNavigation({
   };
 
   const startSettling = () => {
-    if (settleTimerRef.current !== null) {
-      window.clearTimeout(settleTimerRef.current);
-    }
+    clearSettleTimer();
 
     setIsSettling(true);
 
     settleTimerRef.current = window.setTimeout(() => {
       setIsSettling(false);
       settleTimerRef.current = null;
-    }, 220);
+    }, settleDurationMs);
   };
 
   const snapBack = () => {
@@ -444,6 +586,7 @@ export function CoachTabbedNavigation({
     }
 
     setIsDragging(false);
+    syncTargetIndex(null);
     setDragX(0);
     startSettling();
   };
@@ -461,34 +604,6 @@ export function CoachTabbedNavigation({
     }, 350);
   };
 
-  const commitTab = (nextIndex: number, historyMode: "push" | "replace" = "push") => {
-    if (nextIndex < 0 || nextIndex >= coachTabs.length) {
-      snapBack();
-      return;
-    }
-
-    if (frameRef.current !== null) {
-      window.cancelAnimationFrame(frameRef.current);
-      frameRef.current = null;
-    }
-
-    activeIndexRef.current = nextIndex;
-    setActiveIndex(nextIndex);
-    setDragX(0);
-    setIsDragging(false);
-    startSettling();
-
-    const href = coachTabs[nextIndex].href;
-
-    if (window.location.pathname !== href || window.location.search || window.location.hash) {
-      if (historyMode === "replace") {
-        window.history.replaceState(null, "", href);
-      } else {
-        window.history.pushState(null, "", href);
-      }
-    }
-  };
-
   const startGesture = (
     event: ReactPointerEvent<HTMLElement>,
     source: SwipeGesture["source"],
@@ -496,6 +611,8 @@ export function CoachTabbedNavigation({
   ) => {
     if (
       !isMobileViewport() ||
+      isSettling ||
+      targetIndexRef.current !== null ||
       !event.isPrimary ||
       (ignoreInteractiveControls && shouldIgnoreSwipeStart(event.target))
     ) {
@@ -597,7 +714,7 @@ export function CoachTabbedNavigation({
       return;
     }
 
-    commitTab(nextIndex);
+    beginSettle(nextIndex);
   };
 
   const handlePointerCancel = (event: ReactPointerEvent<HTMLElement>) => {
@@ -639,18 +756,19 @@ export function CoachTabbedNavigation({
     }
 
     event.preventDefault();
-    commitTab(index);
+    beginSettle(index);
   };
 
-  const transition = isDragging
+  const panelTransition = isDragging
     ? "none"
     : isSettling
-      ? "transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1)"
+      ? `transform ${settleDurationMs}ms ${settleEasing}`
       : "none";
-  const trackStyle = {
-    "--coach-tab-transform": `translate3d(calc(-${activeIndex * 100}% + ${Math.round(dragX)}px), 0, 0)`,
-    "--coach-tab-transition": transition,
-    willChange: isDragging || isSettling ? "transform" : undefined,
+  const viewportStyle = {
+    "--coach-tabs-height": usesMeasuredHeight ? `${activePanelHeight}px` : "auto",
+    "--coach-tabs-height-transition": isSettling
+      ? `height ${settleDurationMs}ms ${settleEasing}`
+      : "none",
   } as CSSProperties;
 
   return (
@@ -660,30 +778,42 @@ export function CoachTabbedNavigation({
           <CoachHeader activeIndex={activeIndex} />
           <DemoBanner enabled={demoMode} />
           <div
-            className="touch-pan-y overflow-x-clip sm:touch-auto sm:overflow-visible"
+            ref={viewportRef}
+            className="relative touch-pan-y overflow-x-clip [height:var(--coach-tabs-height)] [transition:var(--coach-tabs-height-transition)] sm:h-auto sm:touch-auto sm:overflow-visible sm:!transition-none"
+            style={viewportStyle}
             onPointerDown={handleContentPointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerEnd}
             onPointerCancel={handlePointerCancel}
           >
-            <div
-              className="flex [transform:var(--coach-tab-transform)] [transition:var(--coach-tab-transition)] sm:block sm:!transform-none sm:!transition-none"
-              style={trackStyle}
-            >
-              {panels.map((panel, index) => (
+            {panels.map((panel, index) => {
+              const active = index === activeIndex;
+              const relativePercent = (index - activeIndex) * 100;
+              const panelStyle = {
+                "--coach-panel-transform": `translate3d(calc(${relativePercent}% + ${Math.round(dragX)}px), 0, 0)`,
+                "--coach-panel-transition": panelTransition,
+                willChange: isDragging || isSettling ? "transform" : undefined,
+              } as CSSProperties;
+
+              return (
                 <section
                   key={index}
-                  aria-hidden={index !== activeIndex}
-                  inert={index !== activeIndex ? true : undefined}
+                  ref={(element) => {
+                    panelRefs.current[index] = element;
+                  }}
+                  aria-hidden={!active}
+                  inert={!active ? true : undefined}
                   className={cn(
-                    "w-full shrink-0 space-y-6 sm:w-auto sm:shrink",
-                    index === activeIndex ? "sm:block" : "sm:hidden",
+                    "left-0 top-0 w-full space-y-6 [transform:var(--coach-panel-transform)] [transition:var(--coach-panel-transition)] sm:static sm:w-auto sm:!transform-none sm:!transition-none",
+                    usesMeasuredHeight || !active ? "absolute" : "relative",
+                    active ? "sm:block" : "sm:hidden",
                   )}
+                  style={panelStyle}
                 >
                   {panel}
                 </section>
-              ))}
-            </div>
+              );
+            })}
           </div>
         </div>
       </div>
