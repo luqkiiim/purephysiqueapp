@@ -22,8 +22,9 @@ export default function CoachLoading() {
               <LoadingBlock className="h-10 w-24 rounded-full" />
               <LoadingBlock className="h-10 w-24 rounded-full" />
             </div>
-            <div className="grid gap-2 sm:flex sm:flex-wrap sm:justify-end">
+            <div className="flex flex-wrap items-center justify-end gap-2">
               <LoadingBlock className="h-10 w-full rounded-full sm:w-24" />
+              <LoadingBlock className="h-11 w-11 rounded-full" />
               <LoadingBlock className="h-10 w-full rounded-full sm:w-24" />
             </div>
           </div>

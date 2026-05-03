@@ -194,6 +194,47 @@ export interface CoachDashboardData {
   momentumClients: Array<{ id: string; fullName: string; streak: number; adherence: number }>;
 }
 
+export interface CoachClientsPageData {
+  coach: CoachProfile;
+  dashboardPreferences: CoachDashboardPreferences;
+  clients: ClientStatusRow[];
+}
+
+export interface CoachReviewClient extends ClientStatusRow {
+  averageConsistency: number;
+  progressPhotoCount: number;
+  lastCheckIn?: DailyCheckIn | null;
+}
+
+export interface CoachReviewCheckIn {
+  id: string;
+  clientId: string;
+  clientName: string;
+  date: string;
+  bodyWeight: number;
+  completionPercentage: number;
+  proteinPercent: number;
+  stepPercent: number;
+  proteinGrams: number;
+  steps: number;
+  mealNotes?: string | null;
+}
+
+export interface CoachReviewData {
+  summaryCards: DashboardSummaryCard[];
+  missedClients: CoachReviewClient[];
+  recentCheckIns: CoachReviewCheckIn[];
+  photoIndicators: CoachReviewClient[];
+}
+
+export interface CoachTabsData {
+  coach: CoachProfile;
+  dashboardPreferences: CoachDashboardPreferences;
+  overview: CoachDashboardData;
+  clients: CoachClientsPageData;
+  review: CoachReviewData;
+}
+
 export interface ClientHomeData {
   client: Client;
   todaysCheckIn?: DailyCheckIn | null;

@@ -1,9 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import type { Route } from "next";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Settings, Users, type LucideIcon } from "lucide-react";
 import {
+  ClipboardCheck,
+  LayoutDashboard,
+  Settings,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
+import {
+  Children,
   useEffect,
   useRef,
   useState,
@@ -13,12 +21,25 @@ import {
   type ReactNode,
 } from "react";
 
+import { logoutAction } from "@/app/actions/auth";
+import { DemoBanner } from "@/components/layout/demo-banner";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+export type CoachPrimaryTab = "overview" | "clients" | "review";
+
 type CoachTab = {
-  href: "/coach" | "/coach/clients" | "/coach/settings";
+  id: CoachPrimaryTab;
+  href: "/coach" | "/coach/clients" | "/coach/review";
   label: string;
+  heading: string;
+  subheading: string;
   Icon: LucideIcon;
+  action?: {
+    href: "/coach/clients" | "/coach/clients/new";
+    label: string;
+    variant: "coral" | "secondary";
+  };
 };
 
 type SwipeGesture = {
@@ -31,32 +52,75 @@ type SwipeGesture = {
 
 const coachTabs: CoachTab[] = [
   {
+    id: "overview",
     href: "/coach",
     label: "Overview",
+    heading: "Overview",
+    subheading:
+      "Track who logged today, spot missed check-ins early, and keep momentum visible across the roster without managing profiles from this screen.",
     Icon: LayoutDashboard,
+    action: {
+      href: "/coach/clients/new",
+      label: "Add client",
+      variant: "coral",
+    },
   },
   {
+    id: "clients",
     href: "/coach/clients",
     label: "Clients",
+    heading: "Clients",
+    subheading:
+      "This is the roster-management home for profiles, access codes, targets, and direct links into each client record.",
     Icon: Users,
+    action: {
+      href: "/coach/clients/new",
+      label: "New client",
+      variant: "coral",
+    },
   },
   {
-    href: "/coach/settings",
-    label: "Settings",
-    Icon: Settings,
+    id: "review",
+    href: "/coach/review",
+    label: "Review",
+    heading: "Review",
+    subheading:
+      "Work the daily coaching queue from missed logs, fresh check-ins, and progress-photo signals.",
+    Icon: ClipboardCheck,
+    action: {
+      href: "/coach/clients",
+      label: "Open clients",
+      variant: "secondary",
+    },
   },
 ];
 
-function getCoachTabIndex(pathname: string) {
-  if (pathname === "/coach/settings" || pathname.startsWith("/coach/settings/")) {
-    return 2;
+function getIndexFromTab(tab: CoachPrimaryTab) {
+  return Math.max(
+    0,
+    coachTabs.findIndex((entry) => entry.id === tab),
+  );
+}
+
+function getExactCoachTabIndex(pathname: string) {
+  const index = coachTabs.findIndex((tab) => tab.href === pathname);
+  return index >= 0 ? index : null;
+}
+
+function getCoachBottomTabIndex(pathname: string) {
+  if (pathname === "/coach") {
+    return 0;
   }
 
   if (pathname === "/coach/clients" || pathname.startsWith("/coach/clients/")) {
     return 1;
   }
 
-  return 0;
+  if (pathname === "/coach/review" || pathname.startsWith("/coach/review/")) {
+    return 2;
+  }
+
+  return null;
 }
 
 function isMobileViewport() {
@@ -98,20 +162,120 @@ function applyEdgeResistance(deltaX: number, currentIndex: number) {
   return Math.max(-maxTravel, Math.min(maxTravel, resistedDelta));
 }
 
+function CoachSettingsLink() {
+  return (
+    <Link
+      href="/coach/settings"
+      aria-label="Coach settings"
+      title="Settings"
+      className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/15 bg-slate-50 text-slate-900 transition hover:border-accent-teal/30 hover:bg-slate-100"
+    >
+      <Settings className="h-4 w-4" aria-hidden="true" />
+      <span className="sr-only">Settings</span>
+    </Link>
+  );
+}
+
+function CoachHeaderAction({ activeIndex }: { activeIndex: number }) {
+  const action = coachTabs[activeIndex]?.action;
+
+  if (!action) {
+    return null;
+  }
+
+  return (
+    <Link href={action.href} className="block w-full sm:inline-block sm:w-auto">
+      <Button variant={action.variant} size="sm" fullWidth>
+        {action.label}
+      </Button>
+    </Link>
+  );
+}
+
+function CoachTopNav({ activeIndex }: { activeIndex: number }) {
+  return (
+    <nav className="hidden gap-2 overflow-x-auto pb-1 sm:flex sm:flex-wrap sm:items-center sm:overflow-visible sm:pb-0">
+      {coachTabs.map((tab, index) => {
+        const active = index === activeIndex;
+        const Icon = tab.Icon;
+
+        return (
+          <Link
+            key={tab.href}
+            href={tab.href}
+            aria-current={active ? "page" : undefined}
+            className={cn(
+              "inline-flex min-w-0 shrink-0 items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-semibold leading-tight transition",
+              active
+                ? "bg-accent-coral text-[#2d2e2d] shadow-soft"
+                : "text-slate-700 hover:bg-accent-teal/10 hover:text-slate-900",
+            )}
+          >
+            <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <span>{tab.label}</span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+function CoachHeader({
+  activeIndex,
+  actions,
+}: {
+  activeIndex: number;
+  actions?: ReactNode;
+}) {
+  const activeTab = coachTabs[activeIndex] ?? coachTabs[0];
+
+  return (
+    <header className="surface-card overflow-hidden p-4 sm:p-6">
+      <div className="flex flex-col gap-5">
+        <div className="space-y-3">
+          <Link href="/" className="eyebrow">
+            Pure Physique
+          </Link>
+          <div className="max-w-3xl space-y-3">
+            <h1 className="section-title">{activeTab.heading}</h1>
+            <p className="max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+              {activeTab.subheading}
+            </p>
+          </div>
+        </div>
+        <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+          <CoachTopNav activeIndex={activeIndex} />
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            {actions ?? <CoachHeaderAction activeIndex={activeIndex} />}
+            <CoachSettingsLink />
+            <form action={logoutAction} className="w-full sm:w-auto">
+              <Button variant="secondary" size="sm" type="submit" fullWidth>
+                Sign out
+              </Button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}
+
 function CoachBottomTabs({
   activeIndex,
+  onSelect,
   onPointerDown,
   onPointerMove,
   onPointerUp,
   onPointerCancel,
   onClickCapture,
 }: {
-  activeIndex: number;
-  onPointerDown: (event: ReactPointerEvent<HTMLElement>) => void;
-  onPointerMove: (event: ReactPointerEvent<HTMLElement>) => void;
-  onPointerUp: (event: ReactPointerEvent<HTMLElement>) => void;
-  onPointerCancel: (event: ReactPointerEvent<HTMLElement>) => void;
-  onClickCapture: (event: ReactMouseEvent<HTMLElement>) => void;
+  activeIndex: number | null;
+  onSelect?: (index: number, event: ReactMouseEvent<HTMLAnchorElement>) => void;
+  onPointerDown?: (event: ReactPointerEvent<HTMLElement>) => void;
+  onPointerMove?: (event: ReactPointerEvent<HTMLElement>) => void;
+  onPointerUp?: (event: ReactPointerEvent<HTMLElement>) => void;
+  onPointerCancel?: (event: ReactPointerEvent<HTMLElement>) => void;
+  onClickCapture?: (event: ReactMouseEvent<HTMLElement>) => void;
 }) {
   return (
     <nav
@@ -135,6 +299,7 @@ function CoachBottomTabs({
               href={tab.href}
               aria-label={tab.label}
               aria-current={active ? "page" : undefined}
+              onClick={(event) => onSelect?.(index, event)}
               className={cn(
                 "inline-flex h-14 min-w-0 items-center justify-center rounded-[1.15rem] transition",
                 active
@@ -154,33 +319,81 @@ function CoachBottomTabs({
 
 export function CoachMobileNavigation({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const activeIndex = getCoachBottomTabIndex(pathname);
+
+  return (
+    <>
+      <div className="page-shell overflow-x-clip pb-32 sm:overflow-visible sm:pb-12">
+        <div className="space-y-6">{children}</div>
+      </div>
+      <CoachBottomTabs activeIndex={activeIndex} />
+    </>
+  );
+}
+
+export function CoachTabbedNavigation({
+  initialTab,
+  demoMode,
+  children,
+}: {
+  initialTab: CoachPrimaryTab;
+  demoMode: boolean;
+  children: ReactNode;
+}) {
+  const pathname = usePathname();
   const router = useRouter();
-  const activeIndex = getCoachTabIndex(pathname);
+  const initialIndex = getIndexFromTab(initialTab);
+  const [activeIndex, setActiveIndex] = useState(initialIndex);
+  const activeIndexRef = useRef(initialIndex);
   const gestureRef = useRef<SwipeGesture | null>(null);
   const frameRef = useRef<number | null>(null);
   const nextDragXRef = useRef(0);
   const settleTimerRef = useRef<number | null>(null);
-  const routeTimerRef = useRef<number | null>(null);
   const tabClickTimerRef = useRef<number | null>(null);
   const suppressTabClickRef = useRef(false);
   const [dragX, setDragX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [isSettling, setIsSettling] = useState(false);
-  const [isNavigating, setIsNavigating] = useState(false);
+  const panels = Children.toArray(children);
 
   useEffect(() => {
-    if (frameRef.current !== null) {
-      window.cancelAnimationFrame(frameRef.current);
-      frameRef.current = null;
+    const nextIndex = getExactCoachTabIndex(pathname);
+
+    if (nextIndex === null || nextIndex === activeIndexRef.current) {
+      return;
     }
 
+    activeIndexRef.current = nextIndex;
+    setActiveIndex(nextIndex);
     setDragX(0);
     setIsDragging(false);
-    setIsSettling(false);
-    setIsNavigating(false);
-    gestureRef.current = null;
-    suppressTabClickRef.current = false;
+    setIsSettling(true);
   }, [pathname]);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const nextIndex = getExactCoachTabIndex(window.location.pathname);
+
+      if (nextIndex === null) {
+        const target =
+          `${window.location.pathname}${window.location.search}${window.location.hash}` as Route;
+        router.replace(target);
+        return;
+      }
+
+      activeIndexRef.current = nextIndex;
+      setActiveIndex(nextIndex);
+      setDragX(0);
+      setIsDragging(false);
+      setIsSettling(true);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [router]);
 
   useEffect(() => {
     return () => {
@@ -190,10 +403,6 @@ export function CoachMobileNavigation({ children }: { children: ReactNode }) {
 
       if (settleTimerRef.current !== null) {
         window.clearTimeout(settleTimerRef.current);
-      }
-
-      if (routeTimerRef.current !== null) {
-        window.clearTimeout(routeTimerRef.current);
       }
 
       if (tabClickTimerRef.current !== null) {
@@ -215,6 +424,19 @@ export function CoachMobileNavigation({ children }: { children: ReactNode }) {
     });
   };
 
+  const startSettling = () => {
+    if (settleTimerRef.current !== null) {
+      window.clearTimeout(settleTimerRef.current);
+    }
+
+    setIsSettling(true);
+
+    settleTimerRef.current = window.setTimeout(() => {
+      setIsSettling(false);
+      settleTimerRef.current = null;
+    }, 220);
+  };
+
   const snapBack = () => {
     if (frameRef.current !== null) {
       window.cancelAnimationFrame(frameRef.current);
@@ -222,18 +444,8 @@ export function CoachMobileNavigation({ children }: { children: ReactNode }) {
     }
 
     setIsDragging(false);
-    setIsNavigating(false);
-    setIsSettling(true);
     setDragX(0);
-
-    if (settleTimerRef.current !== null) {
-      window.clearTimeout(settleTimerRef.current);
-    }
-
-    settleTimerRef.current = window.setTimeout(() => {
-      setIsSettling(false);
-      settleTimerRef.current = null;
-    }, 220);
+    startSettling();
   };
 
   const suppressTabClickBriefly = () => {
@@ -249,6 +461,34 @@ export function CoachMobileNavigation({ children }: { children: ReactNode }) {
     }, 350);
   };
 
+  const commitTab = (nextIndex: number, historyMode: "push" | "replace" = "push") => {
+    if (nextIndex < 0 || nextIndex >= coachTabs.length) {
+      snapBack();
+      return;
+    }
+
+    if (frameRef.current !== null) {
+      window.cancelAnimationFrame(frameRef.current);
+      frameRef.current = null;
+    }
+
+    activeIndexRef.current = nextIndex;
+    setActiveIndex(nextIndex);
+    setDragX(0);
+    setIsDragging(false);
+    startSettling();
+
+    const href = coachTabs[nextIndex].href;
+
+    if (window.location.pathname !== href || window.location.search || window.location.hash) {
+      if (historyMode === "replace") {
+        window.history.replaceState(null, "", href);
+      } else {
+        window.history.pushState(null, "", href);
+      }
+    }
+  };
+
   const startGesture = (
     event: ReactPointerEvent<HTMLElement>,
     source: SwipeGesture["source"],
@@ -256,7 +496,6 @@ export function CoachMobileNavigation({ children }: { children: ReactNode }) {
   ) => {
     if (
       !isMobileViewport() ||
-      isNavigating ||
       !event.isPrimary ||
       (ignoreInteractiveControls && shouldIgnoreSwipeStart(event.target))
     ) {
@@ -286,7 +525,7 @@ export function CoachMobileNavigation({ children }: { children: ReactNode }) {
   const handlePointerMove = (event: ReactPointerEvent<HTMLElement>) => {
     const gesture = gestureRef.current;
 
-    if (!gesture || gesture.pointerId !== event.pointerId || isNavigating) {
+    if (!gesture || gesture.pointerId !== event.pointerId) {
       return;
     }
 
@@ -325,7 +564,7 @@ export function CoachMobileNavigation({ children }: { children: ReactNode }) {
     }
 
     event.preventDefault();
-    setVisualDrag(applyEdgeResistance(deltaX, activeIndex));
+    setVisualDrag(applyEdgeResistance(deltaX, activeIndexRef.current));
   };
 
   const handlePointerEnd = (event: ReactPointerEvent<HTMLElement>) => {
@@ -350,7 +589,7 @@ export function CoachMobileNavigation({ children }: { children: ReactNode }) {
 
     const deltaX = event.clientX - gesture.startX;
     const horizontalTravel = Math.abs(deltaX);
-    const nextIndex = deltaX < 0 ? activeIndex + 1 : activeIndex - 1;
+    const nextIndex = deltaX < 0 ? activeIndexRef.current + 1 : activeIndexRef.current - 1;
     const canNavigate = nextIndex >= 0 && nextIndex < coachTabs.length;
 
     if (!canNavigate || horizontalTravel < getSwipeThreshold()) {
@@ -358,26 +597,7 @@ export function CoachMobileNavigation({ children }: { children: ReactNode }) {
       return;
     }
 
-    if (frameRef.current !== null) {
-      window.cancelAnimationFrame(frameRef.current);
-      frameRef.current = null;
-    }
-
-    const exitX = deltaX < 0 ? -window.innerWidth * 0.95 : window.innerWidth * 0.95;
-
-    setIsDragging(false);
-    setIsSettling(false);
-    setIsNavigating(true);
-    setDragX(exitX);
-
-    if (routeTimerRef.current !== null) {
-      window.clearTimeout(routeTimerRef.current);
-    }
-
-    routeTimerRef.current = window.setTimeout(() => {
-      router.push(coachTabs[nextIndex].href);
-      routeTimerRef.current = null;
-    }, 180);
+    commitTab(nextIndex);
   };
 
   const handlePointerCancel = (event: ReactPointerEvent<HTMLElement>) => {
@@ -413,33 +633,63 @@ export function CoachMobileNavigation({ children }: { children: ReactNode }) {
     }
   };
 
-  const contentStyle: CSSProperties = {
-    transform: `translate3d(${Math.round(dragX)}px, 0, 0)`,
-    transition: isDragging
-      ? "none"
-      : isNavigating
-        ? "transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1)"
-        : isSettling
-          ? "transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1)"
-          : undefined,
-    willChange: isDragging || isNavigating || isSettling ? "transform" : undefined,
+  const handleTabSelect = (index: number, event: ReactMouseEvent<HTMLAnchorElement>) => {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+      return;
+    }
+
+    event.preventDefault();
+    commitTab(index);
   };
+
+  const transition = isDragging
+    ? "none"
+    : isSettling
+      ? "transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1)"
+      : "none";
+  const trackStyle = {
+    "--coach-tab-transform": `translate3d(calc(-${activeIndex * 100}% + ${Math.round(dragX)}px), 0, 0)`,
+    "--coach-tab-transition": transition,
+    willChange: isDragging || isSettling ? "transform" : undefined,
+  } as CSSProperties;
 
   return (
     <>
-      <div
-        className="page-shell touch-pan-y overflow-x-clip pb-32 sm:touch-auto sm:overflow-visible sm:pb-12"
-        onPointerDown={handleContentPointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerEnd}
-        onPointerCancel={handlePointerCancel}
-      >
-        <div className="space-y-6" style={contentStyle}>
-          {children}
+      <div className="page-shell pb-32 sm:pb-12">
+        <div className="space-y-6">
+          <CoachHeader activeIndex={activeIndex} />
+          <DemoBanner enabled={demoMode} />
+          <div
+            className="touch-pan-y overflow-x-clip sm:touch-auto sm:overflow-visible"
+            onPointerDown={handleContentPointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerEnd}
+            onPointerCancel={handlePointerCancel}
+          >
+            <div
+              className="flex [transform:var(--coach-tab-transform)] [transition:var(--coach-tab-transition)] sm:block sm:!transform-none sm:!transition-none"
+              style={trackStyle}
+            >
+              {panels.map((panel, index) => (
+                <section
+                  key={index}
+                  aria-hidden={index !== activeIndex}
+                  inert={index !== activeIndex ? true : undefined}
+                  className={cn(
+                    "w-full shrink-0 space-y-6 sm:w-auto sm:shrink",
+                    index === activeIndex ? "sm:block" : "sm:hidden",
+                  )}
+                >
+                  {panel}
+                </section>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
       <CoachBottomTabs
         activeIndex={activeIndex}
+        onSelect={handleTabSelect}
         onPointerDown={handleTabPointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerEnd}

@@ -7,6 +7,7 @@ import {
   Activity,
   Camera,
   ChartSpline,
+  ClipboardCheck,
   Home,
   LayoutDashboard,
   MessagesSquare,
@@ -20,6 +21,7 @@ import { cn } from "@/lib/utils";
 const navIcons = {
   dashboard: LayoutDashboard,
   users: Users,
+  review: ClipboardCheck,
   settings: Settings,
   home: Home,
   history: ChartSpline,

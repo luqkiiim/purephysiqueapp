@@ -22,10 +22,19 @@ import {
 import {
   getDemoClientDetailData,
   getDemoCoachDashboardData,
+  demoCheckIns,
   demoClients,
+  demoProgressPhotos,
 } from "@/lib/demo/data";
 import { isLiveAppEnabled } from "@/lib/supabase/config";
-import type { ClientStatusSource, DailyCheckIn } from "@/lib/types/app";
+import type {
+  ClientStatusRow,
+  ClientStatusSource,
+  CoachClientsPageData,
+  CoachDashboardData,
+  CoachReviewData,
+  DailyCheckIn,
+} from "@/lib/types/app";
 import {
   buildClientStatusRow,
   buildTodaySnapshot,
@@ -33,7 +42,7 @@ import {
   getTodaysOrLatestCheckIn,
   groupCheckInsByClientId,
 } from "@/lib/data/shared";
-import { getTodayIsoDate } from "@/lib/utils";
+import { getTodayIsoDate, percentageAgainstTarget } from "@/lib/utils";
 
 function average(values: number[]) {
   if (!values.length) {
@@ -92,18 +101,188 @@ function buildMomentumClients(
     }));
 }
 
-export async function getCoachDashboardData() {
+function buildCoachSummaryCards(
+  clients: ClientStatusSource[],
+  rows: ClientStatusRow[],
+) {
+  return [
+    {
+      label: "Total clients",
+      value: `${clients.length}`,
+      hint: "One coach workspace",
+      tone: "neutral" as const,
+    },
+    {
+      label: "Logged today",
+      value: `${rows.filter((row) => row.statusLabel === "Logged today").length}`,
+      hint: "Daily compliance snapshot",
+      tone: "success" as const,
+    },
+    {
+      label: "Missed today",
+      value: `${rows.filter((row) => row.statusLabel !== "Logged today").length}`,
+      hint: "Needs follow-up",
+      tone: "warning" as const,
+    },
+    {
+      label: "Active streaks",
+      value: `${rows.filter((row) => row.streak >= 5).length}`,
+      hint: "Clients at 5+ days",
+      tone: "accent" as const,
+    },
+  ];
+}
+
+function sortCheckInsNewestFirst(left: DailyCheckIn, right: DailyCheckIn) {
+  const dateSort = right.date.localeCompare(left.date);
+
+  if (dateSort !== 0) {
+    return dateSort;
+  }
+
+  return right.submittedAt.localeCompare(left.submittedAt);
+}
+
+function buildCoachReviewData(
+  rows: ClientStatusRow[],
+  checkIns: DailyCheckIn[],
+  progressPhotoCountsByClientId: Map<string, number>,
+): CoachReviewData {
+  const today = getTodayIsoDate();
+  const sortedCheckIns = [...checkIns].sort(sortCheckInsNewestFirst);
+  const rowsByClientId = new Map(rows.map((row) => [row.id, row] as const));
+  const latestCheckInByClientId = new Map<string, DailyCheckIn>();
+
+  sortedCheckIns.forEach((entry) => {
+    if (!latestCheckInByClientId.has(entry.clientId)) {
+      latestCheckInByClientId.set(entry.clientId, entry);
+    }
+  });
+
+  const reviewClients = rows.map((row) => ({
+    ...row,
+    averageConsistency: Math.round((row.proteinConsistency + row.stepConsistency) / 2),
+    progressPhotoCount: progressPhotoCountsByClientId.get(row.id) ?? 0,
+    lastCheckIn: latestCheckInByClientId.get(row.id) ?? null,
+  }));
+  const recentCheckIns = sortedCheckIns
+    .map((entry) => {
+      const client = rowsByClientId.get(entry.clientId);
+
+      if (!client) {
+        return null;
+      }
+
+      return {
+        id: entry.id,
+        clientId: entry.clientId,
+        clientName: client.fullName,
+        date: entry.date,
+        bodyWeight: entry.bodyWeight,
+        completionPercentage: entry.completionPercentage,
+        proteinPercent: percentageAgainstTarget(
+          entry.proteinGrams,
+          entry.proteinTargetSnapshot,
+        ),
+        stepPercent: percentageAgainstTarget(entry.steps, entry.stepTargetSnapshot),
+        proteinGrams: entry.proteinGrams,
+        steps: entry.steps,
+        mealNotes: entry.mealNotes,
+      };
+    })
+    .filter((entry): entry is NonNullable<typeof entry> => entry !== null)
+    .slice(0, 10);
+  const totalProgressPhotos = reviewClients.reduce(
+    (total, client) => total + client.progressPhotoCount,
+    0,
+  );
+  const averageCompletion = recentCheckIns.length
+    ? Math.round(
+        recentCheckIns.reduce((total, entry) => total + entry.completionPercentage, 0) /
+          recentCheckIns.length,
+      )
+    : 0;
+
+  return {
+    summaryCards: [
+      {
+        label: "Review queue",
+        value: `${reviewClients.filter((client) => client.statusLabel !== "Logged today").length}`,
+        hint: "Clients still needing attention",
+        tone: "warning",
+      },
+      {
+        label: "Checked in today",
+        value: `${checkIns.filter((entry) => entry.date === today).length}`,
+        hint: "Fresh logs to scan",
+        tone: "success",
+      },
+      {
+        label: "Progress photos",
+        value: `${totalProgressPhotos}`,
+        hint: "Uploaded across the roster",
+        tone: "accent",
+      },
+      {
+        label: "Recent completion",
+        value: `${averageCompletion}%`,
+        hint: "Average from latest logs",
+        tone: "neutral",
+      },
+    ],
+    missedClients: reviewClients
+      .filter((client) => client.statusLabel !== "Logged today")
+      .slice(0, 8),
+    recentCheckIns,
+    photoIndicators: [...reviewClients]
+      .sort((left, right) => {
+        if (right.progressPhotoCount !== left.progressPhotoCount) {
+          return right.progressPhotoCount - left.progressPhotoCount;
+        }
+
+        return right.averageConsistency - left.averageConsistency;
+      })
+      .slice(0, 6),
+  };
+}
+
+export async function getCoachTabsData() {
   const { coach, isDemo } = await requireCoach();
   const dashboardPreferences = await getCoachDashboardPreferences();
 
   if (!isLiveAppEnabled || isDemo) {
     const demo = getDemoCoachDashboardData();
-
-    return {
+    const sortedRows = sortClientStatusRows(demo.clients, dashboardPreferences);
+    const adherenceTrend = demo.adherenceTrend.slice(
+      -Math.max(1, Math.ceil(dashboardPreferences.chartWindowDays / 7)),
+    );
+    const overview: CoachDashboardData = {
       ...demo,
       dashboardPreferences,
-      clients: sortClientStatusRows(demo.clients, dashboardPreferences),
-      adherenceTrend: demo.adherenceTrend.slice(-Math.max(1, Math.ceil(dashboardPreferences.chartWindowDays / 7))),
+      clients: sortedRows,
+      adherenceTrend,
+    };
+    const clients: CoachClientsPageData = {
+      coach: demo.coach,
+      dashboardPreferences,
+      clients: sortedRows,
+    };
+    const progressPhotoCountsByClientId = new Map(
+      demoClients.map(
+        (client) =>
+          [
+            client.id,
+            demoProgressPhotos.filter((photo) => photo.clientId === client.id).length,
+          ] as const,
+      ),
+    );
+
+    return {
+      coach: demo.coach,
+      dashboardPreferences,
+      overview,
+      clients,
+      review: buildCoachReviewData(sortedRows, demoCheckIns, progressPhotoCountsByClientId),
     };
   }
 
@@ -112,9 +291,15 @@ export async function getCoachDashboardData() {
     .toISOString()
     .slice(0, 10);
   const clientIds = clients.map((client) => client.id);
-  const [allRecentCheckIns, supplementTargets] = await Promise.all([
+  const [allRecentCheckIns, supplementTargets, progressPhotoCounts] = await Promise.all([
     listDailyCheckInsForClients(clientIds, sinceDate),
     listClientSupplementTargets(clientIds),
+    Promise.all(
+      clientIds.map(async (clientId) => {
+        const count = await countProgressPhotosForClient(clientId);
+        return [clientId, count] as const;
+      }),
+    ),
   ]);
   const checkInsByClientId = groupCheckInsByClientId(allRecentCheckIns);
   const rows = clients.map((client) =>
@@ -129,36 +314,10 @@ export async function getCoachDashboardData() {
       .filter((entry) => entry.date === getTodayIsoDate())
       .map((entry) => [entry.clientId, entry] as const),
   );
-
-  return {
+  const overview: CoachDashboardData = {
     coach,
     dashboardPreferences,
-    summaryCards: [
-      {
-        label: "Total clients",
-        value: `${clients.length}`,
-        hint: "One coach workspace",
-        tone: "neutral" as const,
-      },
-      {
-        label: "Logged today",
-        value: `${rows.filter((row) => row.statusLabel === "Logged today").length}`,
-        hint: "Daily compliance snapshot",
-        tone: "success" as const,
-      },
-      {
-        label: "Missed today",
-        value: `${rows.filter((row) => row.statusLabel !== "Logged today").length}`,
-        hint: "Needs follow-up",
-        tone: "warning" as const,
-      },
-      {
-        label: "Active streaks",
-        value: `${clients.filter((client) => client.currentStreak >= 5).length}`,
-        hint: "Clients at 5+ days",
-        tone: "accent" as const,
-      },
-    ],
+    summaryCards: buildCoachSummaryCards(clients, rows),
     clients: sortedRows,
     adherenceTrend: buildAdherenceTrend(allRecentCheckIns, dashboardPreferences.chartWindowDays),
     todayCheckInSnapshot: buildTodaySnapshot(
@@ -168,40 +327,33 @@ export async function getCoachDashboardData() {
     ),
     momentumClients: buildMomentumClients(clients, checkInsByClientId),
   };
-}
-
-export async function getCoachClientsPageData() {
-  const { coach, isDemo } = await requireCoach();
-  const dashboardPreferences = await getCoachDashboardPreferences();
-
-  if (!isLiveAppEnabled || isDemo) {
-    const demo = getDemoCoachDashboardData();
-
-    return {
-      coach: demo.coach,
-      dashboardPreferences,
-      clients: sortClientStatusRows(demo.clients, dashboardPreferences),
-    };
-  }
-
-  const clients = await listClientStatusSourcesByCoachId(coach.id);
-  const sinceDate = subDays(new Date(), 6).toISOString().slice(0, 10);
-  const recentCheckIns = await listDailyCheckInsForClients(
-    clients.map((client) => client.id),
-    sinceDate,
-  );
-  const checkInsByClientId = groupCheckInsByClientId(recentCheckIns);
+  const clientsPage: CoachClientsPageData = {
+    coach,
+    dashboardPreferences,
+    clients: sortedRows,
+  };
 
   return {
     coach,
     dashboardPreferences,
-    clients: sortClientStatusRows(
-      clients.map((client) =>
-        buildClientStatusRow(client, checkInsByClientId.get(client.id) ?? []),
-      ),
-      dashboardPreferences,
+    overview,
+    clients: clientsPage,
+    review: buildCoachReviewData(
+      sortedRows,
+      allRecentCheckIns,
+      new Map(progressPhotoCounts),
     ),
   };
+}
+
+export async function getCoachDashboardData() {
+  const data = await getCoachTabsData();
+  return data.overview;
+}
+
+export async function getCoachClientsPageData() {
+  const data = await getCoachTabsData();
+  return data.clients;
 }
 
 export async function getCoachClientDetailData(clientId: string) {
