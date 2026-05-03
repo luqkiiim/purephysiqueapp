@@ -6,14 +6,14 @@ Pure Physique is a mobile-first coaching app that replaces a client tracking spr
 
 - Clients complete a daily check-in in under 60 seconds.
 - One coach account manages multiple client profiles and targets.
-- Clients access the app through a private invite link.
+- Clients claim access with a coach-issued access code, then sign in with email and password.
 - The coach can track adherence, streaks, missed check-ins, body weight, protein, steps, exercise, supplements, notes, and visible feedback.
-- Version one includes progress photos, weekly summaries, manual private-link access, and server-side access control around Supabase data.
+- Version one includes progress photos, weekly summaries, access-code account claiming, and server-side access control around Supabase data.
 
 ## Architecture
 
 - Frontend: Next.js App Router, TypeScript, Tailwind CSS.
-- Backend: Supabase Postgres for coaching data, Supabase Auth for coach login, and Supabase Storage for private progress photos.
+- Backend: Supabase Postgres for coaching data, Supabase Auth for coach and client login, and Supabase Storage for private progress photos.
 - Charts: Recharts for mobile-friendly trend and target visualisation.
 - Mutations: Next.js Server Actions for coach and client flows.
 
@@ -67,6 +67,7 @@ lib/
   validation/
 supabase/
   schema.sql
+  hotfix-client-auth-user-id.sql
   seed.sql
 docs/
 ```
@@ -94,7 +95,10 @@ docs/
 
 ## Access model
 
-- Share the private access link manually from the client detail page or `/access/[token]`.
+- Create or regenerate a client access code from the client detail page.
+- The client uses `/access` with the code, email, and password to claim the account once.
+- After claim, the client signs in with email and password; the `clients.auth_user_id` column links the client row to the Supabase Auth user.
+- If a deployed database was created before client auth linking was added, run [supabase/hotfix-client-auth-user-id.sql](./supabase/hotfix-client-auth-user-id.sql) in the Supabase SQL editor.
 - The legacy `app/api/cron/reminders/route.ts` endpoint now returns a skipped response because outbound email reminders are disabled in this version.
 
 ## Progress photo storage

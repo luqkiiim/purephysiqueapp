@@ -6,3 +6,6 @@ console.log("3. Optionally run supabase/seed.sql for demo records.");
 console.log("4. Create the coach auth user in Supabase Authentication.");
 console.log("5. Copy .env.example to .env.local and fill in the Supabase values.");
 console.log("6. Mirror the same environment variables in Vercel.");
+console.log("");
+console.log("Existing deployments:");
+console.log("- If client signup fails because clients.auth_user_id is missing, run supabase/hotfix-client-auth-user-id.sql in the Supabase SQL editor.");
