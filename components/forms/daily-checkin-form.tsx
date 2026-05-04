@@ -109,6 +109,16 @@ function normalizeExerciseEntries(
     .filter((entry) => entry.type.trim().length > 0);
 }
 
+function numericInputDefault(value?: number) {
+  return value == null ? "" : String(value);
+}
+
+function numberFromInput(value: string) {
+  const parsedValue = value.trim() === "" ? 0 : Number(value);
+
+  return Number.isFinite(parsedValue) ? parsedValue : 0;
+}
+
 export function DailyCheckInForm({
   action,
   defaults,
@@ -149,12 +159,14 @@ export function DailyCheckInForm({
   const [bedtime, setBedtime] = useState(defaults?.bedtime ?? "22:30");
   const [wakeTime, setWakeTime] = useState(defaults?.wakeTime ?? "06:30");
   const [totalSleepHours, setTotalSleepHours] = useState(
-    defaults?.totalSleepHours ?? 7.5,
+    numericInputDefault(defaults?.totalSleepHours),
   );
-  const [proteinGrams, setProteinGrams] = useState(defaults?.proteinGrams ?? 0);
-  const [steps, setSteps] = useState(defaults?.steps ?? 0);
+  const [proteinGrams, setProteinGrams] = useState(
+    numericInputDefault(defaults?.proteinGrams),
+  );
+  const [steps, setSteps] = useState(numericInputDefault(defaults?.steps));
   const [hydrationLiters, setHydrationLiters] = useState(
-    defaults?.hydrationLiters ?? 0,
+    numericInputDefault(defaults?.hydrationLiters),
   );
   const [exerciseEntries, setExerciseEntries] = useState(() =>
     buildExerciseEntryDrafts(
@@ -182,13 +194,17 @@ export function DailyCheckInForm({
   );
   const bodyWeight =
     bodyWeightInput.trim() === "" ? 0 : Number(bodyWeightInput);
+  const totalSleepHoursValue = numberFromInput(totalSleepHours);
+  const proteinGramsValue = numberFromInput(proteinGrams);
+  const stepsValue = numberFromInput(steps);
+  const hydrationLitersValue = numberFromInput(hydrationLiters);
   const completion = calculateCompletionPercentage([
     bedtime,
     wakeTime,
-    totalSleepHours,
-    proteinGrams,
-    steps,
-    hydrationLiters,
+    totalSleepHoursValue,
+    proteinGramsValue,
+    stepsValue,
+    hydrationLitersValue,
     exerciseSummary,
     totalExerciseDurationMinutes,
     bodyWeight,
@@ -196,8 +212,8 @@ export function DailyCheckInForm({
     fishOilEnabled ? fishOilChecked : true,
   ]);
 
-  const proteinPercent = percentageAgainstTarget(proteinGrams, proteinTarget);
-  const stepPercent = percentageAgainstTarget(steps, stepTarget);
+  const proteinPercent = percentageAgainstTarget(proteinGramsValue, proteinTarget);
+  const stepPercent = percentageAgainstTarget(stepsValue, stepTarget);
 
   function updateExerciseEntry(
     id: string,
@@ -313,25 +329,25 @@ export function DailyCheckInForm({
           <div className="tap-card">
             <p className="text-slate-500">Protein</p>
             <p className="mt-1 font-semibold text-slate-900">
-              {proteinGrams} / {proteinTarget}g
+              {proteinGramsValue} / {proteinTarget}g
             </p>
           </div>
           <div className="tap-card">
             <p className="text-slate-500">Steps</p>
             <p className="mt-1 font-semibold text-slate-900">
-              {steps.toLocaleString()} / {stepTarget.toLocaleString()}
+              {stepsValue.toLocaleString()} / {stepTarget.toLocaleString()}
             </p>
           </div>
           <div className="tap-card">
             <p className="text-slate-500">Sleep</p>
             <p className="mt-1 font-semibold text-slate-900">
-              {totalSleepHours} / {SLEEP_TARGET_HOURS}h
+              {totalSleepHoursValue} / {SLEEP_TARGET_HOURS}h
             </p>
           </div>
           <div className="tap-card">
             <p className="text-slate-500">Hydration</p>
             <p className="mt-1 font-semibold text-slate-900">
-              {hydrationLiters} / {HYDRATION_TARGET_LITERS}L
+              {hydrationLitersValue} / {HYDRATION_TARGET_LITERS}L
             </p>
           </div>
           <div className="tap-card">
@@ -424,8 +440,7 @@ export function DailyCheckInForm({
                 step="0.1"
                 className="mt-2 w-full bg-transparent text-[2rem] font-display outline-none sm:text-3xl"
                 value={totalSleepHours}
-                onChange={(event) => setTotalSleepHours(Number(event.target.value))}
-                required
+                onChange={(event) => setTotalSleepHours(event.target.value)}
               />
             </label>
           </div>
@@ -454,8 +469,7 @@ export function DailyCheckInForm({
                   type="number"
                   className="w-full bg-transparent text-[2rem] font-display outline-none sm:text-3xl"
                   value={proteinGrams}
-                  onChange={(event) => setProteinGrams(Number(event.target.value))}
-                  required
+                  onChange={(event) => setProteinGrams(event.target.value)}
                 />
                 <span className="pb-1 text-sm text-slate-500">/ {proteinTarget}</span>
               </div>
@@ -474,8 +488,7 @@ export function DailyCheckInForm({
                   type="number"
                   className="w-full bg-transparent text-[2rem] font-display outline-none sm:text-3xl"
                   value={steps}
-                  onChange={(event) => setSteps(Number(event.target.value))}
-                  required
+                  onChange={(event) => setSteps(event.target.value)}
                 />
               </div>
               <p className="mt-2 text-sm text-slate-600">{stepPercent}% of target</p>
@@ -493,8 +506,7 @@ export function DailyCheckInForm({
                   min="0"
                   className="w-full bg-transparent text-[2rem] font-display outline-none sm:text-3xl"
                   value={hydrationLiters}
-                  onChange={(event) => setHydrationLiters(Number(event.target.value))}
-                  required
+                  onChange={(event) => setHydrationLiters(event.target.value)}
                 />
               </div>
               <p className="mt-2 text-sm text-slate-600">
