@@ -1,5 +1,6 @@
 import { parseISO, subDays } from "date-fns";
 
+import { getClientAccountEmail } from "@/lib/access-codes";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { appEnv, isSupabaseAdminEnabled } from "@/lib/supabase/config";
 import type {
@@ -154,11 +155,14 @@ export function buildClientStatusRow(
       : client.activeStatus === "active"
         ? "warning"
         : "neutral";
+  const accountEmail = getClientAccountEmail(client.email);
 
   return {
     id: client.id,
     fullName: client.fullName,
     email: client.email,
+    accountEmail,
+    accountClaimed: Boolean(accountEmail),
     statusLabel: status.label,
     statusTone,
     streak: client.currentStreak,

@@ -1,5 +1,6 @@
 import { subDays } from "date-fns";
 
+import { getClientAccountEmail } from "@/lib/access-codes";
 import { defaultCoachDashboardPreferences } from "@/lib/coach-settings";
 import type {
   Client,
@@ -367,11 +368,14 @@ export function getDemoCoachDashboardData(): CoachDashboardData {
         : client.activeStatus === "paused"
           ? "neutral"
           : "warning";
+    const accountEmail = getClientAccountEmail(client.email);
 
     return {
       id: client.id,
       fullName: client.fullName,
       email: client.email,
+      accountEmail,
+      accountClaimed: Boolean(accountEmail),
       statusLabel: status.label,
       statusTone,
       streak: client.currentStreak,

@@ -160,6 +160,8 @@ export interface ClientStatusRow {
   id: string;
   fullName: string;
   email: string;
+  accountEmail?: string | null;
+  accountClaimed: boolean;
   statusLabel: string;
   statusTone: "success" | "warning" | "neutral";
   streak: number;

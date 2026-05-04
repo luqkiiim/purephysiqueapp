@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { getCoachClientDetailData } from "@/lib/data/coach";
-import { formatAccessCode, isInternalClientEmail } from "@/lib/access-codes";
+import { formatAccessCode, getClientAccountEmail } from "@/lib/access-codes";
 import { isLiveAppEnabled } from "@/lib/supabase/config";
 import {
   formatClientStatusLabel,
@@ -72,7 +72,8 @@ export default async function CoachClientDetailPage({
     data.client.targets.probioticsEnabled ? "Probiotics" : null,
     data.client.targets.fishOilEnabled ? "Fish oil" : null,
   ].filter(Boolean);
-  const clientHasClaimedAccount = !isInternalClientEmail(data.client.email);
+  const clientAccountEmail = getClientAccountEmail(data.client.email);
+  const clientHasClaimedAccount = Boolean(clientAccountEmail);
   const formattedAccessCode = formatAccessCode(data.client.inviteToken);
 
   return (
@@ -143,6 +144,9 @@ export default async function CoachClientDetailPage({
                 <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Account status</p>
                 <p className="mt-2 break-words text-sm font-semibold text-slate-900">
                   {clientHasClaimedAccount ? "Claimed" : "Waiting for first sign-in"}
+                </p>
+                <p className="mt-1 break-words text-sm text-slate-600">
+                  {clientAccountEmail ?? "No login email yet"}
                 </p>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
@@ -255,7 +259,7 @@ export default async function CoachClientDetailPage({
               <div className="surface-muted p-4">
                 <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Client email</p>
                 <p className="mt-2 text-sm font-semibold text-slate-900">
-                  {clientHasClaimedAccount ? data.client.email : "Not claimed yet"}
+                  {clientAccountEmail ?? "Not claimed yet"}
                 </p>
               </div>
             </CardContent>

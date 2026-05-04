@@ -38,6 +38,14 @@ export function isInternalClientEmail(value: string | null | undefined) {
   return normalizedValue.startsWith("client-") && normalizedValue.endsWith(INTERNAL_CLIENT_EMAIL_DOMAIN);
 }
 
+export function getClientAccountEmail(value: string | null | undefined) {
+  if (!value || isInternalClientEmail(value)) {
+    return null;
+  }
+
+  return value.trim();
+}
+
 export async function generateUniqueClientAccessCode(admin: SupabaseClient) {
   for (let attempt = 0; attempt < 12; attempt += 1) {
     const accessCode = randomAccessCodeValue();

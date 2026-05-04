@@ -76,7 +76,9 @@ export function CoachOverviewPanel({ data }: { data: CoachDashboardData }) {
                         >
                           {client.fullName}
                         </Link>
-                        <p className="text-sm text-slate-600">Coach-managed client access</p>
+                        <p className="break-words text-sm text-slate-600">
+                          {client.accountEmail ?? "Account not claimed yet"}
+                        </p>
                       </div>
                       <div className="flex flex-wrap gap-2">
                         <Badge
@@ -91,6 +93,9 @@ export function CoachOverviewPanel({ data }: { data: CoachDashboardData }) {
                           {client.statusLabel}
                         </Badge>
                         <Badge tone="accent">{client.streak} day streak</Badge>
+                        <Badge tone={client.accountClaimed ? "success" : "warning"}>
+                          {client.accountClaimed ? "Claimed" : "Not claimed"}
+                        </Badge>
                         <Badge tone="neutral">Protein {client.proteinConsistency}%</Badge>
                         <Badge tone="neutral">Steps {client.stepConsistency}%</Badge>
                       </div>

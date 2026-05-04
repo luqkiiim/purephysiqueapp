@@ -108,11 +108,19 @@ export function CoachReviewPanel({ data }: { data: CoachReviewData }) {
                           <Badge tone={getBadgeTone(client.statusTone)}>
                             {client.statusLabel}
                           </Badge>
+                          <Badge tone={client.accountClaimed ? "success" : "warning"}>
+                            {client.accountClaimed ? "Claimed" : "Not claimed"}
+                          </Badge>
                         </div>
                         <p className="text-sm leading-6 text-slate-600">
                           {client.lastCheckIn
                             ? `Last reviewed ${formatFullDate(client.lastCheckIn.date)} at ${client.lastCheckIn.completionPercentage}% completion.`
                             : "No recent check-in is available for this client."}
+                        </p>
+                        <p className="break-words text-sm text-slate-600">
+                          {client.accountEmail
+                            ? `Login email: ${client.accountEmail}`
+                            : "Client has not claimed an account yet."}
                         </p>
                       </div>
                       <div className="flex flex-wrap gap-2">

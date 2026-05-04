@@ -98,6 +98,12 @@ export function CoachClientsPanel({
                     <Badge tone="accent" className="self-start">
                       {client.streak} day streak
                     </Badge>
+                    <Badge
+                      tone={client.accountClaimed ? "success" : "warning"}
+                      className="self-start"
+                    >
+                      {client.accountClaimed ? "Account claimed" : "Not claimed yet"}
+                    </Badge>
                   </div>
                   <div>
                     <CardTitle>
@@ -108,38 +114,52 @@ export function CoachClientsPanel({
                         {client.fullName}
                       </Link>
                     </CardTitle>
-                    <CardDescription>Access code managed by coach</CardDescription>
+                    <CardDescription>
+                      {client.accountEmail ?? "Client has not claimed an account yet"}
+                    </CardDescription>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                <div className="surface-muted p-4">
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Streak</p>
-                  <p className="mt-2 text-lg font-semibold text-slate-900">{client.streak} days</p>
-                </div>
+              <CardContent className="space-y-3">
                 <div className="surface-muted p-4">
                   <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
-                    Protein consistency
+                    Login email
                   </p>
-                  <p className="mt-2 text-lg font-semibold text-slate-900">
-                    {client.proteinConsistency}%
-                  </p>
-                </div>
-                <div className="surface-muted p-4">
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
-                    Step consistency
-                  </p>
-                  <p className="mt-2 text-lg font-semibold text-slate-900">
-                    {client.stepConsistency}%
+                  <p className="mt-2 break-words text-sm font-semibold text-slate-900">
+                    {client.accountEmail ?? "Not claimed yet"}
                   </p>
                 </div>
-                <div className="surface-muted p-4">
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
-                    Recent weight
-                  </p>
-                  <p className="mt-2 text-lg font-semibold text-slate-900">
-                    {client.recentWeight ? client.recentWeight : "No log yet"}
-                  </p>
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                  <div className="surface-muted p-4">
+                    <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Streak</p>
+                    <p className="mt-2 text-lg font-semibold text-slate-900">
+                      {client.streak} days
+                    </p>
+                  </div>
+                  <div className="surface-muted p-4">
+                    <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
+                      Protein consistency
+                    </p>
+                    <p className="mt-2 text-lg font-semibold text-slate-900">
+                      {client.proteinConsistency}%
+                    </p>
+                  </div>
+                  <div className="surface-muted p-4">
+                    <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
+                      Step consistency
+                    </p>
+                    <p className="mt-2 text-lg font-semibold text-slate-900">
+                      {client.stepConsistency}%
+                    </p>
+                  </div>
+                  <div className="surface-muted p-4">
+                    <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
+                      Recent weight
+                    </p>
+                    <p className="mt-2 text-lg font-semibold text-slate-900">
+                      {client.recentWeight ? client.recentWeight : "No log yet"}
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
