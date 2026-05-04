@@ -32,9 +32,15 @@ export async function CoachTabsPage({
 
   return (
     <CoachTabbedNavigation initialTab={initialTab} demoMode={!isLiveAppEnabled}>
-      <CoachOverviewPanel data={data.overview} />
-      <CoachClientsPanel data={data.clients} deleted={deleted} error={error} />
-      <CoachReviewPanel data={data.review} />
+      <div className="space-y-6">
+        <CoachOverviewPanel data={data.overview} />
+      </div>
+      <div className="space-y-6">
+        <CoachClientsPanel data={data.clients} deleted={deleted} error={error} />
+      </div>
+      <div className="space-y-6">
+        <CoachReviewPanel data={data.review} />
+      </div>
     </CoachTabbedNavigation>
   );
 }

@@ -99,6 +99,7 @@ const coachTabs: CoachTab[] = [
 
 const settleDurationMs = 340;
 const settleEasing = "cubic-bezier(0.16, 1, 0.3, 1)";
+const measuredPanelBufferPx = 16;
 
 function getIndexFromTab(tab: CoachPrimaryTab) {
   return Math.max(
@@ -189,7 +190,7 @@ function CoachHeaderAction({ activeIndex }: { activeIndex: number }) {
   }
 
   return (
-    <Link href={action.href} className="block w-full sm:inline-block sm:w-auto">
+    <Link href={action.href} className="block min-w-0 sm:inline-block sm:w-auto">
       <Button variant={action.variant} size="sm" fullWidth>
         {action.label}
       </Button>
@@ -250,11 +251,11 @@ function CoachHeader({
         </div>
         <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
           <CoachTopNav activeIndex={activeIndex} />
-          <div className="flex flex-wrap items-center justify-end gap-2">
+          <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 sm:flex sm:flex-wrap sm:justify-end">
             {actions ?? <CoachHeaderAction activeIndex={activeIndex} />}
             <CoachSettingsLink />
-            <form action={logoutAction} className="w-full sm:w-auto">
-              <Button variant="secondary" size="sm" type="submit" fullWidth>
+            <form action={logoutAction} className="w-auto">
+              <Button variant="secondary" size="sm" type="submit">
                 Sign out
               </Button>
             </form>
@@ -369,6 +370,9 @@ export function CoachTabbedNavigation({
   const heightIndex = targetIndex ?? activeIndex;
   const activePanelHeight = panelHeights[heightIndex] ?? panelHeights[activeIndex] ?? 0;
   const usesMeasuredHeight = activePanelHeight > 0;
+  const viewportHeight = usesMeasuredHeight
+    ? activePanelHeight + measuredPanelBufferPx
+    : activePanelHeight;
 
   const syncTargetIndex = useCallback((nextIndex: number | null) => {
     targetIndexRef.current = nextIndex;
@@ -765,7 +769,7 @@ export function CoachTabbedNavigation({
       ? `transform ${settleDurationMs}ms ${settleEasing}`
       : "none";
   const viewportStyle = {
-    "--coach-tabs-height": usesMeasuredHeight ? `${activePanelHeight}px` : "auto",
+    "--coach-tabs-height": usesMeasuredHeight ? `${viewportHeight}px` : "auto",
     "--coach-tabs-height-transition": isSettling
       ? `height ${settleDurationMs}ms ${settleEasing}`
       : "none",
@@ -779,7 +783,8 @@ export function CoachTabbedNavigation({
           <DemoBanner enabled={demoMode} />
           <div
             ref={viewportRef}
-            className="relative touch-pan-y overflow-x-clip [height:var(--coach-tabs-height)] [transition:var(--coach-tabs-height-transition)] sm:h-auto sm:touch-auto sm:overflow-visible sm:!transition-none"
+            data-coach-tab-viewport="true"
+            className="relative touch-pan-y overflow-hidden [height:var(--coach-tabs-height)] [transition:var(--coach-tabs-height-transition)] sm:h-auto sm:touch-auto sm:overflow-visible sm:!transition-none"
             style={viewportStyle}
             onPointerDown={handleContentPointerDown}
             onPointerMove={handlePointerMove}
@@ -801,10 +806,11 @@ export function CoachTabbedNavigation({
                   ref={(element) => {
                     panelRefs.current[index] = element;
                   }}
+                  data-coach-tab-panel="true"
                   aria-hidden={!active}
                   inert={!active ? true : undefined}
                   className={cn(
-                    "left-0 top-0 w-full space-y-6 [transform:var(--coach-panel-transform)] [transition:var(--coach-panel-transition)] sm:static sm:w-auto sm:!transform-none sm:!transition-none",
+                    "left-0 top-0 w-full [transform:var(--coach-panel-transform)] [transition:var(--coach-panel-transition)] sm:static sm:w-auto sm:!transform-none sm:!transition-none",
                     usesMeasuredHeight || !active ? "absolute" : "relative",
                     active ? "sm:block" : "sm:hidden",
                   )}
