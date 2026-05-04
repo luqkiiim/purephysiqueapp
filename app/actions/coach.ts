@@ -23,6 +23,7 @@ import { saveDailyCheckInForClient } from "@/lib/check-ins";
 import { getClientBundleByCoachAndId } from "@/lib/database/queries";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { appEnv, isLiveAppEnabled } from "@/lib/supabase/config";
+import type { Client } from "@/lib/types/app";
 import {
   coachClientDefaultsSettingsSchema,
   coachBackfillCheckInSchema,
@@ -42,41 +43,49 @@ async function upsertClientSetupRows(
   clientId: string,
   values: ClientProfileValues,
   nowIso: string,
+  existingClient?: Client,
 ) {
+  const resolveSetupRowId = (value: string | undefined, prefix: string) =>
+    value && !value.startsWith(prefix) ? value : randomUUID();
+  const coachingStartDate =
+    existingClient?.profile.coachingStartDate ?? new Date().toISOString().slice(0, 10);
+  const profileCreatedAt = existingClient?.profile.createdAt ?? nowIso;
+  const targetsCreatedAt = existingClient?.targets.createdAt ?? nowIso;
+  const reminderCreatedAt = existingClient?.createdAt ?? nowIso;
   const operations = [
-    admin.from("client_profiles").insert({
-      id: randomUUID(),
+    admin.from("client_profiles").upsert({
+      id: resolveSetupRowId(existingClient?.profile.id, "fallback-profile-"),
       client_id: clientId,
       goal_summary: values.goalSummary,
       training_phase: values.trainingPhase,
       timezone: DEFAULT_CLIENT_TIMEZONE,
-      coaching_start_date: new Date().toISOString().slice(0, 10),
+      coaching_start_date: coachingStartDate,
       welcome_message: values.welcomeMessage,
-      created_at: nowIso,
+      created_at: profileCreatedAt,
       updated_at: nowIso,
-    }),
-    admin.from("client_targets").insert({
-      id: randomUUID(),
+    }, { onConflict: "client_id" }),
+    admin.from("client_targets").upsert({
+      id: resolveSetupRowId(existingClient?.targets.id, "fallback-targets-"),
       client_id: clientId,
       protein_target_grams: values.proteinTargetGrams,
       step_target: values.stepTarget,
       exercise_expectation: values.exerciseExpectation,
       probiotics_enabled: values.probioticsEnabled,
       fish_oil_enabled: values.fishOilEnabled,
-      created_at: nowIso,
+      created_at: targetsCreatedAt,
       updated_at: nowIso,
-    }),
-    admin.from("reminder_settings").insert({
-      id: randomUUID(),
+    }, { onConflict: "client_id" }),
+    admin.from("reminder_settings").upsert({
+      id: resolveSetupRowId(existingClient?.reminderSettings.id, "fallback-reminder-"),
       client_id: clientId,
       email_reminders_enabled: false,
       missed_day_nudges_enabled: false,
       reminder_time: "19:00:00",
       weekly_summary_enabled: false,
       timezone: DEFAULT_CLIENT_TIMEZONE,
-      created_at: nowIso,
+      created_at: reminderCreatedAt,
       updated_at: nowIso,
-    }),
+    }, { onConflict: "client_id" }),
   ];
 
   const [profileResult, targetsResult, reminderResult] = await Promise.all(operations);
@@ -186,7 +195,7 @@ export async function saveClientAction(formData: FormData) {
       redirect("/coach/clients?error=missing-client");
     }
 
-    const [clientUpdateResult, profileUpdateResult, targetsUpdateResult, reminderUpdateResult] =
+    const [clientUpdateResult, setupResults] =
       await Promise.all([
         admin
           .from("clients")
@@ -196,54 +205,23 @@ export async function saveClientAction(formData: FormData) {
           })
           .eq("id", clientId)
           .eq("coach_id", coach.id),
-        admin
-          .from("client_profiles")
-          .update({
-            goal_summary: values.goalSummary,
-            training_phase: values.trainingPhase,
-            timezone: DEFAULT_CLIENT_TIMEZONE,
-            welcome_message: values.welcomeMessage,
-            updated_at: nowIso,
-          })
-          .eq("client_id", clientId),
-        admin
-          .from("client_targets")
-          .update({
-            protein_target_grams: values.proteinTargetGrams,
-            step_target: values.stepTarget,
-            exercise_expectation: values.exerciseExpectation,
-            probiotics_enabled: values.probioticsEnabled,
-            fish_oil_enabled: values.fishOilEnabled,
-            updated_at: nowIso,
-          })
-          .eq("client_id", clientId),
-        admin
-          .from("reminder_settings")
-          .update({
-            email_reminders_enabled: false,
-            missed_day_nudges_enabled: false,
-            reminder_time: "19:00:00",
-            weekly_summary_enabled: false,
-            timezone: DEFAULT_CLIENT_TIMEZONE,
-            updated_at: nowIso,
-          })
-          .eq("client_id", clientId),
+        upsertClientSetupRows(admin, clientId, values, nowIso, existing),
       ]);
 
     if (clientUpdateResult.error) {
       throw new Error(`Failed to update client: ${clientUpdateResult.error.message}`);
     }
 
-    if (profileUpdateResult.error) {
-      throw new Error(`Failed to update client profile: ${profileUpdateResult.error.message}`);
+    if (setupResults.profileResult.error) {
+      throw new Error(`Failed to update client profile: ${setupResults.profileResult.error.message}`);
     }
 
-    if (targetsUpdateResult.error) {
-      throw new Error(`Failed to update client targets: ${targetsUpdateResult.error.message}`);
+    if (setupResults.targetsResult.error) {
+      throw new Error(`Failed to update client targets: ${setupResults.targetsResult.error.message}`);
     }
 
-    if (reminderUpdateResult.error) {
-      throw new Error(`Failed to update reminder settings: ${reminderUpdateResult.error.message}`);
+    if (setupResults.reminderResult.error) {
+      throw new Error(`Failed to update reminder settings: ${setupResults.reminderResult.error.message}`);
     }
   } else {
     clientId = randomUUID();

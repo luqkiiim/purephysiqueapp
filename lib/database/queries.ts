@@ -16,6 +16,18 @@ import {
   parseExerciseEntries,
 } from "@/lib/utils";
 
+const FALLBACK_CLIENT_TIMEZONE = "Asia/Kuala_Lumpur";
+const FALLBACK_CLIENT_DEFAULTS = {
+  goalSummary: "",
+  trainingPhase: "Lean phase",
+  proteinTargetGrams: 150,
+  stepTarget: 9000,
+  exerciseExpectation: "4 training sessions / week",
+  probioticsEnabled: true,
+  fishOilEnabled: true,
+  welcomeMessage: "",
+};
+
 interface CoachProfileRow {
   id: string;
   auth_user_id: string | null;
@@ -218,10 +230,41 @@ function mapClientBundle(
   profile: ClientProfileRow | undefined,
   targets: ClientTargetRow | undefined,
   reminderSettings: ReminderSettingsRow | undefined,
-): Client | null {
-  if (!profile || !targets || !reminderSettings) {
-    return null;
-  }
+): Client {
+  const createdAt = client.created_at;
+  const profileRow = profile ?? {
+    id: `fallback-profile-${client.id}`,
+    client_id: client.id,
+    goal_summary: FALLBACK_CLIENT_DEFAULTS.goalSummary,
+    training_phase: FALLBACK_CLIENT_DEFAULTS.trainingPhase,
+    timezone: FALLBACK_CLIENT_TIMEZONE,
+    coaching_start_date: createdAt.slice(0, 10),
+    welcome_message: FALLBACK_CLIENT_DEFAULTS.welcomeMessage,
+    created_at: createdAt,
+    updated_at: client.updated_at,
+  };
+  const targetsRow = targets ?? {
+    id: `fallback-targets-${client.id}`,
+    client_id: client.id,
+    protein_target_grams: FALLBACK_CLIENT_DEFAULTS.proteinTargetGrams,
+    step_target: FALLBACK_CLIENT_DEFAULTS.stepTarget,
+    exercise_expectation: FALLBACK_CLIENT_DEFAULTS.exerciseExpectation,
+    probiotics_enabled: FALLBACK_CLIENT_DEFAULTS.probioticsEnabled,
+    fish_oil_enabled: FALLBACK_CLIENT_DEFAULTS.fishOilEnabled,
+    created_at: createdAt,
+    updated_at: client.updated_at,
+  };
+  const reminderSettingsRow = reminderSettings ?? {
+    id: `fallback-reminder-${client.id}`,
+    client_id: client.id,
+    email_reminders_enabled: false,
+    missed_day_nudges_enabled: false,
+    reminder_time: "19:00:00",
+    weekly_summary_enabled: false,
+    timezone: profileRow.timezone,
+    created_at: createdAt,
+    updated_at: client.updated_at,
+  };
 
   return {
     id: client.id,
@@ -235,28 +278,28 @@ function mapClientBundle(
     lastCheckInDate: client.last_check_in_date,
     createdAt: client.created_at,
     profile: {
-      id: profile.id,
-      clientId: profile.client_id,
-      goalSummary: profile.goal_summary,
-      trainingPhase: profile.training_phase,
-      timezone: profile.timezone,
-      coachingStartDate: profile.coaching_start_date,
-      welcomeMessage: profile.welcome_message,
-      createdAt: profile.created_at,
-      updatedAt: profile.updated_at,
+      id: profileRow.id,
+      clientId: profileRow.client_id,
+      goalSummary: profileRow.goal_summary,
+      trainingPhase: profileRow.training_phase,
+      timezone: profileRow.timezone,
+      coachingStartDate: profileRow.coaching_start_date,
+      welcomeMessage: profileRow.welcome_message,
+      createdAt: profileRow.created_at,
+      updatedAt: profileRow.updated_at,
     },
     targets: {
-      id: targets.id,
-      clientId: targets.client_id,
-      proteinTargetGrams: Number(targets.protein_target_grams ?? 0),
-      stepTarget: Number(targets.step_target ?? 0),
-      exerciseExpectation: targets.exercise_expectation,
-      probioticsEnabled: asBoolean(targets.probiotics_enabled),
-      fishOilEnabled: asBoolean(targets.fish_oil_enabled),
-      createdAt: targets.created_at,
-      updatedAt: targets.updated_at,
+      id: targetsRow.id,
+      clientId: targetsRow.client_id,
+      proteinTargetGrams: Number(targetsRow.protein_target_grams ?? 0),
+      stepTarget: Number(targetsRow.step_target ?? 0),
+      exerciseExpectation: targetsRow.exercise_expectation,
+      probioticsEnabled: asBoolean(targetsRow.probiotics_enabled),
+      fishOilEnabled: asBoolean(targetsRow.fish_oil_enabled),
+      createdAt: targetsRow.created_at,
+      updatedAt: targetsRow.updated_at,
     },
-    reminderSettings: mapReminderSettings(reminderSettings),
+    reminderSettings: mapReminderSettings(reminderSettingsRow),
   };
 }
 
@@ -369,8 +412,7 @@ async function hydrateClients(rows: ClientRow[]) {
         targetsByClientId.get(row.id),
         remindersByClientId.get(row.id),
       ),
-    )
-    .filter((client): client is Client => client !== null);
+    );
 }
 
 async function hydrateClient(row: ClientRow | null) {
