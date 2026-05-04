@@ -16,6 +16,11 @@ const shouldStartServer = !providedBaseUrl;
 
 const routes = [
   { name: "home", path: "/" },
+  { name: "client-check-in", path: "/client" },
+  { name: "client-history", path: "/client/history" },
+  { name: "client-weekly", path: "/client/weekly" },
+  { name: "client-photos", path: "/client/photos" },
+  { name: "client-messages", path: "/client/messages" },
   { name: "coach-overview", path: "/coach", expectedCoachTabIndex: 0 },
   { name: "coach-clients", path: "/coach/clients", expectedCoachTabIndex: 1 },
   { name: "coach-review", path: "/coach/review", expectedCoachTabIndex: 2 },

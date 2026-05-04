@@ -58,11 +58,13 @@ export function ActiveNav({
           ? "bg-accent-coral text-[#2d2e2d] shadow-soft"
           : "text-slate-700 hover:bg-accent-teal/10 hover:text-slate-900",
         mobile &&
-          "min-h-[3.5rem] min-w-[4.75rem] shrink-0 flex-1 flex-col gap-1 rounded-[1.15rem] px-3 py-2 text-[0.68rem] text-center sm:min-w-0 sm:flex-row sm:gap-2 sm:rounded-full sm:py-2.5 sm:text-xs",
+          "h-14 w-full min-w-0 shrink flex-col rounded-[1.15rem] px-0 py-2 text-center sm:h-auto sm:flex-row sm:gap-2 sm:rounded-full sm:px-3 sm:py-2.5 sm:text-xs",
       )}
     >
-      <Icon className="h-4 w-4 shrink-0" />
-      <span className="min-w-0 text-balance">{label}</span>
+      <Icon className={cn("h-4 w-4 shrink-0", mobile && "h-5 w-5 sm:h-4 sm:w-4")} />
+      <span className={cn("min-w-0 whitespace-nowrap", mobile && "sr-only sm:not-sr-only")}>
+        {label}
+      </span>
     </Link>
   );
 }

@@ -36,7 +36,7 @@ export default async function ClientPhotosPage() {
 
           {data.progressPhotos.length ? (
             <div className="grid gap-4 sm:grid-cols-2">
-              {data.progressPhotos.map((photo) => (
+              {data.progressPhotos.map((photo, index) => (
                 <article key={photo.id} className="surface-muted overflow-hidden">
                   {photo.imageUrl.startsWith("http") ? (
                     <Image
@@ -44,6 +44,7 @@ export default async function ClientPhotosPage() {
                       alt={photo.note ?? "Progress photo"}
                       width={800}
                       height={1000}
+                      priority={index < 2}
                       className="aspect-[4/5] w-full object-cover"
                     />
                   ) : (

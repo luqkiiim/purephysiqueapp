@@ -42,7 +42,7 @@ export function ClientShell({
       <DemoBanner enabled={demoMode} />
       {children}
       <nav className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-xl border-t border-white/10 bg-[rgba(10,10,10,0.96)] px-3 pb-[calc(env(safe-area-inset-bottom,0)+0.75rem)] pt-2 shadow-[0_-8px_24px_rgba(0,0,0,0.35)] sm:rounded-t-4xl sm:border-x sm:backdrop-blur">
-        <div className="flex gap-2 overflow-x-auto pb-1 sm:grid sm:grid-cols-5 sm:overflow-visible sm:pb-0">
+        <div className="grid grid-cols-5 gap-2 pb-1 sm:pb-0">
           <ActiveNav href="/client" label="Check in" icon="home" mobile />
           <ActiveNav href="/client/history" label="History" icon="history" mobile />
           <ActiveNav href="/client/weekly" label="Weekly" icon="weekly" mobile />
