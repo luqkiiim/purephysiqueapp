@@ -119,6 +119,14 @@ function numberFromInput(value: string) {
   return Number.isFinite(parsedValue) ? parsedValue : 0;
 }
 
+function normalizeNumberInput(value: string) {
+  return value.replace(/^0+(?=\d)/, "");
+}
+
+function clearZeroInput(value: string) {
+  return value === "0" ? "" : value;
+}
+
 export function DailyCheckInForm({
   action,
   defaults,
@@ -440,7 +448,8 @@ export function DailyCheckInForm({
                 step="0.1"
                 className="mt-2 w-full bg-transparent text-[2rem] font-display outline-none sm:text-3xl"
                 value={totalSleepHours}
-                onChange={(event) => setTotalSleepHours(event.target.value)}
+                onFocus={() => setTotalSleepHours((value) => clearZeroInput(value))}
+                onChange={(event) => setTotalSleepHours(normalizeNumberInput(event.target.value))}
               />
             </label>
           </div>
@@ -469,7 +478,8 @@ export function DailyCheckInForm({
                   type="number"
                   className="w-full bg-transparent text-[2rem] font-display outline-none sm:text-3xl"
                   value={proteinGrams}
-                  onChange={(event) => setProteinGrams(event.target.value)}
+                  onFocus={() => setProteinGrams((value) => clearZeroInput(value))}
+                  onChange={(event) => setProteinGrams(normalizeNumberInput(event.target.value))}
                 />
                 <span className="pb-1 text-sm text-slate-500">/ {proteinTarget}</span>
               </div>
@@ -488,7 +498,8 @@ export function DailyCheckInForm({
                   type="number"
                   className="w-full bg-transparent text-[2rem] font-display outline-none sm:text-3xl"
                   value={steps}
-                  onChange={(event) => setSteps(event.target.value)}
+                  onFocus={() => setSteps((value) => clearZeroInput(value))}
+                  onChange={(event) => setSteps(normalizeNumberInput(event.target.value))}
                 />
               </div>
               <p className="mt-2 text-sm text-slate-600">{stepPercent}% of target</p>
@@ -506,7 +517,8 @@ export function DailyCheckInForm({
                   min="0"
                   className="w-full bg-transparent text-[2rem] font-display outline-none sm:text-3xl"
                   value={hydrationLiters}
-                  onChange={(event) => setHydrationLiters(event.target.value)}
+                  onFocus={() => setHydrationLiters((value) => clearZeroInput(value))}
+                  onChange={(event) => setHydrationLiters(normalizeNumberInput(event.target.value))}
                 />
               </div>
               <p className="mt-2 text-sm text-slate-600">
