@@ -39,7 +39,7 @@ export default async function ClientHomePage({
 
       <Card>
         <CardHeader>
-          <CardTitle>{data.latestCoachUpdate ? "Latest from coach" : "Today&apos;s focus"}</CardTitle>
+          <CardTitle>{data.latestCoachUpdate ? "Latest from coach" : "Today's focus"}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {data.latestCoachUpdate ? (
