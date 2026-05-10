@@ -38,10 +38,10 @@ export default function ClientLoading() {
         </div>
       </section>
 
-      <nav className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-xl border-t border-white/10 bg-[rgba(10,10,10,0.94)] px-3 pb-[calc(env(safe-area-inset-bottom,0)+0.75rem)] pt-2 shadow-[0_-8px_24px_rgba(0,0,0,0.35)] backdrop-blur sm:rounded-t-4xl sm:border-x">
-        <div className="flex gap-2 overflow-x-auto pb-1 sm:grid sm:grid-cols-5 sm:overflow-visible sm:pb-0">
+      <nav className="fixed inset-x-0 bottom-0 z-20 mx-auto w-full max-w-md border-t border-white/10 bg-[rgba(10,10,10,0.96)] px-3 pb-[calc(env(safe-area-inset-bottom,0)+0.75rem)] pt-2 shadow-[0_-8px_24px_rgba(0,0,0,0.35)] backdrop-blur sm:hidden">
+        <div className="grid grid-cols-5 gap-2">
           {Array.from({ length: 5 }, (_, index) => (
-            <LoadingBlock key={index} className="h-14 w-[4.75rem] rounded-[1.15rem] sm:w-full" />
+            <LoadingBlock key={index} className="h-14 w-full rounded-[1.15rem]" />
           ))}
         </div>
       </nav>

@@ -98,6 +98,53 @@ export const getClientCheckInPageData = cache(async () => {
   };
 });
 
+export const getClientTabsPageData = cache(async () => {
+  const { client, isDemo } = await getClientSessionData();
+
+  if (!isLiveAppEnabled || isDemo) {
+    const demo = getDemoData(client.id);
+
+    return {
+      client: demo.client,
+      todaysCheckIn: demo.todaysCheckIn,
+      latestCoachUpdate: demo.latestCoachUpdate ?? null,
+      recentCheckIns: demo.recentCheckIns,
+      weeklySummary: demo.weeklySummary,
+      progressPhotos: demo.progressPhotos,
+      feedbackMessages: demo.feedbackMessages,
+      sharedCoachNotes: demo.sharedCoachNotes,
+    };
+  }
+
+  const [
+    todaysCheckIn,
+    feedbackMessages,
+    sharedCoachNotes,
+    recentCheckIns,
+    progressPhotos,
+  ] = await Promise.all([
+    getLatestDailyCheckInForClient(client.id),
+    listFeedbackMessagesForClient(client.id),
+    listCoachNotesForClient(client.id, "shared"),
+    listRecentDailyCheckInsForClient(client.id, RECENT_CLIENT_CHECK_IN_LIMIT),
+    listProgressPhotosForClient(client.id).then(resolveProgressPhotoUrls),
+  ]);
+
+  return {
+    client,
+    todaysCheckIn,
+    latestCoachUpdate: pickLatestCoachUpdate({
+      feedbackMessages: feedbackMessages.slice(0, 1),
+      sharedCoachNotes: sharedCoachNotes.slice(0, 1),
+    }),
+    recentCheckIns,
+    weeklySummary: buildWeeklySummary(client, recentCheckIns),
+    progressPhotos,
+    feedbackMessages,
+    sharedCoachNotes,
+  };
+});
+
 export const getClientHistoryPageData = cache(async () => {
   const { client, isDemo } = await getClientSessionData();
 
