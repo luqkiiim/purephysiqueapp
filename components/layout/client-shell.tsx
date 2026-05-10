@@ -1,3 +1,5 @@
+import { Flame } from "lucide-react";
+
 import { clearClientAccessAction } from "@/app/actions/access";
 import { ActiveNav } from "@/components/layout/active-nav";
 import { DemoBanner } from "@/components/layout/demo-banner";
@@ -22,7 +24,8 @@ export function ClientShell({
           <div className="min-w-0 space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="eyebrow">Daily check-in</p>
-              <Badge tone="accent" className="self-start">
+              <Badge tone="accent" className="gap-1.5 self-start">
+                <Flame aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
                 {streak} day streak
               </Badge>
             </div>
