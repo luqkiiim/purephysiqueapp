@@ -1,9 +1,9 @@
 "use client";
 
 import {
-  Area,
-  AreaChart,
   CartesianGrid,
+  Line,
+  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -11,6 +11,22 @@ import {
 } from "recharts";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
+function getWeightDomain(data: Array<{ weight: number }>) {
+  if (!data.length) {
+    return [0, 1];
+  }
+
+  const weights = data.map((entry) => entry.weight);
+  const min = Math.min(...weights);
+  const max = Math.max(...weights);
+  const padding = Math.max((max - min) * 0.25, 0.8);
+
+  return [
+    Number((min - padding).toFixed(1)),
+    Number((max + padding).toFixed(1)),
+  ];
+}
 
 export function WeightTrendChart({
   data,
@@ -21,6 +37,8 @@ export function WeightTrendChart({
   title?: string;
   description?: string;
 }) {
+  const yDomain = getWeightDomain(data);
+
   return (
     <Card>
       <CardHeader>
@@ -29,33 +47,52 @@ export function WeightTrendChart({
       </CardHeader>
       <CardContent className="h-60 px-0 sm:h-72">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data} margin={{ top: 8, right: 8, left: -24, bottom: 0 }}>
-            <defs>
-              <linearGradient id="weightFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#e8c061" stopOpacity={0.3} />
-                <stop offset="100%" stopColor="#e8c061" stopOpacity={0.02} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e1d9ca" />
+          <LineChart data={data} margin={{ top: 12, right: 18, left: -8, bottom: 0 }}>
+            <CartesianGrid
+              vertical={false}
+              strokeDasharray="4 8"
+              stroke="#d8cfae"
+              strokeOpacity={0.34}
+            />
             <XAxis
               dataKey="label"
-              stroke="#646464"
+              stroke="#a8a29a"
               fontSize={12}
               tickLine={false}
               axisLine={false}
               minTickGap={18}
               tickMargin={8}
             />
-            <YAxis stroke="#646464" fontSize={12} tickLine={false} axisLine={false} width={32} />
-            <Tooltip />
-            <Area
+            <YAxis
+              domain={yDomain}
+              stroke="#a8a29a"
+              fontSize={12}
+              tickLine={false}
+              axisLine={false}
+              width={42}
+              tickFormatter={(value: number) => value.toFixed(1)}
+            />
+            <Tooltip
+              cursor={{ stroke: "#e8c061", strokeOpacity: 0.28, strokeWidth: 2 }}
+              contentStyle={{
+                background: "#181818",
+                border: "1px solid rgba(232, 192, 97, 0.4)",
+                borderRadius: "14px",
+                color: "#f8f3e7",
+              }}
+              formatter={(value: number) => [value.toFixed(1), "Weight"]}
+            />
+            <Line
               type="monotone"
               dataKey="weight"
-              stroke="#2d2e2d"
-              strokeWidth={3}
-              fill="url(#weightFill)"
+              stroke="#e8c061"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={4}
+              dot={{ r: 3.5, fill: "#181818", stroke: "#e8c061", strokeWidth: 2 }}
+              activeDot={{ r: 6, fill: "#e8c061", stroke: "#181818", strokeWidth: 2 }}
             />
-          </AreaChart>
+          </LineChart>
         </ResponsiveContainer>
       </CardContent>
     </Card>
