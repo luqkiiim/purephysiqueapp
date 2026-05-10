@@ -26,7 +26,9 @@ export type SnapTab = {
 };
 
 const heightBufferPx = 16;
-const routeCommitDelayMs = 140;
+const settleDelayMs = 180;
+const realignDelayMs = 180;
+const snapTolerancePx = 1;
 
 function isMobileViewport() {
   return typeof window !== "undefined" && window.matchMedia("(max-width: 639px)").matches;
@@ -166,13 +168,17 @@ export function SnapTabbedNavigation({
   const panels = Children.toArray(children);
   const panelCount = panels.length;
   const safeInitialIndex = clampIndex(initialIndex, panelCount);
-  const [activeIndex, setActiveIndex] = useState(safeInitialIndex);
+  const [settledIndex, setSettledIndex] = useState(safeInitialIndex);
+  const [navIndex, setNavIndex] = useState(safeInitialIndex);
   const [panelHeights, setPanelHeights] = useState<number[]>([]);
-  const activeIndexRef = useRef(safeInitialIndex);
+  const settledIndexRef = useRef(safeInitialIndex);
+  const navIndexRef = useRef(safeInitialIndex);
+  const targetIndexRef = useRef<number | null>(null);
+  const pendingHistoryModeRef = useRef<"push" | "replace" | "none">("push");
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const panelRefs = useRef<Array<HTMLElement | null>>([]);
-  const scrollCommitTimerRef = useRef<number | null>(null);
-  const activePanelHeight = panelHeights[activeIndex] ?? 0;
+  const settleTimerRef = useRef<number | null>(null);
+  const activePanelHeight = panelHeights[settledIndex] ?? 0;
   const usesMeasuredHeight = activePanelHeight > 0;
 
   const commitRoute = useCallback(
@@ -196,6 +202,37 @@ export function SnapTabbedNavigation({
     [tabs],
   );
 
+  const updateNavIndex = useCallback(
+    (index: number) => {
+      const nextIndex = clampIndex(index, panelCount);
+
+      if (nextIndex === navIndexRef.current) {
+        return;
+      }
+
+      navIndexRef.current = nextIndex;
+      setNavIndex(nextIndex);
+    },
+    [panelCount],
+  );
+
+  const commitSettledIndex = useCallback(
+    (index: number, historyMode: "push" | "replace" | "none") => {
+      const nextIndex = clampIndex(index, panelCount);
+
+      targetIndexRef.current = null;
+      updateNavIndex(nextIndex);
+
+      if (nextIndex !== settledIndexRef.current) {
+        settledIndexRef.current = nextIndex;
+        setSettledIndex(nextIndex);
+      }
+
+      commitRoute(nextIndex, historyMode);
+    },
+    [commitRoute, panelCount, updateNavIndex],
+  );
+
   const scrollToIndex = useCallback((index: number, behavior: ScrollBehavior = "smooth") => {
     const viewport = viewportRef.current;
 
@@ -209,16 +246,80 @@ export function SnapTabbedNavigation({
     });
   }, []);
 
-  const syncActiveIndex = useCallback(
+  const settleToNearestPanel = useCallback(
+    (historyMode: "push" | "replace" | "none") => {
+      const viewport = viewportRef.current;
+
+      if (!viewport || !isMobileViewport() || viewport.clientWidth <= 0) {
+        commitSettledIndex(targetIndexRef.current ?? navIndexRef.current, historyMode);
+        return;
+      }
+
+      const nextIndex = clampIndex(
+        targetIndexRef.current ?? Math.round(viewport.scrollLeft / viewport.clientWidth),
+        panelCount,
+      );
+      const targetLeft = viewport.clientWidth * nextIndex;
+      const distanceFromSnap = Math.abs(viewport.scrollLeft - targetLeft);
+
+      updateNavIndex(nextIndex);
+
+      if (distanceFromSnap > snapTolerancePx) {
+        targetIndexRef.current = nextIndex;
+        viewport.scrollTo({
+          left: targetLeft,
+          behavior: "smooth",
+        });
+
+        if (settleTimerRef.current !== null) {
+          window.clearTimeout(settleTimerRef.current);
+        }
+
+        settleTimerRef.current = window.setTimeout(() => {
+          settleTimerRef.current = null;
+          settleToNearestPanel(historyMode);
+        }, realignDelayMs);
+        return;
+      }
+
+      commitSettledIndex(nextIndex, historyMode);
+    },
+    [commitSettledIndex, panelCount, updateNavIndex],
+  );
+
+  const scheduleSettle = useCallback(
+    (historyMode: "push" | "replace" | "none", delay = settleDelayMs) => {
+      pendingHistoryModeRef.current = historyMode;
+
+      if (settleTimerRef.current !== null) {
+        window.clearTimeout(settleTimerRef.current);
+      }
+
+      settleTimerRef.current = window.setTimeout(() => {
+        settleTimerRef.current = null;
+        settleToNearestPanel(pendingHistoryModeRef.current);
+      }, delay);
+    },
+    [settleToNearestPanel],
+  );
+
+  const syncTargetIndex = useCallback(
     (index: number, historyMode: "push" | "replace" | "none", behavior: ScrollBehavior = "smooth") => {
       const nextIndex = clampIndex(index, panelCount);
 
-      activeIndexRef.current = nextIndex;
-      setActiveIndex(nextIndex);
+      targetIndexRef.current = nextIndex;
+      pendingHistoryModeRef.current = historyMode;
+      updateNavIndex(nextIndex);
       scrollToIndex(nextIndex, behavior);
-      commitRoute(nextIndex, historyMode);
+
+      if (!isMobileViewport()) {
+        commitSettledIndex(nextIndex, historyMode);
+        return;
+      }
+
+      scheduleSettle(historyMode, behavior === "auto" ? 40 : settleDelayMs);
     },
-    [commitRoute, panelCount, scrollToIndex],
+    [commitSettledIndex, panelCount, scheduleSettle, scrollToIndex, updateNavIndex],
   );
 
   useLayoutEffect(() => {
@@ -258,18 +359,21 @@ export function SnapTabbedNavigation({
   }, [panelCount]);
 
   useLayoutEffect(() => {
-    scrollToIndex(activeIndexRef.current, "auto");
+    scrollToIndex(settledIndexRef.current, "auto");
   }, [scrollToIndex]);
 
   useEffect(() => {
     const nextIndex = getSnapTabIndexFromPath(tabs, pathname);
 
-    if (nextIndex === null || nextIndex === activeIndexRef.current) {
+    if (
+      nextIndex === null ||
+      (nextIndex === settledIndexRef.current && nextIndex === navIndexRef.current)
+    ) {
       return;
     }
 
-    syncActiveIndex(nextIndex, "none", "auto");
-  }, [pathname, syncActiveIndex, tabs]);
+    syncTargetIndex(nextIndex, "none", "auto");
+  }, [pathname, syncTargetIndex, tabs]);
 
   useEffect(() => {
     const handlePopState = () => {
@@ -282,7 +386,7 @@ export function SnapTabbedNavigation({
         return;
       }
 
-      syncActiveIndex(nextIndex, "none", "smooth");
+      syncTargetIndex(nextIndex, "none", "smooth");
     };
 
     window.addEventListener("popstate", handlePopState);
@@ -290,12 +394,30 @@ export function SnapTabbedNavigation({
     return () => {
       window.removeEventListener("popstate", handlePopState);
     };
-  }, [router, syncActiveIndex, tabs]);
+  }, [router, syncTargetIndex, tabs]);
+
+  useEffect(() => {
+    const viewport = viewportRef.current;
+
+    if (!viewport) {
+      return;
+    }
+
+    const handleScrollEnd = () => {
+      settleToNearestPanel(pendingHistoryModeRef.current);
+    };
+
+    viewport.addEventListener("scrollend", handleScrollEnd);
+
+    return () => {
+      viewport.removeEventListener("scrollend", handleScrollEnd);
+    };
+  }, [settleToNearestPanel]);
 
   useEffect(() => {
     return () => {
-      if (scrollCommitTimerRef.current !== null) {
-        window.clearTimeout(scrollCommitTimerRef.current);
+      if (settleTimerRef.current !== null) {
+        window.clearTimeout(settleTimerRef.current);
       }
     };
   }, []);
@@ -307,21 +429,13 @@ export function SnapTabbedNavigation({
       return;
     }
 
-    const nextIndex = clampIndex(Math.round(viewport.scrollLeft / viewport.clientWidth), panelCount);
+    const nextIndex = clampIndex(
+      targetIndexRef.current ?? Math.round(viewport.scrollLeft / viewport.clientWidth),
+      panelCount,
+    );
 
-    if (nextIndex !== activeIndexRef.current) {
-      activeIndexRef.current = nextIndex;
-      setActiveIndex(nextIndex);
-    }
-
-    if (scrollCommitTimerRef.current !== null) {
-      window.clearTimeout(scrollCommitTimerRef.current);
-    }
-
-    scrollCommitTimerRef.current = window.setTimeout(() => {
-      commitRoute(activeIndexRef.current, "push");
-      scrollCommitTimerRef.current = null;
-    }, routeCommitDelayMs);
+    updateNavIndex(nextIndex);
+    scheduleSettle(targetIndexRef.current === null ? "push" : pendingHistoryModeRef.current);
   };
 
   const handleTabSelect = (index: number, event: ReactMouseEvent<HTMLAnchorElement>) => {
@@ -330,7 +444,7 @@ export function SnapTabbedNavigation({
     }
 
     event.preventDefault();
-    syncActiveIndex(index, "push", "smooth");
+    syncTargetIndex(index, "push", "smooth");
   };
 
   const viewportStyle = {
@@ -341,17 +455,19 @@ export function SnapTabbedNavigation({
 
   return (
     <>
-      {header?.(activeIndex)}
+      {header?.(settledIndex)}
       <div
         ref={viewportRef}
         data-snap-tab-viewport="true"
+        data-snap-nav-index={navIndex}
+        data-snap-settled-index={settledIndex}
         className="overflow-x-auto overflow-y-hidden scroll-smooth snap-x snap-mandatory overscroll-x-contain [height:var(--snap-tabs-height)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:h-auto sm:overflow-visible"
         style={viewportStyle}
         onScroll={handleScroll}
       >
         <div className="flex items-start sm:block">
           {panels.map((panel, index) => {
-            const active = index === activeIndex;
+            const active = index === settledIndex;
 
             return (
               <section
@@ -359,6 +475,8 @@ export function SnapTabbedNavigation({
                 ref={(element) => {
                   panelRefs.current[index] = element;
                 }}
+                data-snap-tab-panel="true"
+                data-snap-panel-index={index}
                 aria-hidden={!active}
                 inert={!active ? true : undefined}
                 className={cn(
@@ -374,7 +492,7 @@ export function SnapTabbedNavigation({
       </div>
       <SnapBottomTabs
         tabs={tabs}
-        activeIndex={activeIndex}
+        activeIndex={navIndex}
         ariaLabel={ariaLabel}
         maxWidthClassName={bottomMaxWidthClassName}
         onSelect={handleTabSelect}
